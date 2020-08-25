@@ -258,17 +258,17 @@
               <table id="issueTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>提交人</th>
-                  <th>接收人</th>
-                  <th>模块</th>
-                  <th>严重性</th>
-                  <th>SLA</th>
-                  <th>解决状态</th>
-                  <th>问题状态</th>
-                  <th>概述</th>
-                  <th>提交时间</th>
-                  <th>更新时间</th>
+                  <th style="width: 5%">ID</th>
+                  <th style="width: 5%">提交人</th>
+                  <th style="width: 5%;">接收人</th>
+                  <th style="width: 5%;">模块</th>
+                  <th style="width: 5%;">严重性</th>
+                  <th style="width: 5%">SLA</th>
+                  <th style="width: 5%">解决状态</th>
+                  <th style="width: 5%">问题状态</th>
+                  <th style="width: 40%">概述</th>
+                  <th style="width: 10%">提交时间</th>
+                  <th style="width: 10%">更新时间</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -368,13 +368,16 @@
        });
 
         $('#issueTable').DataTable({
-            "paging": true,
+            "processing": true,
             "lengthChange": true,
             "searching": false,
             "ordering": true,
             "info": true,
             "autoWidth": false,
             "responsive": true,
+            "aLengthMenu":[10,25,50,100],
+            "bPaginate": true,
+            "serverSide": true,
         });
     });
 

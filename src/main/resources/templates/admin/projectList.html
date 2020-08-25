@@ -128,10 +128,6 @@
 <!-- Bootstrap 4 -->
 <script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<!-- daterangepicker -->
-<script th:src="@{/plugins/moment/moment.min.js}"></script>
-<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
-
 <script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
 <script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
 <script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
@@ -144,38 +140,47 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
+  var tableView = {};
     document.addEventListener('DOMContentLoaded', function () {
-        $('#projectTable').DataTable({
+        tableView = $('#projectTable').DataTable({
             "processing": true,
             "lengthChange": true,
             "searching": false,
             "ordering": true,
             "info": true,
-            "autoWidth": true,
+            "autoWidth": false,
             "responsive": true,
             "aLengthMenu":[10,20],
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
                 var pageSize = data.length;
-                var page = (data.start) / data.length + 1;
-                var params = {
-                    page: page,
+                var pageNo = (data.start) / data.length + 1;
+                var obj = {
+                    param1 : "dick",
+                    param2 : "penis"
+                }
+                var args = {
+                    pageNo: pageNo,
                     pageSize: pageSize,
+                    orderColumnNo:data.order[0]["column"],
+                    order: data.order[0]["dir"],
+                    params: obj
                 };
 
                 $.ajax({
                     url: "/web/project/list",
                     type: "post",
-                    data: params,
+                    data: JSON.stringify(args),
+                    contentType: "application/json",
                     dataType:"json",
                     cache : false,
                     success: function (res) {
                         var returnData = {};
                         //returnData.draw = arr.data.pagination.pageCount;
-                        returnData.recordsTotal = 100;
-                        returnData.recordsFiltered = 100;
-                        returnData.data = res.data;
+                        returnData.recordsTotal = res.data[0].totalCounts;
+                        returnData.recordsFiltered = res.data[0].totalCounts;
+                        returnData.data = res.data[0].resultList;
                         callback(returnData);
                     }
                 });
@@ -187,9 +192,14 @@
                 {"data": "description", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
                 {"data": "-", "defaultContent": "-"}
-            ]
+            ],
+            language: aegis.locale
         });
     });
+
+    function refresh() {
+      tableView.draw();
+    }
 </script>
 </body>
 </html>

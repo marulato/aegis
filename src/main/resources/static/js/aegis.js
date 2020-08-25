@@ -50,3 +50,16 @@ aegis.activate = function () {
         });
     });
 }
+
+aegis.locale = {
+    "sEmptyTable": "没有数据",
+    "sInfo": "显示第 _START_ 至第 _END_ 项结果，共 _TOTAL_ 项",
+    "sInfoEmpty": "显示第 0 至第 0 项结果，共 0 项",
+    "sLengthMenu": "显示 _MENU_ 项结果",
+    "oPaginate": {
+        "sFirst": "首页",
+        "sPrevious": "上一页",
+        "sNext": "下一页",
+        "sLast": "末页"
+    }
+}

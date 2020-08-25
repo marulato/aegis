@@ -3,17 +3,15 @@ package org.legion.aegis.admin.controller;
 import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
+import org.legion.aegis.common.base.SearchParam;
+import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
+import org.legion.aegis.common.utils.MiscGenerator;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class ProjectMgrController {
@@ -40,22 +38,29 @@ public class ProjectMgrController {
 
     @PostMapping("/web/project/list")
     @ResponseBody
-    public AjaxResponseBody getProjects(@RequestParam Map<String, String> param) {
-        System.out.println(param);
+    public AjaxResponseBody getProjects(@RequestBody SearchParam searchParam) {
+        System.out.println(searchParam.getParams());
         AjaxResponseManager manager = AjaxResponseManager.create(200);
+        SearchResult<Project> searchResult = new SearchResult<>();
         List<Project> projects = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             Project project = new Project();
-            project.setName("test" + i);
+            project.setDescription("test" + i);
+            project.setName(MiscGenerator.generateInitialPassword(10));
             projects.add(project);
         }
         List<Project> result = new ArrayList<>();
-        int page = Integer.parseInt(param.get("page")) - 1;
-        int pageSize = Integer.parseInt(param.get("pageSize"));
+        int page = searchParam.getPageNo() - 1;
+        int pageSize = searchParam.getPageSize();
         for (int i = page * pageSize; i < page * pageSize + pageSize; i++) {
             result.add(projects.get(i));
         }
-        manager.addDataObjects(result);
+        if (searchParam.getOrderColumnNo() == 1) {
+            result.sort(Comparator.comparing(Project::getName));
+        }
+        searchResult.setResultList(result);
+        searchResult.setTotalCounts(projects.size());
+        manager.addDataObject(searchResult);
         return manager.respond();
     }
 }
