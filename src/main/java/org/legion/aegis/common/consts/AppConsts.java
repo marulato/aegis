@@ -4,6 +4,8 @@ import java.util.List;
 
 public class AppConsts {
 
+    public static final String LINK_STYLE_ACTIVE = "active";
+
     public static final String YES         = "Y";
     public static final String NO          = "N";
     public static final String TRUE        = "TRUE";

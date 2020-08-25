@@ -42,12 +42,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark"><a href="#"><i class="fa fa-chevron-left"></i></a>&nbsp;添加子项目和模块</h1>
+            <h1 class="m-0 text-dark"><a href="#"><i class="fa fa-chevron-left"></i></a>&nbsp;修改项目</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">主页</a></li>
-              <li class="breadcrumb-item active">添加子项目和模块</li>
+              <li class="breadcrumb-item active">修改项目</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -62,7 +62,7 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">向Project添加子项目</h3>
+                <h3 class="card-title">基本信息</h3>
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
                     <i class="fas fa-minus"></i>
@@ -74,8 +74,23 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="name">子项目名</label>
+                      <label for="name">项目名</label>
                       <input class="form-control" type="text" name="name" id="name">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="type">项目类型</label>
+                      <select class="custom-select" name="type" id="type"></select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="typeOther">其他类型</label>
+                      <input class="form-control" type="text" name="typeOther" id="typeOther">
                     </div>
                   </div>
                 </div>
@@ -88,50 +103,112 @@
                     </div>
                   </div>
                 </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="stage">阶段</label>
-                      <select class="custom-select" name="stage" id="stage"></select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label>模块</label>
-                      <table class="table table-sm" id="moduleTable">
-                        <thead>
-                        <tr>
-                          <th style="width: 50px">#</th>
-                          <th>模块</th>
-                          <th style="width: 100px">操作</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tbody"></tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="module">添加模块</label>
-                      <input class="form-control" type="text" name="minput" id="minput">
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <button type="button" class="btn btn-default btn-sm float-left" onclick="addModule()">添加</button>
-                  </div>
-                </div>
-
               </div>
             </div>
           </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">日程规划</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="reqRange">开发阶段</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="far fa-calendar-alt"></i>
+                        </span>
+                        </div>
+                        <input id="reqRange" name="reqRange" class="form-control" type="text">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="sitRange">内测阶段</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="far fa-calendar-alt"></i>
+                        </span>
+                        </div>
+                        <input id="sitRange" name="sitRange" class="form-control" type="text">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="uatRange">UAT开始日期</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="far fa-calendar-alt"></i>
+                        </span>
+                        </div>
+                        <input id="uatRange" name="uatRange" class="form-control" type="text">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </form>
+
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">模块</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>模块</label>
+                    <table class="table table-sm" id="moduleTable">
+                      <thead>
+                      <tr>
+                        <th style="width: 50px">#</th>
+                        <th>模块名</th>
+                        <th style="width: 100px">操作</th>
+                      </tr>
+                      </thead>
+                      <tbody id="tbody">
+                        <tr>
+                          <td>1</td>
+                          <td>1</td>
+                          <td><button class="btn btn-default btn-sm" onclick="showModify()">modify</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="col-12">
@@ -173,6 +250,45 @@
 </div>
 <!-- ./wrapper -->
 
+
+
+<div class="modal fade" id="modal_modify">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label>名称</label>
+              <input type="text" class="form-control" name="modalName", id="modalName">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label>描述</label>
+              <input type="text" class="form-control" name="modalDescription", id="modalDescription">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -206,43 +322,9 @@
             format: 'YYYY/MM/DD'
         });
     });
-
-    function addModule() {
-      var module = $("#minput").val();
-      var rowNo = $("#moduleTable").find("tr").length;
-      if (module != null && module != '') {
-          var trId = "tr_" + rowNo;
-          var row = "<tr id='"+trId+"'>";
-          var aId = "a_" + rowNo;
-          row += "<td name='td_row'>" + rowNo + "</td>"
-          row += "<td>" + module + "</td>"
-          row += "<td>"+"<a style='color: red' id='"+ aId +"' onclick='removeModule(" + rowNo +")' href='javascript:void(0)'><i class='fa fa-times'></i></a>" +"</td>"
-          row += "</tr>"
-          $("tbody").append(row);
-          $("#mainForm").append("<input type='hidden' name='module_" + rowNo + "' value='" + module + "'>");
-      }
-    }
-
-    function removeModule(rowNo) {
-        var trId = "tr_" + rowNo;
-        var inputName = "module_" + rowNo;
-        $("#" + trId).remove();
-
-        $("input[name^='" + inputName + "']").remove();
-        $("td[name='td_row']").each(function (idx, element) {
-          $(element).html(idx + 1);
-        });
-        for (i = rowNo; i <= $("#moduleTable").find("tr").length; i++) {
-            var oldTrId = "tr_" + (i + 1);
-            var oldInputName = "module_" + (i + 1);
-            var oldAId = "a_" + (i + 1);
-            var newAId = "a_" + i;
-            $("#" + oldTrId).attr("id", "tr_" + i);
-            $("#" + oldAId).attr("id", "a_" + i);
-            $("input[name^='"+oldInputName+"']").attr("name", "module_" + i);
-            $("#" + newAId).removeAttr("onclick");
-            $("#" + newAId).attr("onclick", "removeModule("+ i +")");
-        }
+    
+    function showModify() {
+      $("#modal_modify").modal({backdrop: true, show: true});
     }
 </script>
 </body>

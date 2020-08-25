@@ -169,6 +169,53 @@
               </div>
             </div>
           </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">模块</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>模块</label>
+                      <table class="table table-sm" id="moduleTable">
+                        <thead>
+                        <tr>
+                          <th style="width: 50px">#</th>
+                          <th>模块</th>
+                          <th style="width: 100px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="minput">添加模块</label>
+                      <div class="input-group">
+                        <input class="form-control" type="text" name="minput" id="minput">
+                        <span>&nbsp;&nbsp;</span>
+                        <button type="button" class="btn btn-default btn-sm" onclick="addModule()">
+                          <i class="fa fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -244,6 +291,45 @@
             format: 'YYYY/MM/DD'
         });
     });
+
+
+    function addModule() {
+        var module = $("#minput").val();
+        var rowNo = $("#moduleTable").find("tr").length;
+        if (module != null && module != '') {
+            var trId = "tr_" + rowNo;
+            var row = "<tr id='"+trId+"'>";
+            var aId = "a_" + rowNo;
+            row += "<td name='td_row'>" + rowNo + "</td>"
+            row += "<td>" + module + "</td>"
+            row += "<td>"+"<a style='color: red' id='"+ aId +"' onclick='removeModule(" + rowNo +")' href='javascript:void(0)'><i class='fa fa-times'></i></a>" +"</td>"
+            row += "</tr>"
+            $("tbody").append(row);
+            $("#mainForm").append("<input type='hidden' name='module_" + rowNo + "' value='" + module + "'>");
+        }
+    }
+
+    function removeModule(rowNo) {
+        var trId = "tr_" + rowNo;
+        var inputName = "module_" + rowNo;
+        $("#" + trId).remove();
+
+        $("input[name^='" + inputName + "']").remove();
+        $("td[name='td_row']").each(function (idx, element) {
+            $(element).html(idx + 1);
+        });
+        for (i = rowNo; i <= $("#moduleTable").find("tr").length; i++) {
+            var oldTrId = "tr_" + (i + 1);
+            var oldInputName = "module_" + (i + 1);
+            var oldAId = "a_" + (i + 1);
+            var newAId = "a_" + i;
+            $("#" + oldTrId).attr("id", "tr_" + i);
+            $("#" + oldAId).attr("id", "a_" + i);
+            $("input[name^='"+oldInputName+"']").attr("name", "module_" + i);
+            $("#" + newAId).removeAttr("onclick");
+            $("#" + newAId).attr("onclick", "removeModule("+ i +")");
+        }
+    }
 </script>
 </body>
 </html>

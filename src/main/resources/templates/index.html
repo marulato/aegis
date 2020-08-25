@@ -32,7 +32,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu"></div>
+  <div th:replace="/include/sidebar::leftmenu('1.1')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -350,6 +350,7 @@
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>

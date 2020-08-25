@@ -39,3 +39,14 @@ aegis.required = function () {
         }
     });
 }
+
+aegis.activate = function () {
+    $("a[id^='link_']").each(function (idx, a) {
+        $(a).click(function () {
+            $("a[id^='link_']").each(function (i, link) {
+                $(link).removeClass("active");
+            });
+            $(a).addClass("active");
+        });
+    });
+}

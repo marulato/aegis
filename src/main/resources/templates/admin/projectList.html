@@ -33,7 +33,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu"></div>
+  <div th:replace="/include/sidebar::leftmenu('3')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -140,19 +140,54 @@
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-
         $('#projectTable').DataTable({
-            "paging": true,
+            "processing": true,
             "lengthChange": true,
             "searching": false,
             "ordering": true,
             "info": true,
-            "autoWidth": false,
+            "autoWidth": true,
             "responsive": true,
+            "aLengthMenu":[10,20],
+            "bPaginate": true,
+            "serverSide": true,
+            ajax: function (data, callback, settings) {
+                var pageSize = data.length;
+                var page = (data.start) / data.length + 1;
+                var params = {
+                    page: page,
+                    pageSize: pageSize,
+                };
+
+                $.ajax({
+                    url: "/web/project/list",
+                    type: "post",
+                    data: params,
+                    dataType:"json",
+                    cache : false,
+                    success: function (res) {
+                        var returnData = {};
+                        //returnData.draw = arr.data.pagination.pageCount;
+                        returnData.recordsTotal = 100;
+                        returnData.recordsFiltered = 100;
+                        returnData.data = res.data;
+                        callback(returnData);
+                    }
+                });
+            },
+            columns: [
+                {"data": "id", "defaultContent": "-"},
+                {"data": "name", "defaultContent": "-"},
+                {"data": "status", "defaultContent": "-"},
+                {"data": "description", "defaultContent": "-"},
+                {"data": "createdAt", "defaultContent": "-"},
+                {"data": "-", "defaultContent": "-"}
+            ]
         });
     });
 </script>
