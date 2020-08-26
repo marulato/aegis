@@ -10,6 +10,10 @@ public abstract class EmailTemplateGenerator implements IDocGenerator{
 
     @Override
     public byte[] generate() throws Exception {
+        return getEmailContent().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public String getEmailContent() throws Exception {
         String templatePath = this.getClass().getResource("/").getPath();
         templatePath = templatePath.replaceAll("%20", " ") + "emails/";
         String ftl = getTemplate();
@@ -26,7 +30,7 @@ public abstract class EmailTemplateGenerator implements IDocGenerator{
         Template template = config.getTemplate(fileName);
         StringWriter writer = new StringWriter();
         template.process(getParameters(), writer);
-        return writer.toString().getBytes(StandardCharsets.UTF_8);
+        return writer.toString();
     }
 
     public abstract String getSubject();

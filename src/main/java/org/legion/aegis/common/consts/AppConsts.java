@@ -23,6 +23,9 @@ public class AppConsts {
     public static final String ACCOUNT_STATUS_LOCKED    = "L";
     public static final String ACCOUNT_STATUS_FROZEN    = "F";
 
+    public static final String USER_DOMAIN_INTRANET  = "INTRANET";
+    public static final String USER_DOMAIN_EXTRANET  = "EXTRANET";
+
 
 
     public static final int RESPONSE_VALIDATION_NOT_PASS  = 221;

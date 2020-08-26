@@ -2,6 +2,7 @@ package org.legion.aegis.admin.entity;
 
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
+import org.legion.aegis.common.jpa.annotation.NotColumn;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
 import org.legion.aegis.common.validation.NotEmpty;
 
@@ -17,7 +18,6 @@ public class UserAccount extends BasePO {
     private String domain;
     private String name;
     private String displayName;
-    private String type;
     @NotEmpty(message = "请输入密码")
     private String password;
     private String email;
@@ -31,6 +31,9 @@ public class UserAccount extends BasePO {
     private Integer loginFailedTimes;
     private Date activatedAt;
     private Date deactivatedAt;
+
+    @NotColumn
+    private String originalPwd;
 
     public Long getId() {
         return id;
@@ -70,14 +73,6 @@ public class UserAccount extends BasePO {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getPassword() {
@@ -174,5 +169,13 @@ public class UserAccount extends BasePO {
 
     public void setDeactivatedAt(Date deactivatedAt) {
         this.deactivatedAt = deactivatedAt;
+    }
+
+    public String getOriginalPwd() {
+        return originalPwd;
+    }
+
+    public void setOriginalPwd(String originalPwd) {
+        this.originalPwd = originalPwd;
     }
 }

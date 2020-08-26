@@ -93,7 +93,10 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label for="role" data-required="true">权限</label>
-                      <select class="custom-select" type="text" name="role" id="role"></select>
+                      <select class="custom-select" type="text" name="role" id="role">
+                        <option th:each="role, stat:${roles}" th:value="${role.id}" th:text="${role.roleName}"></option>
+                      </select>
+
                     </div>
                   </div>
                 </div>

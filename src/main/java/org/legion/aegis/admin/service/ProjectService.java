@@ -20,4 +20,8 @@ public class ProjectService {
     public List<Project> getAllProjects() {
         return projectDAO.getAllProjects();
     }
+
+    public Project getProjectById(Long id) {
+        return getProjectById(id);
+    }
 }

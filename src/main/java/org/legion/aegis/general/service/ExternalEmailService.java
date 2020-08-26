@@ -53,6 +53,10 @@ public class ExternalEmailService {
                 (StringUtils.isEmpty(subject) && StringUtils.isEmpty(content) && attachment == null)) {
             return;
         }
+        String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
+        if (!StringUtils.parseBoolean(isEmailEnabled)) {
+            return;
+        }
         EmailArchive emailArchive = new EmailArchive();
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -100,6 +104,10 @@ public class ExternalEmailService {
             JPAExecutor.save(emailArchive);
         }
 
+    }
+
+    public void sendEmail(String[] sentTo, String[] cc, String subject, String content) throws Exception {
+        sendEmail(ConfigUtils.get("server.smtp.username"), sentTo, cc, subject, content, null, null);
     }
 
     public void sendEmail(EmailEntity emailEntity) throws Exception {
