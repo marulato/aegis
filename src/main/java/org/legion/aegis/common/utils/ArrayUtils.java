@@ -85,4 +85,16 @@ public class ArrayUtils {
         }
         return temp;
     }
+
+    public static String toString(String[] array, String connector) {
+        if (array != null && array.length > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (String s : array) {
+                builder.append(s).append(connector);
+            }
+            builder.deleteCharAt(builder.lastIndexOf(connector));
+            return builder.toString();
+        }
+        return null;
+    }
 }

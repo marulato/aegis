@@ -33,7 +33,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu"></div>
+  <div th:replace="/include/sidebar::leftmenu('3')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -214,7 +214,7 @@
       <div class="col-12">
         <div class="row">
           <div class="col-md-6">
-            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/project'">
               <i class="fa fa-chevron-left"></i>
               返回</button>
           </div>
@@ -234,13 +234,7 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2020 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.1.0-pre
-    </div>
-  </footer>
+  <div th:replace="/include/footer::footer"></div>
 
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">

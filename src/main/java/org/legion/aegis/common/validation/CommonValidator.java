@@ -109,15 +109,16 @@ public class CommonValidator {
         if (isProfileMatch(profile, anno.profile())) {
             String methodName = anno.method();
             String[] parameters = anno.parameters();
-            Object[] argsArray = new String[parameters.length + 1];
+            List<Object> argsList = new ArrayList<>();
             Class<?>[] argTypesArray = new Class[parameters.length + 1];
             Arrays.fill(argTypesArray, String.class);
+            argTypesArray[0] = field.getType();
             Method method = objClass.getDeclaredMethod(methodName, argTypesArray);
             if (method.getReturnType() == boolean.class || method.getReturnType() == Boolean.class) {
                 method.setAccessible(true);
-                argsArray[0] = String.valueOf(value);
-                System.arraycopy(parameters, 0, argsArray, 1, parameters.length);
-                boolean result = (boolean) method.invoke(obj, argsArray);
+                argsList.add(value);
+                argsList.addAll(Arrays.asList(parameters));
+                boolean result = (boolean) method.invoke(obj, argsList.toArray());
                 if (!result) {
                     validationMap.get(field.getName()).add(anno.message());
                 }

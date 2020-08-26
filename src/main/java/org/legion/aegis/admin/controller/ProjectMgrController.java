@@ -1,12 +1,14 @@
 package org.legion.aegis.admin.controller;
 
 import org.legion.aegis.admin.entity.Project;
+import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.MiscGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,13 @@ import java.util.*;
 
 @Controller
 public class ProjectMgrController {
+
+    private final ProjectService projectService;
+
+    @Autowired
+    public ProjectMgrController(ProjectService projectService) {
+        this.projectService = projectService;
+    }
 
     @GetMapping("/web/project")
     public String getProjectDisplayPage(HttpServletRequest request) {
@@ -26,6 +35,11 @@ public class ProjectMgrController {
         return "admin/projectDisplay";
     }
 
+    @GetMapping("/web/project/acknowledge")
+    public String acknowledge() {
+        return "admin/projectAcknowledge";
+    }
+
     @GetMapping("/web/project/add")
     public String add() {
         return "admin/projectAdd";
@@ -34,6 +48,13 @@ public class ProjectMgrController {
     @GetMapping("/web/project/modify")
     public String addSub() {
         return "admin/projectModify";
+    }
+
+    @GetMapping("/web/project/get")
+    public AjaxResponseBody getProjectSelector() {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        responseMgr.addDataObjects(projectService.getAllProjects());
+        return responseMgr.respond();
     }
 
     @PostMapping("/web/project/list")

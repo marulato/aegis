@@ -12,6 +12,7 @@ import freemarker.template.Template;
 import org.legion.aegis.common.utils.StringUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public abstract class PdfTemplateGenerator implements IDocGenerator {
 
@@ -21,15 +22,11 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
     private int headerAlignment = 1;
     private String footer;
     private int footerAlignment = 1;
-    private String font = "simhei.ttf";
+    private String font = "styles/simhei.ttf";
 
     protected byte[] generatePdf(byte[] content) throws Exception {
         Document document = new Document();
-        if (pageSize != null) {
-            document.setPageSize(pageSize);
-        } else {
-            document.setPageSize(DocumentConsts.PAGE_A4);
-        }
+        document.setPageSize(Objects.requireNonNullElse(pageSize, DocumentConsts.PAGE_A4));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
         if (needPageNo || StringUtils.isNotBlank(header) || StringUtils.isNotBlank(footer)) {
@@ -37,7 +34,7 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
         }
         document.open();
         if (StringUtils.isBlank(font)) {
-            font = "simhei.ttf";
+            font = "styles/simhei.ttf";
         }
         XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
         fontProvider.register(font);
@@ -57,7 +54,7 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
     }
 
     protected PdfPageEventHelper initHeaderFooter() {
-        PdfPageEventHelper headerFooter = new PdfPageEventHelper(){
+        return new PdfPageEventHelper(){
             @Override
             public void onEndPage(PdfWriter writer, Document document) {
                 float center = document.getPageSize().getRight() / 2;
@@ -65,31 +62,30 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
                 float right = document.getPageSize().getRight() - 48;
                 float top = document.getPageSize().getTop() - 36;
                 float bottom = document.getPageSize().getBottom() + 36;
-                Font font = FontFactory.getFont(getFont(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED,
+                Font font1 = FontFactory.getFont(getFont(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED,
                         10, Font.NORMAL, BaseColor.BLACK);
 
                 if (StringUtils.isNotBlank(header)) {
-                    Phrase headerPhrase = new Phrase(header, font);
+                    Phrase headerPhrase = new Phrase(header, font1);
                     ColumnText.showTextAligned(writer.getDirectContent(), headerAlignment, headerPhrase, center, top, 0);
                 }
                 if(StringUtils.isNotBlank(footer) && !needPageNo) {
-                    Phrase phrase = new Phrase(footer, font);
+                    Phrase phrase = new Phrase(footer, font1);
                     ColumnText.showTextAligned(writer.getDirectContent(), footerAlignment, phrase, center, bottom, 0);
                 }
                 if (StringUtils.isNotBlank(footer) && needPageNo) {
-                    Phrase phrase = new Phrase(footer, font);
+                    Phrase phrase = new Phrase(footer, font1);
                     ColumnText.showTextAligned(writer.getDirectContent(), footerAlignment, phrase, left, bottom, 0);
-                    Phrase pageNumberPh = new Phrase(String.valueOf(document.getPageNumber()), font);
+                    Phrase pageNumberPh = new Phrase(String.valueOf(document.getPageNumber()), font1);
                     ColumnText.showTextAligned(writer.getDirectContent(), footerAlignment, pageNumberPh, center, bottom, 0);
                 }
                 if (StringUtils.isBlank(footer) && needPageNo) {
-                    Phrase pageNumberPh = new Phrase(String.valueOf(document.getPageNumber()), font);
+                    Phrase pageNumberPh = new Phrase(String.valueOf(document.getPageNumber()), font1);
                     ColumnText.showTextAligned(writer.getDirectContent(), footerAlignment, pageNumberPh, center, bottom, 0);
                 }
                 super.onEndPage(writer, document);
             }
         };
-        return headerFooter;
     }
 
 

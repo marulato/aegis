@@ -110,4 +110,19 @@ public class StringUtils {
         return true;
     }
 
+    public static Integer parseIfIsInteger(String src) {
+        try {
+            return Integer.parseInt(src);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Long parseIfIsLong(String src) {
+        try {
+            return Long.parseLong(src);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

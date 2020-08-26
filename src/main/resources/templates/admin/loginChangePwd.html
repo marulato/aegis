@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AEGIS Bug Tracker | Log in</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <a href="#"><b>AEGIS</b> Bug Tracker</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">首次登录，请修改密码</p>
+
+      <form id="mainForm"  method="post">
+        <input type="hidden" name="browser" id="browser">
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="pwd1" id="pwd1" placeholder="新密码">
+          <div class="input-group-append" name="loginId_append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="pwd2" id="pwd2" placeholder="确认密码">
+          <div class="input-group-append" name="password_append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button type="button" class="btn btn-primary btn-block" onclick="">确认</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- /.social-auth-links -->
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script th:src="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.min.js}"></script>
+
+<script th:src="@{/js/aegis.js}"></script>
+
+<script>
+
+    function land(roleId) {
+        var role = "";
+        if (roleId !== 1) {
+            role = roleId;
+        }
+        location.href = "/web/login/landing/" + roleId;
+    }
+</script>
+</body>
+</html>

@@ -33,7 +33,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu"></div>
+  <div th:replace="/include/sidebar::leftmenu('3')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -60,6 +60,11 @@
       <div class="container-fluid">
         <!-- table-->
         <div class="col-12">
+          <div class="alert alert-success alert-dismissible" style="display: none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <h5><i class="icon fas fa-check"></i> Alert!</h5>
+            Success alert preview. This alert is dismissable.
+          </div>
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">基本信息</h3>
@@ -182,17 +187,21 @@
 
       <!-- /.row (main row) -->
     <!-- /.container-fluid -->
+      <div class="col-12">
+        <div class="row">
+          <div class="col-md-6">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/project'">
+              <i class="fa fa-chevron-left"></i>
+              返回</button>
+          </div>
+        </div>
+      </div>
+      <br/>
   </section>
   <!-- /.content -->
 </div>
 <!-- /.content-wrapper -->
-<footer class="main-footer">
-  <strong>Copyright &copy; 2014-2020 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-  All rights reserved.
-  <div class="float-right d-none d-sm-inline-block">
-    <b>Version</b> 3.1.0-pre
-  </div>
-</footer>
+  <div th:replace="/include/footer::footer"></div>
 
 <!-- Control Sidebar -->
 <aside class="control-sidebar control-sidebar-dark">
