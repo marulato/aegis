@@ -34,7 +34,7 @@ public class BeanUtils {
                 if (targetField.getType() == Date.class || targetField.getType() == java.sql.Date.class) {
                     String dateString = (String) getValue(dtoField, dtoType, dto);
                     if (StringUtils.isNotBlank(dateString)) {
-                        setValue(targetField, type, instance, DateUtils.parseDate(dateString));
+                        setValue(targetField, type, instance, DateUtils.parseDatetime(dateString));
                     }
                 }
                 if (targetField.getType() == int.class || targetField.getType() == Integer.class) {

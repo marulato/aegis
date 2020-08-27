@@ -145,7 +145,7 @@
                         返回</button>
                     </div>
                     <div class="col-md-6">
-                      <button type="button" class="btn btn-primary float-left" style="font-size: 14px">
+                      <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="submitAction()">
                         <i class="fa fa-check"></i>
                         提交</button>
                     </div>
@@ -196,6 +196,7 @@
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/blockUI.js}"></script>
 <script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
@@ -212,17 +213,18 @@
     });
 
 
-    function submit() {
+    function submitAction() {
+      aegis.loading();
       var formData = {
           loginId: $("#loginId").val(),
           email: $("#email").val(),
           role: $("#role").val(),
           effectiveRange: $("#effectiveRange").val(),
-          project: $("projectSelector").select2('val'),
+          project: $("#projectSelector").select2('val'),
       };
 
       $.ajax({
-          url: "",
+          url: "/web/user/add",
           type: "post",
           contentType: "application/json;charset=utf-8",
           data: JSON.stringify(formData),

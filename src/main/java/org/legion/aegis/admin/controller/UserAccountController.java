@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +43,7 @@ public class UserAccountController {
         return modelAndView;
     }
 
-    @GetMapping("/web/user/")
+    @GetMapping("/web/user")
     public String redirectUserPage() {
         return "admin/userList";
     }
@@ -50,8 +53,9 @@ public class UserAccountController {
         return "admin/userDisplay";
     }
 
-    @PostMapping("/web/user/add/submit")
-    public void addUser(UserDto userDto) throws Exception {
+    @PostMapping("/web/user/add")
+    @ResponseBody
+    public void addUser(@RequestBody UserDto userDto) throws Exception {
         Map<String, List<String>> errors = CommonValidator.doValidation(userDto, null);
         if (errors.isEmpty()) {
             UserAccount userAccount = BeanUtils.mapFromDto(userDto, UserAccount.class);
@@ -66,7 +70,6 @@ public class UserAccountController {
             UserAccount createdUser = accountService.createUser(userAccount, List.of(role), projects);
             accountService.sendAcknowledgementEmail(createdUser);
         }
-
     }
 
 }

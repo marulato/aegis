@@ -1,7 +1,9 @@
 package org.legion.aegis.admin.dto;
 
 import org.legion.aegis.admin.dao.ProjectDAO;
+import org.legion.aegis.admin.dao.UserAccountDAO;
 import org.legion.aegis.common.base.BaseDto;
+import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.utils.ValidationUtils;
@@ -9,6 +11,7 @@ import org.legion.aegis.common.validation.ValidateWithMethod;
 import org.legion.aegis.common.validation.ValidateWithRegex;
 
 import java.util.Arrays;
+import java.util.Date;
 
 public class UserDto extends BaseDto {
 
@@ -18,15 +21,41 @@ public class UserDto extends BaseDto {
     private String email;
     @ValidateWithMethod(method = "validateProject", message = "请添加正确的项目")
     private String[] project;
+    @ValidateWithMethod(method = "validateRole", message = "请选择正确的权限")
     private String role;
+    @ValidateWithMethod(method = "validateRange", message = "请选择正确的日期范围")
     private String effectiveRange;
     private String password;
+
+    private Date activatedAt;
+    private Date deactivatedAt;
 
     private boolean validateProject(String[] project) {
         if (project != null) {
             ProjectDAO projectDAO = SpringUtils.getBean(ProjectDAO.class);
             for (String id : project) {
                 return projectDAO.getProjectById(StringUtils.parseIfIsLong(id)) != null;
+            }
+        }
+        return false;
+    }
+
+    private boolean validateRole(String role) {
+        UserAccountDAO accountDAO = SpringUtils.getBean(UserAccountDAO.class);
+        return accountDAO.getRoleById(role) != null;
+    }
+
+    private boolean validateRange(String effectiveRange) {
+        if (StringUtils.isNotBlank(effectiveRange)) {
+            String[] range = effectiveRange.split("-");
+            if (range.length == 2) {
+                Date start = DateUtils.parseDatetime(range[0]);
+                Date end = DateUtils.parseDatetime(range[1]);
+                if (start != null && end != null && start.before(end)) {
+                    setActivatedAt(start);
+                    setDeactivatedAt(end);
+                    return true;
+                }
             }
         }
         return false;
@@ -78,5 +107,21 @@ public class UserDto extends BaseDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Date getActivatedAt() {
+        return activatedAt;
+    }
+
+    public void setActivatedAt(Date activatedAt) {
+        this.activatedAt = activatedAt;
+    }
+
+    public Date getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public void setDeactivatedAt(Date deactivatedAt) {
+        this.deactivatedAt = deactivatedAt;
     }
 }

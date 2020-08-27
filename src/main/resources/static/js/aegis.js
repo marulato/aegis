@@ -51,6 +51,10 @@ aegis.activate = function () {
     });
 }
 
+aegis.loading = function() {
+    $.blockUI({message:'<span style="font-size: 12px"><img src="/dist/img/loading.gif">&nbsp;正在处理，请稍后</span>'});
+}
+
 aegis.locale = {
     "sEmptyTable": "没有数据",
     "sInfo": "显示第 _START_ 至第 _END_ 项结果，共 _TOTAL_ 项",

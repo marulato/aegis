@@ -26,10 +26,10 @@ VALUES ('QA', 'Quality Assurance', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NO
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('ADMIN', 'Project Administrator', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('PJTADM', 'Project Administrator', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('CLIENT', 'Client', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('EXTPTY', 'External Party', 'USER', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 

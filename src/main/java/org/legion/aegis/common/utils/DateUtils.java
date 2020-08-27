@@ -5,84 +5,41 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class DateUtils {
-    public static final String FULL_STD_FORMAT 				= "yyyy-MM-dd HH:mm:ss:SSS";
-    public static final String STD_FORMAT 					= "yyyy-MM-dd HH:mm:ss";
+    public static final String FULL_STD_FORMAT_1 			= "yyyy-MM-dd HH:mm:ss:SSS";
+    public static final String FULL_STD_FORMAT_2 			= "yyyy/MM/dd HH:mm:ss:SSS";
+    public static final String STD_FORMAT_1 				= "yyyy-MM-dd HH:mm:ss";
+    public static final String STD_FORMAT_2 				= "yyyy/MM/dd HH:mm:ss";
     public static final String TODAY_FORMAT 				= "yyyy-MM-dd";
-    public static final String TIME_24H 					= "HH:mm:ss";
-    public static final String TIME_12H 					= "hh:mm:ss";
-    public static final String TIME_24H_MILLIS 				= "HH:mm:ss:SSS";
-    public static final String TIME_12H_MILLIS 				= "hh:mm:ss:SSS";
     public static final String SLASH_TODAY_FORMAT			= "yyyy/MM/dd";
-    public static final String MD_FORMAT 					= "MM/dd";
-    public static final String UPSIDE_DOWN_TODAY_FORMAT 	= "dd/MM/yyyy";
+    public static final String US_TODAY_FORMAT 				= "MM/dd/yyyy";
+    public static final String ENG_TODAY_FORMAT 	        = "dd/MM/yyyy";
+    public static final String TIME_24H 					= "HH:mm:ss";
+    public static final String TIME_24H_MILLIS 				= "HH:mm:ss:SSS";
     public static final long ONE_DAY_MILLIS					= 24 * 60 * 60 * 1000;
     public static final long ONE_HOUR_MILLIS				= 60 * 60 * 1000;
+    public static final List<String> COMMON_FORMAT = List.of(FULL_STD_FORMAT_1, FULL_STD_FORMAT_2, STD_FORMAT_1,
+                                STD_FORMAT_2, TODAY_FORMAT, SLASH_TODAY_FORMAT, US_TODAY_FORMAT, ENG_TODAY_FORMAT);
 
-    public static Date parseDate(String dateStr) {
-        Date date = null;
+    public static Date parseDatetime(String dateStr) {
         if (!StringUtils.isEmpty(dateStr)) {
-            try {
-                SimpleDateFormat dateFormatter = new SimpleDateFormat(FULL_STD_FORMAT);
-                date = dateFormatter.parse(dateStr);
-            } catch (ParseException e0) {
-                try {
-                    SimpleDateFormat dateFormatter = new SimpleDateFormat(STD_FORMAT);
-                    date = dateFormatter.parse(dateStr);
-                } catch (ParseException e1) {
-                    try {
-                        SimpleDateFormat dateFormatter = new SimpleDateFormat(TODAY_FORMAT);
-                        date = dateFormatter.parse(dateStr);
-                    } catch (ParseException e2) {
-                        try {
-                            SimpleDateFormat dateFormatter = new SimpleDateFormat(TIME_24H);
-                            date = dateFormatter.parse(dateStr);
-                        } catch (ParseException e3) {
-                            try {
-                                SimpleDateFormat dateFormatter = new SimpleDateFormat(TIME_12H);
-                                date = dateFormatter.parse(dateStr);
-                            } catch (ParseException e4) {
-                                try {
-                                    SimpleDateFormat dateFormatter = new SimpleDateFormat(SLASH_TODAY_FORMAT);
-                                    date = dateFormatter.parse(dateStr);
-                                } catch (ParseException e5) {
-                                    try {
-                                        SimpleDateFormat dateFormatter = new SimpleDateFormat(MD_FORMAT);
-                                        date = dateFormatter.parse(dateStr);
-                                    } catch (ParseException e6) {
-                                        try {
-                                            SimpleDateFormat dateFormatter = new SimpleDateFormat(UPSIDE_DOWN_TODAY_FORMAT);
-                                            date = dateFormatter.parse(dateStr);
-                                        } catch (ParseException e7) {
-                                            try {
-                                                SimpleDateFormat dateFormatter = new SimpleDateFormat(TIME_24H_MILLIS);
-                                                date = dateFormatter.parse(dateStr);
-                                            } catch (ParseException e8) {
-                                                try {
-                                                    SimpleDateFormat dateFormatter = new SimpleDateFormat(TIME_12H_MILLIS);
-                                                    date = dateFormatter.parse(dateStr);
-                                                } catch (ParseException e9) {
-                                                    date = null;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            for (String fmt : COMMON_FORMAT) {
+                Date date = parseDatetime(dateStr, fmt);
+                if (date != null) {
+                    return date;
                 }
             }
         }
-        return date;
+        return null;
     }
 
     public static Date now() {
         return new Date();
     }
 
-    public static Date parseDate(String dateStr, String format) {
+    public static Date parseDatetime(String dateStr, String format) {
         try {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(format);
             return dateFormatter.parse(dateStr);
@@ -92,36 +49,15 @@ public class DateUtils {
     }
 
     public static Date today() {
-        Date date = null;
         try {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(TODAY_FORMAT);
-            date = dateFormatter.parse(dateFormatter.format(now()));
-        } catch (ParseException e0) {
-            try {
-                SimpleDateFormat dateFormatter = new SimpleDateFormat(SLASH_TODAY_FORMAT);
-                date = dateFormatter.parse(dateFormatter.format(now()));
-            } catch (ParseException e1) {
-                try {
-                    SimpleDateFormat dateFormatter = new SimpleDateFormat(UPSIDE_DOWN_TODAY_FORMAT);
-                    date = dateFormatter.parse(dateFormatter.format(now()));
-                } catch (ParseException e2) {
-                    date = now();
-                }
-            }
+            return dateFormatter.parse(dateFormatter.format(now()));
+        } catch (ParseException ignored) {
+
         }
-        return date;
+        return null;
     }
 
-    public static Date today(String format) {
-        Date date = null;
-        try {
-            SimpleDateFormat dateFormatter = new SimpleDateFormat(format);
-            date = dateFormatter.parse(dateFormatter.format(now()));
-        } catch (Exception e) {
-            date = today();
-        }
-        return date;
-    }
 
     public static Date sameTimeTomorrow(Date current) {
         return addHours(current, 24);
@@ -237,20 +173,6 @@ public class DateUtils {
         return new Date(millis);
     }
 
-    public static Date getDate(String dateStr, String format) {
-        if (StringUtils.isEmpty(format) || StringUtils.isEmpty(dateStr)) {
-            return null;
-        }
-        Date date = null;
-        SimpleDateFormat formater = new SimpleDateFormat(format);
-        try {
-            date = formater.parse(dateStr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return date;
-
-    }
 
     public static int getDaysBetween(Date from, Date to) {
         if (from != null && to != null) {
@@ -273,8 +195,7 @@ public class DateUtils {
         long fromMillis = from.getTime();
         long toMillis = to.getTime();
         long temp = toMillis - fromMillis;
-        long between = temp >= 0 ? temp : -temp;
-        return between;
+        return temp >= 0 ? temp : -temp;
     }
 
     public static String getDateString(Date date, String format) {
@@ -287,14 +208,14 @@ public class DateUtils {
     public static String getLogDate(Date date) {
         if (date == null)
             return null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat(FULL_STD_FORMAT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(FULL_STD_FORMAT_2);
         return dateFormat.format(date);
     }
 
     public static String getStandardDate(Date date) {
         if (date == null)
             return null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat(STD_FORMAT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(STD_FORMAT_2);
         return dateFormat.format(date);
     }
 
@@ -340,8 +261,7 @@ public class DateUtils {
         if (date != null && from != null && to != null) {
             if (isSame(date, from) || isSame(date, to))
                 return true;
-            if (date.after(from) && date.before(to))
-                return true;
+            return date.after(from) && date.before(to);
         }
         return false;
     }
