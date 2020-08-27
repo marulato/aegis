@@ -1,5 +1,6 @@
 <html lang="zh-CN">
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>已为您创建AEGIS账户</title>
   </head>
 <body>

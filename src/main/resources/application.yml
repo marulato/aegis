@@ -83,9 +83,10 @@ spring:
   mail:
     host: smtp.qq.com
     username: 351975711@qq.com
-    password: 123456
+    password: lolxhpfpcplobjdj
     default-encoding: UTF-8
-    port: 80
+    port: 465
+    protocol: smtps
   thymeleaf:
     cache: false
 

@@ -16,6 +16,7 @@
   <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
   <!-- iCheck -->
   <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/select2/css/select2.min.css}">
 
   <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
   <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
@@ -118,35 +119,17 @@
                 </div>
 
                 <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label>项目列表</label>
-                      <table class="table table-sm" id="projectTable">
-                        <thead>
-                        <tr>
-                          <th style="width: 50px">#</th>
-                          <th>项目名</th>
-                          <th style="width: 100px">操作</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tbody"></tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-9">
                     <div class="form-group">
                       <label for="projectSelector" data-required="true">项目</label>
-                      <div class="input-group">
-                        <select class="custom-select" name="projectSelector" id="projectSelector">
+                      <div class="select2-blue">
+                        <select class="select2" multiple="multiple" data-dropdown-css-class="select2-blue" name="projectSelector" id="projectSelector" style="width: 100%;">
                           <option th:each="project, stat:${projects}" th:value="${project.id}" th:text="${project.name}"></option>
                         </select>
-                        <span>&nbsp;&nbsp;</span>
+                        <!--<span>&nbsp;&nbsp;</span>
                         <button type="button" class="btn btn-default btn-sm" onclick="addProject()">
                           <i class="fa fa-plus"></i>
-                        </button>
+                        </button>-->
                       </div>
                     </div>
                   </div>
@@ -208,6 +191,7 @@
 <!-- daterangepicker -->
 <script th:src="@{/plugins/moment/moment.min.js}"></script>
 <script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<script th:src="@{/plugins/select2/js/select2.full.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
@@ -221,47 +205,35 @@
         $('#effectiveRange').daterangepicker({
             format: 'YYYY/MM/DD'
         });
+        $("#projectSelector").select2({
+            closeOnSelect: false,
+            tag: true
+        });
     });
 
 
-    function addProject() {
-        var project = $("#projectSelector").val();
-        var text = $("#projectSelector").find("option:selected").text();
-        var rowNo = $("#projectTable").find("tr").length;
-        if (project != null && project != '') {
-            var trId = "tr_" + rowNo;
-            var row = "<tr id='"+trId+"'>";
-            var aId = "a_" + rowNo;
-            row += "<td name='td_row'>" + rowNo + "</td>"
-            row += "<td>" + text + "</td>"
-            row += "<td>"+"<a style='color: red' id='"+ aId +"' onclick='removeProject(" + rowNo +")' href='javascript:void(0)'><i class='fa fa-times'></i></a>" +"</td>"
-            row += "</tr>"
-            $("tbody").append(row);
-            $("#mainForm").append("<input type='hidden' name='project'  id='project_" + rowNo + "' value='" + project + "'>");
-        }
+    function submit() {
+      var formData = {
+          loginId: $("#loginId").val(),
+          email: $("#email").val(),
+          role: $("#role").val(),
+          effectiveRange: $("#effectiveRange").val(),
+          project: $("projectSelector").select2('val'),
+      };
+
+      $.ajax({
+          url: "",
+          type: "post",
+          contentType: "application/json;charset=utf-8",
+          data: JSON.stringify(formData),
+          dataType: "json",
+          success: function (res) {
+
+          }
+      });
+
     }
 
-    function removeProject(rowNo) {
-        var trId = "tr_" + rowNo;
-        var inputName = "project_" + rowNo;
-        $("#" + trId).remove();
-
-        $("input[id^='" + inputName + "']").remove();
-        $("td[name='td_row']").each(function (idx, element) {
-            $(element).html(idx + 1);
-        });
-        for (i = rowNo; i <= $("#projectTable").find("tr").length; i++) {
-            var oldTrId = "tr_" + (i + 1);
-            var oldInputName = "project_" + (i + 1);
-            var oldAId = "a_" + (i + 1);
-            var newAId = "a_" + i;
-            $("#" + oldTrId).attr("id", "tr_" + i);
-            $("#" + oldAId).attr("id", "a_" + i);
-            $("input[id^='"+oldInputName+"']").attr("id", "project_" + i);
-            $("#" + newAId).removeAttr("onclick");
-            $("#" + newAId).attr("onclick", "removeProject("+ i +")");
-        }
-    }
 
 
 

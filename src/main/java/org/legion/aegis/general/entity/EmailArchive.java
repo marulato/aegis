@@ -1,8 +1,10 @@
 package org.legion.aegis.general.entity;
 
 import org.legion.aegis.common.base.BasePO;
+import org.legion.aegis.common.jpa.annotation.Entity;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
 
+@Entity(tableName = "SA_EMAIL_ARCHIVE")
 public class EmailArchive extends BasePO {
 
     @PrimaryKey(autoIncrement = true)

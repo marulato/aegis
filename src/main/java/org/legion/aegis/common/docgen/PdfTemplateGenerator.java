@@ -104,7 +104,7 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
         }
         Configuration config = new Configuration(Configuration.VERSION_2_3_30);
         config.setDirectoryForTemplateLoading(new File(templatePath));
-        Template template = config.getTemplate(fileName);
+        Template template = config.getTemplate(fileName, "UTF-8");
         StringWriter writer = new StringWriter();
         template.process(getParameters(), writer);
         writer.close();
