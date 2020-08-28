@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.legion.aegis.admin.dao.ProjectDAO">
+    <select id="search" parameterType="org.legion.aegis.common.base.SearchParam" resultType="org.legion.aegis.admin.entity.Project">
+        SELECT * FROM PJT_PROJECT
+        <where>
+            <if test="sp.params.projectName != null and sp.params.projectName != ''">
+                AND UPPER (NAME) LIKE CONCAT('%', UPPER(#{sp.params.projectName}), '%')
+            </if>
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER (DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%'})
+            </if>
+        </where>
+        <choose>
+            <when test="sp.orderColumnNo == 0">
+                ORDER BY NAME <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 1">
+                ORDER BY TYPE <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 2">
+                ORDER BY STATUS <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY DESCRIPTION <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 4">
+                ORDER BY CREATED_AT <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+        </choose>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+</mapper>

@@ -4,7 +4,6 @@ import java.util.List;
 
 public class AppConsts {
 
-    public static final String LINK_STYLE_ACTIVE = "active";
 
     public static final String YES         = "Y";
     public static final String NO          = "N";
@@ -12,6 +11,18 @@ public class AppConsts {
     public static final String FALSE       = "FALSE";
     public static final String TRUE_SHORT  = "T";
     public static final String FALSE_SHORT = "F";
+
+    public static final String STATUS_ACTIVE            = "ACTIVE";
+    public static final String STATUS_ACTIVE_CHN        = "正常";
+    public static final String STATUS_ACTIVE_SHORT      = "A";
+    public static final String STATUS_INACTIVE          = "INACTIVE";
+    public static final String STATUS_INACTIVE_CHN      = "未生效";
+    public static final String STATUS_INACTIVE_SHORT    = "I";
+    public static final String STATUS_EXPIRED           = "EXPIRED";
+    public static final String STATUS_EXPIRED_CHN       = "已过期";
+    public static final String STATUS_EXPIRED_SHORT     = "E";
+    public static final String STATUS_VOID              = "VOID";
+    public static final String STATUS_VOID_CHN          = "无效";
 
     public static final String GENDER_MALE    = "M";
     public static final String GENDER_FEMALE  = "F";
@@ -56,11 +67,8 @@ public class AppConsts {
     public static final String FILE_NET_SRC_TYPE_AUTO_GENERATED    = "GENERATED";
     public static final String FILE_NET_SRC_TYPE_EMAIL_ATTACHMENT  = "EMAIL";
 
-    public static final String EMIAL_STATUS_NOT_SENT       = "NOT_SENT";
+
     public static final String EMIAL_STATUS_SENT           = "SENT";
-    public static final String EMIAL_STATUS_RECEIVED       = "RECEIVED";
-    public static final String EMIAL_STATUS_READ           = "READ";
-    public static final String EMIAL_STATUS_RECYCLED       = "RECYCLED";
     public static final String EMIAL_STATUS_SENT_FAILED    = "FAILED";
 
 

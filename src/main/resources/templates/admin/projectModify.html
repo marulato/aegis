@@ -75,7 +75,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="name">项目名</label>
-                      <input class="form-control" type="text" name="name" id="name">
+                      <input class="form-control" type="text" name="name" id="name" th:value="${project.name}">
                     </div>
                   </div>
                 </div>
@@ -84,13 +84,15 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="type">项目类型</label>
-                      <select class="custom-select" name="type" id="type"></select>
+                      <select class="custom-select" name="type" id="type" th:value="${project.type}">
+                        <option></option>
+                      </select>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="typeOther">其他类型</label>
-                      <input class="form-control" type="text" name="typeOther" id="typeOther">
+                      <input class="form-control" type="text" name="typeOther" id="typeOther" th:value="${project.typeOther}">
                     </div>
                   </div>
                 </div>
@@ -99,7 +101,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="description">描述</label>
-                      <textarea class="form-control" name="description" id="description"></textarea>
+                      <textarea class="form-control" name="description" id="description" th:text="${project.description}"></textarea>
                     </div>
                   </div>
                 </div>
@@ -107,68 +109,6 @@
             </div>
           </div>
 
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">日程规划</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="reqRange">开发阶段</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="reqRange" name="reqRange" class="form-control" type="text">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="sitRange">内测阶段</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="sitRange" name="sitRange" class="form-control" type="text">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="uatRange">UAT开始日期</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="uatRange" name="uatRange" class="form-control" type="text">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
         </form>
 
@@ -186,20 +126,22 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>模块</label>
+                    <label>模块列表</label>
                     <table class="table table-sm" id="moduleTable">
                       <thead>
                       <tr>
-                        <th style="width: 50px">#</th>
-                        <th>模块名</th>
-                        <th style="width: 100px">操作</th>
+                        <th style="width: 10%">#</th>
+                        <th style="width: 45%">名称</th>
+                        <th style="width: 45%">描述</th>
+                        <th style="width: 10%">操作</th>
                       </tr>
                       </thead>
                       <tbody id="tbody">
-                        <tr>
-                          <td>1</td>
-                          <td>1</td>
-                          <td><button class="btn btn-default btn-sm" onclick="showModify()">modify</button></td>
+                        <tr th:each="m, stats:${project.modules}">
+                          <td th:text="${stats.count}"></td>
+                          <td th:text="${m.name}"></td>
+                          <td th:text="${m.description}"></td>
+                          <td><button class="btn btn-default btn-sm" th:onclick="showModify([[${m.id}]]);"><i class="fa fa-edit"></i></button></td>
                         </tr>
                       </tbody>
                     </table>
@@ -317,8 +259,11 @@
         });
     });
     
-    function showModify() {
-      $("#modal_modify").modal({backdrop: true, show: true});
+    function showModify(id) {
+        $.ajax({
+
+        });
+        $("#modal_modify").modal({backdrop: true, show: true});
     }
 </script>
 </body>

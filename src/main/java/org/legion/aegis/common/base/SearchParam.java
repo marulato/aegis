@@ -9,6 +9,7 @@ public class SearchParam implements Serializable {
     private Integer pageSize;
     private Integer orderColumnNo;
     private String order;
+    private Integer draw;
     private Map<String, String> params;
 
     public Integer getPageNo() {
@@ -40,7 +41,7 @@ public class SearchParam implements Serializable {
     }
 
     public void setOrder(String order) {
-        this.order = order;
+        this.order = order != null ? order.toUpperCase() : null;
     }
 
     public Map<String, String> getParams() {
@@ -49,5 +50,13 @@ public class SearchParam implements Serializable {
 
     public void setParams(Map<String, String> params) {
         this.params = params;
+    }
+
+    public Integer getDraw() {
+        return draw;
+    }
+
+    public void setDraw(Integer draw) {
+        this.draw = draw;
     }
 }

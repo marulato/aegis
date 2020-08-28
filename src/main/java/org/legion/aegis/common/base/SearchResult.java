@@ -36,5 +36,8 @@ public class  SearchResult <E> implements Serializable {
 
     public void setResultList(List<E> resultList) {
         this.resultList = resultList;
+        if (resultList != null) {
+            this.totalCounts = resultList.size();
+        }
     }
 }

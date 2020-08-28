@@ -2,7 +2,9 @@ package org.legion.aegis.common.utils;
 
 
 import org.legion.aegis.common.base.BaseDto;
+import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.base.PropertyMapping;
+import org.legion.aegis.common.jpa.annotation.NotColumn;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -61,6 +63,49 @@ public class BeanUtils {
         return null;
     }
 
+    public static <T> T mapFromPO(BasePO po, Class<T> type, String dateFormat) throws Exception {
+        if (StringUtils.isEmpty(dateFormat)) {
+            dateFormat = "yyyy/MM/dd HH:mm:ss";
+        }
+        if (po != null && type != null) {
+            T instance = type.getConstructor().newInstance();
+            Class<?> poType = po.getClass();
+            Class<?> basePoClass = poType.getSuperclass();
+            Class<?> baseDtoClass = type.getSuperclass();
+            Field[] fields = poType.getDeclaredFields();
+            for (Field field : fields) {
+                Field targetField;
+                try {
+                    targetField = type.getDeclaredField(field.getName());
+                } catch (Exception e) {
+                    continue;
+                }
+                if (field.isAnnotationPresent(NotColumn.class)) {
+                    continue;
+                }
+                if (field.getType() == Date.class) {
+                    Date date = (Date) getValue(field, poType, po);
+                    setValue(targetField, type, instance, DateUtils.getDateString(date, dateFormat));
+                } else {
+                    setValue(targetField, type, instance,
+                            StringUtils.getNonEmpty(String.valueOf(getValue(field, poType, po))));
+                }
+            }
+            Field[] auditFields = basePoClass.getDeclaredFields();
+            for (Field auditField : auditFields) {
+                Field dtoAuditField = baseDtoClass.getDeclaredField(auditField.getName());
+                if (dtoAuditField.getType() == String.class && auditField.getType() == Date.class) {
+                    Date date = (Date) getValue(auditField, basePoClass, po);
+                    setValue(dtoAuditField, baseDtoClass, instance, DateUtils.getDateString(date, dateFormat));
+                } else {
+                    setValue(dtoAuditField, baseDtoClass, instance,
+                            StringUtils.getNonEmpty(String.valueOf(getValue(auditField, basePoClass, po))));
+                }
+            }
+            return instance;
+        }
+        return null;
+    }
 
     public static Object getValue(Field field, Class<?> objClass, Object instance) throws Exception {
         String getter = "get";
@@ -89,7 +134,7 @@ public class BeanUtils {
         Method setterMethod = objClass.getDeclaredMethod(setter, field.getType());
         int modifier = setterMethod.getModifiers();
         if (Modifier.isPublic(modifier) && !Modifier.isAbstract(modifier)
-                && !Modifier.isStatic(modifier) && setterMethod.getReturnType() == field.getType()) {
+                && !Modifier.isStatic(modifier)) {
             setterMethod.setAccessible(true);
             setterMethod.invoke(instance, value);
         } else {

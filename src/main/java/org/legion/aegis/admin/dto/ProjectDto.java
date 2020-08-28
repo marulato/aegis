@@ -1,31 +1,23 @@
-package org.legion.aegis.admin.entity;
+package org.legion.aegis.admin.dto;
 
-import org.legion.aegis.common.base.BasePO;
-import org.legion.aegis.common.jpa.annotation.Entity;
-import org.legion.aegis.common.jpa.annotation.NotColumn;
-import org.legion.aegis.common.jpa.annotation.PrimaryKey;
-import java.util.Date;
-import java.util.List;
 
-@Entity(tableName = "PJT_PROJECT")
-public class Project extends BasePO {
+import org.legion.aegis.common.base.BaseDto;
+import org.legion.aegis.common.consts.AppConsts;
 
-    @PrimaryKey(autoIncrement = true)
-    private Long id;
+public class ProjectDto extends BaseDto {
+
+    private String id;
     private String name;
     private String type;
     private String typeOther;
     private String description;
     private String status;
 
-    @NotColumn
-    private List<Module> modules;
-
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -67,13 +59,5 @@ public class Project extends BasePO {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public List<Module> getModules() {
-        return modules;
-    }
-
-    public void setModules(List<Module> modules) {
-        this.modules = modules;
     }
 }

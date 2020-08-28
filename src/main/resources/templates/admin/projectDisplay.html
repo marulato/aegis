@@ -42,7 +42,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark"><a href="#"><i class="fa fa-chevron-left"></i></a>&nbsp;项目明细</h1>
+            <h1 class="m-0 text-dark"><a href="/web/project"><i class="fa fa-chevron-left"></i></a>&nbsp;项目明细</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -77,65 +77,44 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row">
-                <div class="col-12 col-sm-4">
+                <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">项目名</span>
-                      <span class="info-box-number text-center text-muted mb-0">AEGIS Issue Tracker</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.name}"></span>
                     </div>
                   </div>
                 </div>
-                <div class="col-12 col-sm-4">
+                <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">项目类型</span>
-                      <span class="info-box-number text-center text-muted mb-0">Java Web - a SpringBoot Application</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.type}"></span>
                     </div>
                   </div>
                 </div>
-                <div class="col-12 col-sm-4">
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">状态</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.status == 'ACTIVE' ? '正常':'已过期'}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">创建时间</span>
-                      <span class="info-box-number text-center text-muted mb-0">2020-01-01</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${#dates.format(project.createdAt, 'yyyy/MM/dd')}"></span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">子项目</h3>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
               <div class="row">
-                <div class="col-12 col-sm-4">
-                  <div class="info-box bg-light">
-                    <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Stage</span>
-                      <span class="info-box-number text-center text-muted mb-0">Status</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 col-sm-4">
-                  <div class="info-box bg-light">
-                    <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Stage</span>
-                      <span class="info-box-number text-center text-muted mb-0">Status</span>
-                    </div>
+                <div class="col-md-6">
+                  <div class="callout callout-info">
+                    <h6><strong>描述</strong></h6>
+                    <p th:text="${project.description}"></p>
                   </div>
                 </div>
               </div>
@@ -156,26 +135,25 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row">
-                <div class="col-12 col-sm-4">
-                  <div class="info-box bg-light">
-                    <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">Sub Project Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 col-sm-4">
-                  <div class="info-box bg-light">
-                    <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">Sub Project Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                      <span class="info-box-number text-center text-muted mb-0">Module Name</span>
-                    </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>模块列表</label>
+                    <table class="table table-sm" id="moduleTable">
+                      <thead>
+                      <tr>
+                        <th style="width: 20%">#</th>
+                        <th style="width: 40%">名称</th>
+                        <th style="width: 40%">描述</th>
+                      </tr>
+                      </thead>
+                      <tbody id="tbody">
+                        <tr th:each="obj, stats:${project.modules}">
+                          <td th:text="${stats.count}"></td>
+                          <td th:text="${obj.name}"></td>
+                          <td th:text="${obj.description}"></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>

@@ -58,12 +58,61 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
+
+
         <!-- table-->
         <div class="col-12">
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">搜索</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="projectName">项目名</label>
+                    <input class="form-control" type="text" name="projectName" id="projectName">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="description">描述</label>
+                    <input class="form-control" type="text" name="description" id="description">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="col-12">
+                <div class="row">
+                  <div class="col-md-6">
+                    <button type="button" class="btn btn-default float-right" style="font-size: 14px" onclick="reset()">
+                      <i class="fa fa-redo-alt"></i>
+                    </button>
+                  </div>
+                  <div class="col-md-6">
+                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="refresh()">
+                      <i class="fa fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">项目列表</h3>
-              <button type="button" class="btn btn-success btn-sm float-right">
+              <button type="button" class="btn btn-success btn-sm float-right" onclick="location.href='/web/project/add'">
                 <i class="fas fa-plus"></i>
                 添加
               </button>
@@ -144,21 +193,22 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-            "aLengthMenu":[10,20],
+            "aLengthMenu":[10,20,50],
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
                 var pageSize = data.length;
                 var pageNo = (data.start) / data.length + 1;
                 var obj = {
-                    param1 : "dick",
-                    param2 : "penis"
+                    projectName: $("#projectName").val(),
+                    description: $("#description").val()
                 }
                 var args = {
                     pageNo: pageNo,
                     pageSize: pageSize,
                     orderColumnNo:data.order[0]["column"],
                     order: data.order[0]["dir"],
+                    draw: data.draw,
                     params: obj
                 };
 
@@ -170,22 +220,26 @@
                     dataType:"json",
                     cache : false,
                     success: function (res) {
+                        var tableList = res.data[0];
                         var returnData = {};
-                        //returnData.draw = arr.data.pagination.pageCount;
-                        returnData.recordsTotal = res.data[0].totalCounts;
-                        returnData.recordsFiltered = res.data[0].totalCounts;
-                        returnData.data = res.data[0].resultList;
+                        returnData.draw = tableList.draw;
+                        returnData.recordsTotal = tableList.totalCounts;
+                        returnData.recordsFiltered = tableList.totalCounts;
+                        returnData.data = tableList.resultList;
                         callback(returnData);
                     }
                 });
             },
             columns: [
-                {"data": "id", "defaultContent": "-"},
                 {"data": "name", "defaultContent": "-"},
+                {"data": "type", "defaultContent": "-"},
                 {"data": "status", "defaultContent": "-"},
                 {"data": "description", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
-                {"data": "-", "defaultContent": "-"}
+                {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
+                        return "<a style='color: #505050' href='javascript:void(0)' onclick='display("+full.id+")'><i class='fa fa-clipboard'></i></a>" +
+                            "&emsp;<a style='color: #505050' href='javascript:void(0)' onclick='modify("+full.id+")'><i class='fa fa-edit'></i></a>";
+                    }}
             ],
             language: aegis.locale
         });
@@ -193,6 +247,20 @@
 
     function refresh() {
       tableView.draw();
+    }
+
+    function display(id) {
+      location.href = "/web/project/" + id;
+    }
+
+  function modify(id) {
+      location.href = "/web/project/modify/" + id;
+  }
+
+    function reset() {
+      $("#projectName").val('');
+      $("#description").val('');
+      refresh();
     }
 </script>
 </body>

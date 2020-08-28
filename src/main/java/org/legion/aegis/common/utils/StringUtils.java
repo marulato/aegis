@@ -34,7 +34,7 @@ public class StringUtils {
     public static String[] convertToArray(String value) {
         if (value.isBlank())
             return new String[0];
-        String array[] = new String[value.length()];
+        String[] array = new String[value.length()];
         for (int i = 0; i < value.length(); i++) {
             array[i] = String.valueOf(value.charAt(i));
         }
@@ -58,9 +58,7 @@ public class StringUtils {
             char ch = src.charAt(index);
             if(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
                 ch = Character.toUpperCase(ch);
-                StringBuilder sBuilder = new StringBuilder();
-                sBuilder.append(src.substring(0, index)).append(ch).append(src.substring(index + 1));
-                return sBuilder.toString();
+                return src.substring(0, index) + ch + src.substring(index + 1);
             }
         }
         return src;
@@ -124,5 +122,12 @@ public class StringUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String getNonEmpty(String src) {
+        if (isBlank(src) || "null".equalsIgnoreCase(src)) {
+            return "-";
+        }
+        return src;
     }
 }

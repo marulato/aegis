@@ -64,7 +64,7 @@ public class UserAccountController {
             UserRole role = accountService.getRoleById(userDto.getRole());
             List<Project> projects = new ArrayList<>();
             for (String projectId : userDto.getProject()) {
-                Project project = projectService.getProjectById(StringUtils.parseIfIsLong(projectId));
+                Project project = projectService.getProjectById(StringUtils.parseIfIsLong(projectId), false);
                 projects.add(project);
             }
             UserAccount createdUser = accountService.createUser(userAccount, List.of(role), projects);
