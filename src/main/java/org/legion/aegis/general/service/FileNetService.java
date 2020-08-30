@@ -36,10 +36,6 @@ public class FileNetService {
         return null;
     }
 
-    public static String getEmailStoragePath(String emailAddress) {
-        return MessageFormat.format(SystemConsts.FILE_STORAGE_PATH_EMAIL_ATTACHMENT, emailAddress);
-    }
-
     public Long saveFileNetFTP(String path, String fileName, byte[] data) throws Exception {
         if (StringUtils.isNotBlank(path) && data != null) {
             FileNet fileNet = new FileNet();

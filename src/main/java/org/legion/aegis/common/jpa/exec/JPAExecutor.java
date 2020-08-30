@@ -16,10 +16,6 @@ public class JPAExecutor {
         if (entity != null) {
             Date now = new Date();
             AppContext appContext = AppContext.getFromWebThread();
-            if (appContext == null) {
-                appContext = new AppContext();
-                appContext.setLoginId("TEST");
-            }
             entity.setCreatedAt(now);
             entity.setUpdatedAt(now);
             entity.setCreatedBy(appContext.getLoginId());
@@ -35,6 +31,12 @@ public class JPAExecutor {
             entity.setUpdatedAt(now);
             entity.setUpdatedBy(appContext.getLoginId());
             executor.update(entity);
+        }
+    }
+
+    public static void delete(BasePO entity) {
+        if (entity != null) {
+            executor.delete(entity);
         }
     }
 }

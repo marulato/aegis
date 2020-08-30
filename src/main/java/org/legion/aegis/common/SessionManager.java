@@ -1,30 +1,24 @@
 package org.legion.aegis.common;
 
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.net.InetAddress;
 
 public class SessionManager {
 
-    private static final ThreadLocal<HttpSession> threadSession = new ThreadLocal<>();
-
-    public static void setSession(HttpServletRequest request) {
-        if (request != null) {
-            threadSession.set(request.getSession());
-        }
-    }
-
     public static HttpSession getSession() {
-        return threadSession.get();
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes();
+        return requestAttributes.getRequest().getSession();
     }
 
     public static HttpSession getSession(HttpServletRequest request) {
         return request.getSession(false);
     }
 
-    public static void clear() {
-        threadSession.remove();
-    }
 
     public static String getIpAddress(HttpServletRequest request) {
         if (request != null) {

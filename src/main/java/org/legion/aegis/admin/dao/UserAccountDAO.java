@@ -2,10 +2,14 @@ package org.legion.aegis.admin.dao;
 
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.legion.aegis.admin.dto.UserSearchDto;
 import org.legion.aegis.admin.entity.UserAccount;
+import org.legion.aegis.admin.entity.UserProjectAssign;
 import org.legion.aegis.admin.entity.UserRole;
 import org.legion.aegis.admin.entity.UserRoleAssign;
+import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.jpa.SimpleSQLGenerator;
 
 import java.util.List;
@@ -33,4 +37,9 @@ public interface UserAccountDAO {
 
     @InsertProvider(type = SimpleSQLGenerator.class, method = "insert")
     void createUserAccount(UserAccount userAccount);
+
+    List<UserSearchDto> search(@Param("sp") SearchParam param);
+
+    @Select("SELECT * FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{userId}")
+    List<UserProjectAssign> getUserProjectAssignments(Long userId);
 }

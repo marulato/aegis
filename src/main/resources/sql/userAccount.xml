@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.legion.aegis.admin.dao.UserAccountDAO">
+    <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.admin.dto.UserSearchDto">
+        SELECT USER.ID,
+        USER.LOGIN_ID,
+        USER.NAME,
+        USER.EMAIL,
+        USER.STATUS,
+        DATE_FORMAT(USER.LAST_LOGIN_SUCCESS_DT, '%Y/%m/%d %T') AS LAST_LOGIN_SUCCESS_DT,
+        DATE_FORMAT(USER.ACTIVATED_AT, '%Y/%m/%d') AS ACTIVATED_AT,
+        DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT,
+        ROLE.ROLE_NAME AS ROLE,
+        PJT.NAME AS PROJECT
+        FROM AC_USER_ACCT USER
+        LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
+        LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.USER_ACCT_ID = USER.ID
+        LEFT JOIN PJT_PROJECT PJT ON PJT.ID = PSN.PROJECT_ID
+        <where>
+            <if test="sp.params.loginId != null and sp.params.loginId != ''">
+                AND UPPER(LOGIN_ID) LIKE CONCAT ('%', UPPER(#{sp.params.loginId}), '%')
+            </if>
+
+            <if test="sp.params.email != null and sp.params.email != ''">
+                AND UPPER(EMAIL) LIKE CONCAT ('%', UPPER(#{sp.params.email}), '%')
+            </if>
+
+            <if test="sp.params.role != null and sp.params.role != '' and sp.params.role != '0'.toString()">
+                AND ROLE.ID = #{sp.params.role}
+            </if>
+
+            <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
+                AND PJT.ID = #{sp.params.project}
+            </if>
+        </where>
+
+        <choose>
+            <when test="sp.orderColumnNo == 0">
+                ORDER BY LOGIN_ID
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 1">
+                ORDER BY EMAIL
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 2">
+                ORDER BY ROLE
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY PROJECT
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 4">
+                ORDER BY STATUS
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 5">
+                ORDER BY LAST_LOGIN_SUCCESS_DT
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+        </choose>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+</mapper>

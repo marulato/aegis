@@ -13,8 +13,8 @@ public class Project extends BasePO {
     @PrimaryKey(autoIncrement = true)
     private Long id;
     private String name;
-    private String type;
-    private String typeOther;
+    private String filePath;
+    private String isPublic;
     private String description;
     private String status;
 
@@ -37,20 +37,20 @@ public class Project extends BasePO {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
-    public String getTypeOther() {
-        return typeOther;
+    public String getIsPublic() {
+        return isPublic;
     }
 
-    public void setTypeOther(String typeOther) {
-        this.typeOther = typeOther;
+    public void setIsPublic(String isPublic) {
+        this.isPublic = isPublic;
     }
 
     public String getDescription() {

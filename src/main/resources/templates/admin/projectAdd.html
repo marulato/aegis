@@ -24,6 +24,7 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -74,7 +75,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="name">项目名</label>
+                      <label for="name" data-required="true">项目名</label>
                       <input class="form-control" type="text" name="name" id="name">
                     </div>
                   </div>
@@ -83,14 +84,28 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="type">项目类型</label>
-                      <select class="custom-select" name="type" id="type"></select>
+                      <label for="isPublicSwitch">公开权限</label>
+                      <br/>
+                      <input class="form-control" type="checkbox" name="isPublicSwitch" id="isPublicSwitch">
+                      <input type="hidden" name="isPublic" id="isPublic" value="N">
                     </div>
                   </div>
+                </div>
+
+                <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="typeOther">其他类型</label>
-                      <input class="form-control" type="text" name="typeOther" id="typeOther">
+                      <label for="filePath" data-required="true">文件存储目录    </label>
+                      <label for="filePath" style="font-size: 14px">当前根目录：</label>
+                      <label for="filePath" style="font-size: 14px" th:text="${currentRootPath}"></label>
+                      <div class="input-group">
+                        <input class="form-control" name="filePath" id="filePath">
+                        <div class="input-group-append" name="filePath_append">
+                          <button type="button" class="btn btn-default btn-sm" title="生成随机目录" onclick="randomDir()">
+                            <i class="fas fa-dice"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -100,69 +115,6 @@
                     <div class="form-group">
                       <label for="description">描述</label>
                       <textarea class="form-control" name="description" id="description"></textarea>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">日程规划</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="reqRange">开发阶段</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="reqRange" name="reqRange" class="form-control" type="text">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="sitRange">内测阶段</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="sitRange" name="sitRange" class="form-control" type="text">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="uatRange">UAT开始日期</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
-                        </div>
-                        <input id="uatRange" name="uatRange" class="form-control" type="text">
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -184,13 +136,14 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label>模块</label>
+                      <label>模块列表</label>
                       <table class="table table-sm" id="moduleTable">
                         <thead>
                         <tr>
-                          <th style="width: 50px">#</th>
-                          <th>模块</th>
-                          <th style="width: 100px">操作</th>
+                          <th style="width: 10%">#</th>
+                          <th style="width: 40%">名称</th>
+                          <th style="width: 40%">描述</th>
+                          <th style="width: 10%">操作</th>
                         </tr>
                         </thead>
                         <tbody id="tbody"></tbody>
@@ -202,14 +155,7 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="minput">添加模块</label>
-                      <div class="input-group">
-                        <input class="form-control" type="text" name="minput" id="minput">
-                        <span>&nbsp;&nbsp;</span>
-                        <button type="button" class="btn btn-default btn-sm" onclick="addModule()">
-                          <i class="fa fa-plus"></i>
-                        </button>
-                      </div>
+                      <button type="button" class="btn btn-block btn-success" onclick="showAdd()"><i class="fa fa-plus"></i>&nbsp;添加</button>
                     </div>
                   </div>
                 </div>
@@ -227,7 +173,7 @@
               返回</button>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-primary float-left" style="font-size: 14px">
+            <button type="button" id="submitBtn" class="btn btn-primary float-left" style="font-size: 14px" onclick="save()">
               <i class="fa fa-check"></i>
               提交</button>
           </div>
@@ -252,6 +198,48 @@
 </div>
 <!-- ./wrapper -->
 
+<div class="modal fade" id="modal_add">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalModifyTitle">添加模块</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" style="display: none" id="validation_alert">
+          <h5><i class="icon fas fa-ban"></i>错误</h5>
+          请输入正确的名称或描述
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="moduleName">名称</label>
+              <input type="text" class="form-control" name="moduleName" id="moduleName">
+              <input type="hidden" name="moduleId" id="moduleId">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="moduleDesc">描述</label>
+              <textarea type="text" class="form-control" name="moduleDesc" id="moduleDesc"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" style="font-size: 14px" onclick="addModule()">添加</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -263,66 +251,137 @@
 <!-- Bootstrap 4 -->
 <script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<!-- daterangepicker -->
-<script th:src="@{/plugins/moment/moment.min.js}"></script>
-<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<script th:src="@{/plugins/bootstrap-switch/js/bootstrap-switch.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
+    toastr.options = { // toastr配置
+        "closeButton": false, //是否显示关闭按钮
+        "debug": false, //是否使用debug模式
+        "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+        "positionClass": "toast-top-right",//显示的动画时间
+        "showDuration": "200", //显示的动画时间
+        "hideDuration": "400", //消失的动画时间
+        "timeOut": "1000", //展现时间
+        "extendedTimeOut": "1000", //加长展示时间
+        "showEasing": "swing", //显示时的动画缓冲方式
+        "hideEasing": "linear", //消失时的动画缓冲方式
+        "showMethod": "fadeIn", //显示时的动画方式
+        "hideMethod": "fadeOut" //消失时的动画方式
+    }
+
+    toastr.options.onHidden = function() {
+      location.href = "/web/project";
+    }
     document.addEventListener('DOMContentLoaded', function () {
 
-        $('#reqRange').daterangepicker({
-            format: 'YYYY/MM/DD'
-        });
-        $('#sitRange').daterangepicker({
-            format: 'YYYY/MM/DD'
-        });
-        $('#uatRange').daterangepicker({
-            format: 'YYYY/MM/DD'
+        aegis.required();
+        var onoff = $("#isPublic").val() === 'Y';
+        $("#isPublicSwitch").bootstrapSwitch({
+            onText: "公开",
+            offText: "私有",
+            onColor: "success",
+            offColor: "danger",
+            state: onoff,
+            onSwitchChange: function (event, state) {
+                if (state === true) {
+                    $("#isPublic").val('Y');
+                } else {
+                    $("#isPublic").val('N');
+                }
+            }
+
         });
     });
 
+    function showAdd() {
+        $("#validation_alert").hide();
+      $("#modal_add").modal({backdrop: true, show: true});
+    }
+
+
+
 
     function addModule() {
-        var module = $("#minput").val();
+        $("#validation_alert").hide();
+        var module = $("#moduleName").val();
+        var desc = $("#moduleDesc").val();
         var rowNo = $("#moduleTable").find("tr").length;
-        if (module != null && module != '') {
+        if (module != null && module.trim() != '' && module.length <= 64 && desc.length < 500) {
             var trId = "tr_" + rowNo;
-            var row = "<tr id='"+trId+"'>";
             var aId = "a_" + rowNo;
+            var row = "<tr id='"+trId+"'>";
+            row += "<input type='hidden' name='module' value='" + module + "&&" + desc + "'>";
             row += "<td name='td_row'>" + rowNo + "</td>"
             row += "<td>" + module + "</td>"
+            row += "<td>"+ desc +"</td>";
             row += "<td>"+"<a style='color: red' id='"+ aId +"' onclick='removeModule(" + rowNo +")' href='javascript:void(0)'><i class='fa fa-times'></i></a>" +"</td>"
             row += "</tr>"
             $("tbody").append(row);
-            $("#mainForm").append("<input type='hidden' name='module' id='module_" + rowNo + "' value='" + module + "'>");
+            $("#modal_add").modal("hide");
+
+        } else {
+          $("#validation_alert").show();
         }
     }
 
     function removeModule(rowNo) {
         var trId = "tr_" + rowNo;
-        var inputName = "module_" + rowNo;
         $("#" + trId).remove();
-
-        $("input[id^='" + inputName + "']").remove();
         $("td[name='td_row']").each(function (idx, element) {
             $(element).html(idx + 1);
         });
         for (i = rowNo; i <= $("#moduleTable").find("tr").length; i++) {
             var oldTrId = "tr_" + (i + 1);
-            var oldInputName = "module_" + (i + 1);
             var oldAId = "a_" + (i + 1);
             var newAId = "a_" + i;
             $("#" + oldTrId).attr("id", "tr_" + i);
             $("#" + oldAId).attr("id", "a_" + i);
-            $("input[id^='"+oldInputName+"']").attr("id", "module_" + i);
             $("#" + newAId).removeAttr("onclick");
             $("#" + newAId).attr("onclick", "removeModule("+ i +")");
         }
+    }
+
+    function save() {
+        aegis.clearErrors();
+        $("#submitBtn").attr("disabled", true);
+      $.ajax({
+          url: "/web/project/add",
+          data: $("#mainForm").serialize(),
+          type: "post",
+          dataType: "json",
+          success: function (res) {
+              if (res.status == 221) {
+                  aegis.showErrors(res.data);
+                  $("#submitBtn").removeAttr("disabled");
+              } else {
+                toastr.success("添加成功");
+              }
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
+    }
+
+    function randomDir() {
+      $.ajax({
+          url: "/web/project/randomDir",
+          type: "get",
+          dataType: "json",
+          success: function (res) {
+            $("#filePath").val(res.data[0])
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
     }
 </script>
 </body>

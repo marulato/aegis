@@ -72,10 +72,10 @@ public abstract class BaseBatchJob extends QuartzJobBean {
         BatchJobStatus currentJobStatus = new BatchJobStatus();
         try {
             if (request == null) {
-                context = AppContext.getFromWebThread(true);
+                context = AppContext.getFromWebThread();
                 context.setLoginId(batchJobId);
                 context.setDomain("SYSTEM");
-                AppContext.setLocalThreadAppContext(context);
+                context.setLocalAppContext();
                 currentJobStatus.setTriggeredBy("Internal Job Scheduler");
             } else {
                 currentJobStatus.setTriggeredBy(AppContext.getFromWebThread().getDomain() + " User");

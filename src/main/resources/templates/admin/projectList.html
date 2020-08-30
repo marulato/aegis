@@ -24,6 +24,7 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -123,22 +124,15 @@
                 <thead>
                 <tr>
                   <th>项目名</th>
-                  <th>类型</th>
-                  <th>状态</th>
                   <th>描述</th>
+                  <th>状态</th>
+                  <th>权限</th>
                   <th>创建日期</th>
                   <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>AEGIS Bug Tracker</td>
-                    <td>java web</td>
-                    <td>正常</td>
-                    <td>缺陷管理平台</td>
-                    <td>2020-08-01</td>
-                    <td>...</td>
-                  </tr>
+
                 </tbody>
               </table>
             </div>
@@ -160,6 +154,55 @@
 </div>
 <!-- ./wrapper -->
 
+<div class="modal fade" id="modal_delete">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalDeleteTitle">Title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" style="display:none" id="ban_alert">
+          <h5><i class="icon fas fa-ban"></i>警告</h5>
+          禁用后该项目将仅对管理员可见，该项目将无法被授予其他用户，或被用于提交和查看问题
+        </div>
+
+        <div class="alert alert-info" id="activate_info" style="display:none">
+          <h5><i class="icon fas fa-check"></i>注意</h5>
+          启用后该项目将对持有其访问权限的用户可见
+        </div>
+        <input type="hidden" name="projectDelId" id="projectDelId">
+        <dl class="row">
+            <dt class="col-sm-4">名称</dt>
+            <dd class="col-sm-8" id="pjt_name"></dd>
+
+            <dt class="col-sm-4">描述</dt>
+            <dd class="col-sm-8" id="pjt_desc"></dd>
+
+            <dt class="col-sm-4">状态</dt>
+            <dd class="col-sm-8" id="pjt_status"></dd>
+
+            <dt class="col-sm-4">权限</dt>
+            <dd class="col-sm-8" id="pjt_isPublic"></dd>
+
+            <dt class="col-sm-4">创建日期</dt>
+            <dd class="col-sm-8" id="pjt_createdAt"></dd>
+
+          </dl>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" id="ban_btn" class="btn btn-danger" style="font-size: 14px;display: none" onclick="doBan()">确认禁用</button>
+        <button type="button" id="activate_btn" class="btn btn-success" style="font-size: 14px;display: none" onclick="doActivate()">确认启用</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -175,6 +218,7 @@
 <script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
 <script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
 <script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
@@ -227,23 +271,35 @@
                         returnData.recordsFiltered = tableList.totalCounts;
                         returnData.data = tableList.resultList;
                         callback(returnData);
+                    },
+                    error: function () {
+                        location.href = "/web/error";
                     }
                 });
             },
             columns: [
                 {"data": "name", "defaultContent": "-"},
-                {"data": "type", "defaultContent": "-"},
-                {"data": "status", "defaultContent": "-"},
                 {"data": "description", "defaultContent": "-"},
+                {"data": "statusCode", "defaultContent": "-"},
+                {"data": "isPublic", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
                 {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
-                        return "<a style='color: #505050' href='javascript:void(0)' onclick='display("+full.id+")'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #505050' href='javascript:void(0)' onclick='modify("+full.id+")'><i class='fa fa-edit'></i></a>";
+                        var banBtn = "";
+                    if (full.status == 'ACTIVE') {
+                        banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan("+full.id+")' title='禁用'><i class='fa fa-ban'></i></a>";
+                    } else {
+                        banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showActivate("+full.id+")' title='启用'><i class='fa fa-check-square'></i></a>";
+                    }
+                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
+                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-edit'></i></a>"
+                            + banBtn;
                     }}
             ],
             language: aegis.locale
         });
     });
+
+    toastr.options = aegis.toastrOptions;
 
     function refresh() {
       tableView.draw();
@@ -254,7 +310,58 @@
     }
 
   function modify(id) {
-      location.href = "/web/project/modify/" + id;
+      location.href = "/web/project/" + id + "/modify";
+  }
+
+  function showBan(id) {
+      $("#ban_alert").show();
+      $("#activate_info").hide();
+      $("#ban_btn").show();
+      $("#activate_btn").hide();
+      $.ajax({
+          url: "/web/project/" + id + "/retrieve",
+          type: "get",
+          dataType: "json",
+          success: function (res) {
+              var obj = res.data[0];
+              $("#modalDeleteTitle").text("禁用：" + obj.name);
+              initModal(obj);
+              $("#modal_delete").modal("show");
+          },
+          error: function () {
+            location.href = "/web/error";
+          }
+      });
+  }
+
+  function showActivate(id) {
+      $("#ban_alert").hide();
+      $("#activate_info").show();
+      $("#ban_btn").hide();
+      $("#activate_btn").show();
+      $.ajax({
+          url: "/web/project/" + id + "/retrieve",
+          type: "get",
+          dataType: "json",
+          success: function (res) {
+              var obj = res.data[0];
+              $("#modalDeleteTitle").text("启用：" + obj.name);
+              initModal(obj);
+              $("#modal_delete").modal("show");
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
+  }
+
+  function initModal(obj) {
+      $("#projectDelId").val(obj.id);
+      $("#pjt_name").html(obj.name);
+      $("#pjt_desc").html(obj.description);
+      $("#pjt_status").html(obj.status);
+      $("#pjt_isPublic").html(obj.isPublic);
+      $("#pjt_createdAt").html(obj.createdAt);
   }
 
     function reset() {
@@ -262,6 +369,40 @@
       $("#description").val('');
       refresh();
     }
+
+    function doBan() {
+        var id = $("#projectDelId").val();
+      $.ajax({
+        url: "/web/project/" + id + "/ban",
+        type: "post",
+          dataType: "json",
+          success: function (res) {
+            $("#modal_delete").modal("hide");
+            tableView.draw();
+            toastr.success("禁用成功");
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
+    }
+
+  function doActivate() {
+      var id = $("#projectDelId").val();
+      $.ajax({
+          url: "/web/project/" + id + "/activate",
+          type: "post",
+          dataType: "json",
+          success: function (res) {
+              $("#modal_delete").modal("hide");
+              tableView.draw();
+              toastr.success("启用成功");
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
+  }
 </script>
 </body>
 </html>

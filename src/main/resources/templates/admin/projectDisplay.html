@@ -88,8 +88,8 @@
                 <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">项目类型</span>
-                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.type}"></span>
+                      <span class="info-box-text text-center text-muted">查看权限</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.isPublic == 'Y' ? '公开' : '私有'}"></span>
                     </div>
                   </div>
                 </div>
@@ -107,6 +107,14 @@
                       <span class="info-box-text text-center text-muted">创建时间</span>
                       <span class="info-box-number text-center text-muted mb-0" th:text="${#dates.format(project.createdAt, 'yyyy/MM/dd')}"></span>
                     </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="callout callout-success">
+                    <h6><strong>文件存储路径</strong></h6>
+                    <p th:text="${project.filePath}"></p>
                   </div>
                 </div>
               </div>

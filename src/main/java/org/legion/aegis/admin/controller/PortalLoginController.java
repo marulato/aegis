@@ -60,10 +60,10 @@ public class PortalLoginController {
      * Ajax Call
      * @return login validation result
      */
-    @PostMapping("/web/login/signin")
+    @PostMapping("/web/login")
     @ResponseBody
     public AjaxResponseBody login(UserAccount webUser, HttpServletRequest request) throws Exception {
-        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);;
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
         Map<String, List<String>> errorMap = CommonValidator.doValidation(webUser, null);
         if (!errorMap.isEmpty()) {
             responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);

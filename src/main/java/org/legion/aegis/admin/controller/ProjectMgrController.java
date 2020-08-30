@@ -1,23 +1,29 @@
 package org.legion.aegis.admin.controller;
 
 import org.legion.aegis.admin.dto.ProjectDto;
+import org.legion.aegis.admin.entity.Module;
 import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.admin.service.ProjectService;
+import org.legion.aegis.admin.validator.ModuleValidator;
+import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
+import org.legion.aegis.common.consts.SystemConsts;
 import org.legion.aegis.common.exception.RecordsNotFoundException;
+import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.BeanUtils;
-import org.legion.aegis.common.utils.MiscGenerator;
 import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.common.validation.CommonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.*;
 
 @Controller
@@ -53,11 +59,27 @@ public class ProjectMgrController {
     }
 
     @GetMapping("/web/project/add")
-    public String add() {
-        return "admin/projectAdd";
+    public ModelAndView add() throws Exception {
+        ModelAndView modelAndView = new ModelAndView("admin/projectAdd");
+        modelAndView.addObject("currentRootPath", new File(SystemConsts.ROOT_STORAGE_PATH).getCanonicalPath());
+        return modelAndView;
     }
 
-    @GetMapping("/web/project/modify/{id}")
+    @PostMapping("/web/project/add")
+    @ResponseBody
+    public AjaxResponseBody addProject(ProjectDto dto, HttpServletRequest request) throws Exception {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
+        if (!errors.isEmpty()) {
+            responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            responseMgr.addValidations(errors);
+        } else {
+            projectService.saveNewProject(dto, AppContext.getAppContext(request));
+        }
+        return responseMgr.respond();
+    }
+
+    @GetMapping("/web/project/{id}/modify")
     public ModelAndView prepareModify(@PathVariable("id") String id) {
         ModelAndView modelAndView = new ModelAndView("admin/projectModify");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
@@ -68,34 +90,128 @@ public class ProjectMgrController {
         return modelAndView;
     }
 
-    @GetMapping("/web/project/get")
+    @GetMapping("/web/project/selector")
     public AjaxResponseBody prepareProjectSelector() {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
-        responseMgr.addDataObjects(projectService.getAllProjects());
+        responseMgr.addDataObjects(projectService.getProjectsByIsPublic(AppConsts.NO));
+        return responseMgr.respond();
+    }
+
+    @GetMapping("/web/project/module/{id}")
+    @ResponseBody
+    public AjaxResponseBody retrieveForModify(@PathVariable("id") String id) {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Module module = projectService.getModuleById(StringUtils.parseIfIsLong(id));
+        responseMgr.addDataObject(module);
+        return responseMgr.respond();
+    }
+
+    @PostMapping("/web/project")
+    @ResponseBody
+    public AjaxResponseBody saveProject(ProjectDto dto) throws Exception {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
+        if (!errors.isEmpty()) {
+            responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            responseMgr.addValidations(errors);
+        } else {
+            projectService.updateProject(dto);
+        }
+        return responseMgr.respond();
+    }
+
+    @PostMapping("/web/project/module")
+    @ResponseBody
+    public AjaxResponseBody saveModule(@RequestBody Map<String, String> params) {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        String id = params.get("moduleId");
+        String projectId = params.get("projectId");
+        String moduleName = params.get("moduleName");
+        String moduleDesc = params.get("moduleDesc");
+        String action = params.get("action");
+        if (!"delete".equals(action)) {
+            Map<String, String> errors = new ModuleValidator().doValidate(params);
+            if (!errors.isEmpty()) {
+                responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                responseMgr.addErrors(errors);
+            } else {
+                if (StringUtils.parseIfIsLong(id) != null && "modify".equals(action)) {
+                    Module module = projectService.getModuleById(StringUtils.parseIfIsLong(id));
+                    if (module != null) {
+                        module.setName(moduleName);
+                        module.setDescription(moduleDesc);
+                        JPAExecutor.update(module);
+                        responseMgr.addDataObjects(projectService.getModulesByProjectId(module.getProjectId()));
+                    }
+                } else if (StringUtils.parseIfIsLong(projectId) != null && "add".equals(action)) {
+                    Project project = projectService.getProjectById(StringUtils.parseIfIsLong(projectId), false);
+                    if (project != null) {
+                        Module module = new Module();
+                        module.setProjectId(project.getId());
+                        module.setName(moduleName);
+                        module.setDescription(moduleDesc);
+                        JPAExecutor.save(module);
+                        responseMgr.addDataObjects(projectService.getModulesByProjectId(module.getProjectId()));
+                    }
+                }
+            }
+        } else {
+            Module module = projectService.getModuleById(StringUtils.parseIfIsLong(id));
+            JPAExecutor.delete(module);
+            responseMgr.addDataObjects(projectService.getModulesByProjectId(module.getProjectId()));
+        }
         return responseMgr.respond();
     }
 
     @PostMapping("/web/project/list")
     @ResponseBody
-    public AjaxResponseBody prepareTable(@RequestBody SearchParam searchParam) throws Exception {
-        AjaxResponseManager manager = AjaxResponseManager.create(200);
+    public AjaxResponseBody search(@RequestBody SearchParam searchParam, HttpServletRequest request) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext appContext = AppContext.getAppContext(request);
+        searchParam.addParam("userId", appContext.getUserId());
         List<Project> projectList = projectService.search(searchParam);
-        List<ProjectDto> dtoList = new ArrayList<>();
-        for (Project project : projectList) {
-            ProjectDto dto = BeanUtils.mapFromPO(project, ProjectDto.class, "yyyy/MM/dd");
-            if (dto != null) {
-                if (AppConsts.STATUS_ACTIVE.equals(project.getStatus())) {
-                    dto.setStatus(AppConsts.STATUS_ACTIVE_CHN);
-                } else if (AppConsts.STATUS_EXPIRED.equals(project.getStatus())) {
-                    dto.setStatus(AppConsts.STATUS_EXPIRED_CHN);
-                }
-                dtoList.add(dto);
-            }
-        }
-        SearchResult<ProjectDto> searchResult = new SearchResult<>();
-        searchResult.setDraw(searchParam.getDraw());
-        searchResult.setResultList(dtoList);
-        manager.addDataObject(searchResult);
+        List<ProjectDto> dtoList = projectService.toDtoView(projectList);
+        manager.addDataObject(new SearchResult<>(dtoList, searchParam));
         return manager.respond();
+    }
+
+    @GetMapping("/web/project/{id}/retrieve")
+    @ResponseBody
+    public AjaxResponseBody retrieveProject(@PathVariable("id") String id) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
+        manager.addDataObject(projectService.toDtoView(project));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/project/{id}/ban")
+    @ResponseBody
+    public AjaxResponseBody banProject(@PathVariable("id") String id) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
+        projectService.banProject(project);
+        return manager.respond();
+    }
+
+    @PostMapping("/web/project/{id}/activate")
+    @ResponseBody
+    public AjaxResponseBody activateProject(@PathVariable("id") String id) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
+        projectService.activateProject(project);
+        return manager.respond();
+    }
+
+    @GetMapping("/web/project/randomDir")
+    @ResponseBody
+    public AjaxResponseBody generateRandomDir() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        manager.addDataObject(projectService.generateRandomDir());
+        return manager.respond();
+    }
+
+    @GetMapping("/web/test")
+    public void test() throws Exception {
+        throw new Exception();
     }
 }

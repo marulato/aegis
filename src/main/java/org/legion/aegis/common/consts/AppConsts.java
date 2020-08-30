@@ -23,6 +23,8 @@ public class AppConsts {
     public static final String STATUS_EXPIRED_SHORT     = "E";
     public static final String STATUS_VOID              = "VOID";
     public static final String STATUS_VOID_CHN          = "无效";
+    public static final String STATUS_BANNED            = "BANNED";
+    public static final String STATUS_BANNED_CHN        = "已禁用";
 
     public static final String GENDER_MALE    = "M";
     public static final String GENDER_FEMALE  = "F";

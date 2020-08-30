@@ -35,11 +35,11 @@ public class PortalLoginService {
         if (webUser != null) {
             UserAccount user = userAcctService.getUserByLoginId(webUser.getLoginId());
             if (user != null) {
-                SessionManager.setSession(request);
                 AppContext appContext = new AppContext();
                 appContext.setLoginId(user.getLoginId());
                 appContext.setDomain(user.getDomain());
-                AppContext.setWebThreadAppContext(appContext);
+                appContext.setAppContext(request);
+                appContext.setUserId(user.getId());
                 boolean isPwdMatch = userAcctService.isPasswordMatch(webUser.getPassword(), user.getPassword());
                 if (isPwdMatch) {
                     String accountStatus = checkStatus(user);

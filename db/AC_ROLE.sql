@@ -26,7 +26,11 @@ VALUES ('QA', 'Quality Assurance', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NO
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('PJTADM', 'Project Administrator', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('DEV_S', 'Developer Supervisor', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
+                     UPDATED_AT, UPDATED_BY)
+VALUES ('QA_S', 'QA Supervisor', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)

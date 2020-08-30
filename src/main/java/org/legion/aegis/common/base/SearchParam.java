@@ -1,6 +1,7 @@
 package org.legion.aegis.common.base;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SearchParam implements Serializable {
@@ -10,7 +11,14 @@ public class SearchParam implements Serializable {
     private Integer orderColumnNo;
     private String order;
     private Integer draw;
-    private Map<String, String> params;
+    private Map<String, Object> params;
+
+    public void addParam(String name, Object param) {
+        if (params == null) {
+            params = new HashMap<>();
+        }
+        params.put(name, param);
+    }
 
     public Integer getPageNo() {
         return pageNo;
@@ -44,11 +52,11 @@ public class SearchParam implements Serializable {
         this.order = order != null ? order.toUpperCase() : null;
     }
 
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 

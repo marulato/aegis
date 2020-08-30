@@ -2,6 +2,9 @@ package org.legion.aegis.common;
 
 
 import org.legion.aegis.admin.entity.UserRole;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -10,6 +13,7 @@ import java.util.List;
 
 public class AppContext implements Serializable {
 
+    private Long userId;
     private String loginId;
     private String domain;
     private String userType;
@@ -20,27 +24,13 @@ public class AppContext implements Serializable {
     private List<UserRole> allRoles;
 
     public static final String APP_CONTEXT_KEY = "Legion_Web_Session_Context";
-    private static final ThreadLocal<AppContext> webThreadContext = new ThreadLocal<>();
-    private static final ThreadLocal<AppContext> localThreadContext = new ThreadLocal<>();
+    private static final ThreadLocal<AppContext> localContext = new ThreadLocal<>();
 
-    public static AppContext getFromWebThread(boolean flag) {
-        AppContext context = webThreadContext.get();
-        if (context == null) {
-            HttpSession session = SessionManager.getSession();
-            if (session != null) {
-                context = (AppContext) session.getAttribute(APP_CONTEXT_KEY);
-                setWebThreadAppContext(context);
-            }
-        }
-        if (context == null) {
-            context = localThreadContext.get();
-        }
-        if (context == null && flag) {
-            context = new AppContext();
-            context.setLoginId("Virtual User Account");
-            localThreadContext.set(context);
-        }
-        return context;
+    public static AppContext getFromWebThread() {
+
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes();
+        return (AppContext) requestAttributes.getRequest().getSession().getAttribute(APP_CONTEXT_KEY);
     }
 
     public static AppContext getAppContext(HttpServletRequest request) {
@@ -53,22 +43,32 @@ public class AppContext implements Serializable {
         return null;
     }
 
-    public static AppContext getFromWebThread() {
-        return getFromWebThread(false);
+    public void setAppContext() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes();
+        requestAttributes.getRequest().getSession().setAttribute(APP_CONTEXT_KEY, this);
     }
 
-    public static void setLocalThreadAppContext(AppContext context) {
-        if (context != null) {
-            localThreadContext.set(context);
+    public void setAppContext(HttpServletRequest request) {
+        if (request != null) {
+            request.getSession().setAttribute(APP_CONTEXT_KEY, this);
         }
     }
 
-    public static void setWebThreadAppContext(AppContext context) {
-        if (context != null) {
-            HttpSession session = SessionManager.getSession();
-            session.setAttribute(APP_CONTEXT_KEY, context);
-            webThreadContext.set(context);
-        }
+    public void setLocalAppContext() {
+        localContext.set(this);
+    }
+
+    public AppContext getLocalAppContext() {
+        return localContext.get();
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getLoginId() {

@@ -3,9 +3,11 @@ package org.legion.aegis.admin.service;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.legion.aegis.admin.dao.UserAccountDAO;
 import org.legion.aegis.admin.dto.UserDto;
+import org.legion.aegis.admin.dto.UserSearchDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.generator.NewUserEmailGenerator;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.CollectionUtils;
@@ -72,11 +74,23 @@ public class UserAccountService {
         return null;
     }
 
+    public UserAccount getUserById(Long id) {
+        return userAccountDAO.getUserById(id);
+    }
+
+    public List<UserProjectAssign> getUserProjectAssignments(Long userId) {
+        return userAccountDAO.getUserProjectAssignments(userId);
+    }
+
     public List<UserRoleAssign> getActiveRoleAssignById(Long userAcctId) {
         if (userAcctId != null && userAcctId > 0) {
             return userAccountDAO.getActiveUserRoleAssignment(userAcctId);
         }
         return null;
+    }
+
+    public List<UserRoleAssign> getRoleAssigments(Long userId) {
+        return userAccountDAO.getUserRoleAssignment(userId);
     }
 
     public UserRole getRoleById(String roleId) {
@@ -89,6 +103,15 @@ public class UserAccountService {
     public List<UserRole> getAllRoles() {
         return userAccountDAO.getAllRoles();
     }
+    public List<UserRole> getAllRolesForSearchSelector() {
+        List<UserRole> roles = userAccountDAO.getAllRoles();
+        UserRole userRole = new UserRole();
+        userRole.setId("0");
+        userRole.setRoleName("请选择");
+        roles.add(0, userRole);
+        return roles;
+    }
+
 
     public UserAccount createDefaultUser(UserAccount account) {
         if (account != null) {
@@ -159,6 +182,11 @@ public class UserAccountService {
             NewUserEmailGenerator generator = new NewUserEmailGenerator(account);
             emailService.sendEmail(new String[]{account.getEmail()}, null, generator.getSubject(), generator.getEmailContent());
         }
+    }
+
+    public List<UserSearchDto> searchUsers(SearchParam searchParam) {
+        List<UserSearchDto> userSearchDtos = userAccountDAO.search(searchParam);
+        return userSearchDtos;
     }
 
 

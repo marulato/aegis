@@ -24,6 +24,7 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -76,6 +77,7 @@
                     <div class="form-group">
                       <label for="name">项目名</label>
                       <input class="form-control" type="text" name="name" id="name" th:value="${project.name}">
+                      <input type="hidden" name="projectId" id="projectId" th:value="${project.id}">
                     </div>
                   </div>
                 </div>
@@ -83,16 +85,19 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="type">项目类型</label>
-                      <select class="custom-select" name="type" id="type" th:value="${project.type}">
-                        <option></option>
-                      </select>
+                      <label for="isPublicSwitch">公开权限</label>
+                      <br/>
+                      <input class="form-control" type="checkbox" name="isPublicSwitch" id="isPublicSwitch">
+                      <input type="hidden" name="isPublic" id="isPublic" th:value="${project.isPublic}">
                     </div>
                   </div>
+                </div>
+
+                <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="typeOther">其他类型</label>
-                      <input class="form-control" type="text" name="typeOther" id="typeOther" th:value="${project.typeOther}">
+                      <label for="filePath">文件存储目录</label>
+                      <input class="form-control" name="filePath" id="filePath" th:value="${project.filePath}" readonly>
                     </div>
                   </div>
                 </div>
@@ -102,6 +107,23 @@
                     <div class="form-group">
                       <label for="description">描述</label>
                       <textarea class="form-control" name="description" id="description" th:text="${project.description}"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="col-md-12">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/project'">
+                        <i class="fa fa-chevron-left"></i>
+                        返回</button>
+                    </div>
+                    <div class="col-md-6">
+                      <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="saveProject()">
+                        <i class="fa fa-save"></i>
+                        保存</button>
                     </div>
                   </div>
                 </div>
@@ -142,9 +164,17 @@
                           <td th:text="${m.name}"></td>
                           <td th:text="${m.description}"></td>
                           <td><button class="btn btn-default btn-sm" th:onclick="showModify([[${m.id}]]);"><i class="fa fa-edit"></i></button></td>
+                          <td><button class="btn btn-default btn-sm" th:onclick="showDelete([[${m.id}]]);"><i class="fa fa-trash"></i></button></td>
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <button type="button" class="btn btn-success" onclick="showAdd()"><i class="fa fa-plus"></i>&nbsp;添加</button>
                   </div>
                 </div>
               </div>
@@ -153,20 +183,6 @@
         </div>
       </div>
 
-      <div class="col-12">
-        <div class="row">
-          <div class="col-md-6">
-            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/project'">
-              <i class="fa fa-chevron-left"></i>
-              返回</button>
-          </div>
-          <div class="col-md-6">
-            <button type="button" class="btn btn-primary float-left" style="font-size: 14px">
-              <i class="fa fa-check"></i>
-              提交</button>
-          </div>
-        </div>
-      </div>
       <br/>
       <!-- /.row -->
 
@@ -192,7 +208,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="modalTitle">Title</h4>
+        <h4 class="modal-title" id="modalModifyTitle">Title</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -201,29 +217,60 @@
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <label>名称</label>
-              <input type="text" class="form-control" name="modalName" id="modalName">
+              <label for="moduleName">名称</label>
+              <input type="text" class="form-control" name="moduleName" id="moduleName">
+              <input type="hidden" name="moduleId" id="moduleId">
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <label>描述</label>
-              <input type="text" class="form-control" name="modalDescription" id="modalDescription">
+              <label for="moduleDesc">描述</label>
+              <textarea type="text" class="form-control" name="moduleDesc" id="moduleDesc"></textarea>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer justify-content-between">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">关闭</button>
+        <button type="button" id="modifyBtn" class="btn btn-primary" style="font-size: 14px" onclick="saveModify()">保存</button>
+        <button type="button" id="addBtn" class="btn btn-primary" style="font-size: 14px" onclick="saveAdd()">保存</button>
       </div>
     </div>
     <!-- /.modal-content -->
   </div>
   <!-- /.modal-dialog -->
 </div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="modal_delete">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalDeleteTitle">Title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <input type="hidden" name="moduleDelId" id="moduleDelId">
+          <h5 id="confirmAlert"></h5>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" style="font-size: 14px" onclick="doDelete()">删除</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+
 
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
@@ -235,35 +282,203 @@
 </script>
 <!-- Bootstrap 4 -->
 <script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
-<!-- daterangepicker -->
-<script th:src="@{/plugins/moment/moment.min.js}"></script>
-<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<script th:src="@{/plugins/bootstrap-switch/js/bootstrap-switch.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        $('#reqRange').daterangepicker({
-            format: 'YYYY/MM/DD'
-        });
-        $('#sitRange').daterangepicker({
-            format: 'YYYY/MM/DD'
-        });
-        $('#uatRange').daterangepicker({
-            format: 'YYYY/MM/DD'
-        });
-    });
-    
-    function showModify(id) {
-        $.ajax({
+        var onoff = $("#isPublic").val() === 'Y';
+        $("#isPublicSwitch").bootstrapSwitch({
+            onText: "公开",
+            offText: "私有",
+            onColor: "success",
+            offColor: "danger",
+            state: onoff,
+            onSwitchChange: function (event, state) {
+              if (state === true) {
+                  $("#isPublic").val('Y');
+              } else {
+                  $("#isPublic").val('N');
+              }
+            }
 
         });
+    });
+
+    toastr.options = aegis.toastrOptions;
+
+    function showAdd() {
+        aegis.clearErrors();
+        $("#modifyBtn").hide();
+        $("#addBtn").show();
+        $("#modalModifyTitle").text('添加新模块');
+        $("#moduleName").val('');
+        $("#moduleDesc").text('');
+        $("#moduleId").val('');
         $("#modal_modify").modal({backdrop: true, show: true});
+    }
+    
+    function showModify(id) {
+        aegis.clearErrors();
+        $("#modifyBtn").show();
+        $("#addBtn").hide();
+        $.ajax({
+           url: "/web/project/module/" + id,
+           type: "get",
+           dataType: "json",
+           success: function (res) {
+              var obj = res.data[0];
+              $("#modalModifyTitle").text("修改：" + obj.name);
+              $("#moduleName").val(obj.name);
+              $("#moduleDesc").val(obj.description);
+              $("#moduleDesc").text(obj.description);
+              $("#moduleId").val(obj.id);
+              $("#modal_modify").modal({backdrop: true, show: true});
+           },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function showDelete(id) {
+        $.ajax({
+            url: "/web/project/module/" + id,
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                var obj = res.data[0];
+                $("#modalDeleteTitle").text("删除：" + obj.name);
+                $("#confirmAlert").text("确认删除 " + obj.name + " 吗？");
+                $("#modal_delete").modal({backdrop: true, show: true});
+                $("#moduleDelId").val(obj.id);
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function doDelete() {
+        var obj = {
+            moduleId: $("#moduleDelId").val(),
+            action: "delete"
+        };
+
+        $.ajax({
+            url: "/web/project/module",
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify(obj),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    $("#modal_delete").modal("hide");
+                    renderTable(res.data);
+                    toastr.success("删除成功");
+                }
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function saveAdd() {
+        var obj = {
+            projectId: $("#projectId").val(),
+            moduleName: $("#moduleName").val(),
+            moduleDesc: $("#moduleDesc").val(),
+            action: "add"
+        };
+
+        $.ajax({
+            url: "/web/project/module",
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify(obj),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else if (res.status == 200) {
+                    $("#modal_modify").modal("hide");
+                    renderTable(res.data);
+                    toastr.success("添加模块成功");
+                }
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function saveModify() {
+        var obj = {
+            moduleId: $("#moduleId").val(),
+            moduleName: $("#moduleName").val(),
+            moduleDesc: $("#moduleDesc").val(),
+            action: "modify"
+        };
+      $.ajax({
+          url: "/web/project/module",
+          type: "post",
+          contentType: "application/json",
+          data: JSON.stringify(obj),
+          dataType: "json",
+          success: function (res) {
+            if (res.status == 221) {
+                aegis.showErrors(res.data);
+            } else if (res.status == 200) {
+                $("#modal_modify").modal("hide");
+                renderTable(res.data);
+                toastr.success("修改模块成功");
+            }
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
+    }
+
+    function renderTable(data) {
+        $("#tbody").empty();
+        $.each(data, function (idx, e) {
+            $("#tbody").append("<tr>");
+            $("#tbody").append("<td>"+(idx + 1)+"</td>");
+            $("#tbody").append("<td>"+e.name+"</td>");
+            $("#tbody").append("<td>"+e.description+"</td>");
+            $("#tbody").append("<td><button type='button' onclick='showModify("+e.id+")' class='btn btn-default btn-sm'><i class='fa fa-edit'></i></button></td>");
+            $("#tbody").append("<td><button type='button' onclick='showDelete("+e.id+")' class='btn btn-default btn-sm'><i class='fa fa-trash'></i></button></td>");
+            $("#tbody").append("</tr>");
+        });
+    }
+
+    function saveProject() {
+        aegis.clearErrors();
+      $.ajax({
+          url: "/web/project",
+          type: "post",
+          data: $("#mainForm").serialize(),
+          dataType: "json",
+          success: function (res) {
+              if (res.status == 221) {
+                  aegis.showErrors(res.data);
+              } else if (res.status == 200) {
+                  toastr.success("修改项目成功");
+              }
+          },
+          error: function () {
+              location.href = "/web/error";
+          }
+      });
     }
 </script>
 </body>

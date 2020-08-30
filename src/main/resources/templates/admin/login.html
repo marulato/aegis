@@ -85,7 +85,7 @@
     function login() {
         $("#browser").val(navigator.userAgent);
         $.ajax({
-            url: "/web/login/signin",
+            url: "/web/login",
             type: "post",
             data: $("#mainForm").serialize(),
             dataType: "json",
