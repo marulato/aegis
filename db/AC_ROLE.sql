@@ -14,26 +14,26 @@ CREATE TABLE AC_ROLE
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('SYSADMIN', 'System Administrator', 'SYS', 'Y', '/web/SystemIndex', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('SYSADMIN', '系统管理员', 'SYS', 'Y', '/web/SystemIndex', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('DEV', 'Developer', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('DEV', '软件开发工程师', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('QA', 'Quality Assurance', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('QA', '软件测试工程师', 'DEV', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('DEV_S', 'Developer Supervisor', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('DEV_S', '开发主管', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('QA_S', 'QA Supervisor', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('QA_S', '测试主管', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('EXTPTY', 'External Party', 'USER', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('EXT_PTY', '第三方', 'USER', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 

@@ -73,13 +73,28 @@
             </p>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="/web/project"  th:class="${selected == '3' ? 'nav-link active' : 'nav-link'}">
+        <li th:class="${(selected == '3.1' || selected == '3.2') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#"  th:class="${(selected == '3.1' || selected == '3.2')  ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-th"></i>
             <p>
               项目管理
+              <i class="right fas fa-angle-left"></i>
             </p>
           </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/web/projectGroup" th:class="${selected == '3.1' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>项目组</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/web/project" th:class="${selected == '3.2' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>子项目管理</p>
+              </a>
+            </li>
+          </ul>
         </li>
 
         <li th:class="${(selected == '4.1' || selected == '4.2') ? 'nav-item menu-open' : 'nav-item'}">

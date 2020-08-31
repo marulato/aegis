@@ -36,6 +36,12 @@ public class AppConsts {
     public static final String ACCOUNT_STATUS_LOCKED    = "L";
     public static final String ACCOUNT_STATUS_FROZEN    = "F";
 
+    public static final String ROLE_SYSTEM_ADMIN   = "SYSADMIN";
+    public static final String ROLE_DEV            = "DEV";
+    public static final String ROLE_QA             = "QA";
+    public static final String ROLE_DEV_SUPERVISOR = "DEV_S";
+    public static final String ROLE_QA_SUPERVISOR  = "QA_S";
+
     public static final String USER_DOMAIN_INTRANET  = "INTRANET";
     public static final String USER_DOMAIN_EXTRANET  = "EXTRANET";
 

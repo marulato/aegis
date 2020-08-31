@@ -96,8 +96,11 @@ public class UserAccountController {
 
     @PostMapping("/web/user/list")
     @ResponseBody
-    public AjaxResponseBody search(@RequestBody SearchParam searchParam) {
+    public AjaxResponseBody search(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext appContext = AppContext.getAppContext(request);
+        searchParam.addParam("userId", appContext.getUserId());
+        searchParam.addParam("role", appContext.getCurrentRole().getId());
         manager.addDataObject(new SearchResult<>(accountService.searchUsers(searchParam), searchParam));
         return manager.respond();
     }

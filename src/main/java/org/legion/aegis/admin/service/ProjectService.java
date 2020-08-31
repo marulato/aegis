@@ -3,10 +3,9 @@ package org.legion.aegis.admin.service;
 import org.legion.aegis.admin.dao.ModuleDAO;
 import org.legion.aegis.admin.dao.ProjectDAO;
 import org.legion.aegis.admin.dto.ProjectDto;
+import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
-import org.legion.aegis.admin.entity.Project;
-import org.legion.aegis.admin.entity.UserAccount;
-import org.legion.aegis.admin.entity.UserProjectAssign;
+import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.consts.AppConsts;
@@ -60,7 +59,7 @@ public class ProjectService {
         return project;
     }
 
-    public List<Project> search(SearchParam param) {
+    public List<ProjectVO> search(SearchParam param) {
         return projectDAO.search(param);
     }
 
@@ -91,6 +90,7 @@ public class ProjectService {
             Project project = BeanUtils.mapFromDto(dto, Project.class);
             if (project != null) {
                 project.setStatus(AppConsts.STATUS_ACTIVE);
+                project.setGroupId(Long.parseLong(dto.getGroup()));
                 project.createAuditValues(AppContext.getFromWebThread());
                 projectDAO.createProject(project);
                 if (dto.getModule() != null) {
@@ -107,20 +107,22 @@ public class ProjectService {
                         }
                     }
                 }
-                UserProjectAssign projectAssign = new UserProjectAssign();
-                projectAssign.setProjectId(project.getId());
-                projectAssign.setUserAcctId(context.getUserId());
-                projectAssign.setAssignReason("New Project Created by " + context.getLoginId());
-                JPAExecutor.save(projectAssign);
+                if (!AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getCurrentRole().getId())) {
+                    UserProjectAssign projectAssign = new UserProjectAssign();
+                    projectAssign.setProjectId(project.getId());
+                    projectAssign.setUserAcctId(context.getUserId());
+                    projectAssign.setAssignReason("New Project Created by " + context.getLoginId());
+                    JPAExecutor.save(projectAssign);
+                }
             }
         }
     }
 
-    public List<ProjectDto> toDtoView(List<Project> projects) throws Exception {
-        List<ProjectDto> dtoList = new ArrayList<>();
+    public List<ProjectVO> toProjectView(List<Project> projects) throws Exception {
+        List<ProjectVO> dtoList = new ArrayList<>();
         if (projects != null) {
             for (Project project : projects) {
-                ProjectDto dto = toDtoView(project);
+                ProjectVO dto = toProjectView(project);
                 if (dto != null) {
                     dtoList.add(dto);
                 }
@@ -129,22 +131,22 @@ public class ProjectService {
         return dtoList;
     }
 
-    public ProjectDto toDtoView(Project project) throws Exception {
+    public ProjectVO toProjectView(Project project) throws Exception {
         if (project != null) {
-            ProjectDto dto = BeanUtils.mapDtoFromPO(project, ProjectDto.class, "yyyy/MM/dd");
-            if (dto != null) {
-                if (AppConsts.STATUS_ACTIVE.equals(project.getStatus())) {
-                    dto.setStatusCode(AppConsts.STATUS_ACTIVE_CHN);
-                } else if (AppConsts.STATUS_BANNED.equals(project.getStatus())) {
-                    dto.setStatusCode(AppConsts.STATUS_BANNED_CHN);
-                }
-                if (AppConsts.YES.equals(project.getIsPublic())) {
-                    dto.setIsPublic("公开");
-                } else {
-                    dto.setIsPublic("私有");
-                }
-                return dto;
+            ProjectVO vo = new ProjectVO(project);
+            AppContext context = AppContext.getFromWebThread();
+            vo.setRole(context.getCurrentRole().getId());
+            if (AppConsts.STATUS_ACTIVE.equals(project.getStatus())) {
+                vo.setStatusDesc(AppConsts.STATUS_ACTIVE_CHN);
+            } else if (AppConsts.STATUS_BANNED.equals(project.getStatus())) {
+                vo.setStatusDesc(AppConsts.STATUS_BANNED_CHN);
             }
+            if (AppConsts.YES.equals(project.getIsPublic())) {
+                vo.setIsPublic("公开");
+            } else {
+                vo.setIsPublic("私有");
+            }
+            return vo;
         }
         return null;
     }
@@ -176,6 +178,33 @@ public class ProjectService {
             project.setStatus(AppConsts.STATUS_ACTIVE);
             JPAExecutor.update(project);
         }
+    }
+
+    public List<ProjectGroup> searchGroup(SearchParam param) {
+        return projectDAO.searchProjectGroup(param);
+    }
+
+    public void saveProjectGroup(ProjectGroup group) {
+        if (group != null && group.getId() > 0) {
+            ProjectGroup projectGroup = getProjectGroupById(group.getId());
+            projectGroup.setName(group.getName());
+            projectGroup.setDescription(group.getDescription());
+            JPAExecutor.update(projectGroup);
+        } else if (group != null) {
+            JPAExecutor.save(group);
+        }
+    }
+
+    public ProjectGroup getProjectGroupById(Long id) {
+        return projectDAO.getProjectGroupById(id);
+    }
+
+    public List<Project> getProjectsUnderGroup(Long groupId) {
+        return projectDAO.getProjectsUnderGroup(groupId);
+    }
+
+    public List<ProjectGroup> getProjectGroupUnderUser(Long userId, String role) {
+        return projectDAO.getProjectGroupUnderUser(userId, role);
     }
 
 }

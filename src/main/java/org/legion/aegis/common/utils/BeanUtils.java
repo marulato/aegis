@@ -63,6 +63,7 @@ public class BeanUtils {
         return null;
     }
 
+    @Deprecated
     public static <T> T mapDtoFromPO(BasePO po, Class<T> type, String dateFormat) throws Exception {
         if (StringUtils.isEmpty(dateFormat)) {
             dateFormat = "yyyy/MM/dd HH:mm:ss";

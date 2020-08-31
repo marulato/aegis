@@ -2,46 +2,53 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.legion.aegis.admin.dao.ProjectDAO">
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
-            resultType="org.legion.aegis.admin.entity.Project">
-        SELECT PJT.*
+            resultType="org.legion.aegis.admin.vo.ProjectVO">
+        SELECT PJT.NAME,
+        PJT.DESCRIPTION,
+        PJT.STATUS,
+        PJT.STAGE,
+        CASE PJT.IS_PUBLIC WHEN 'Y' THEN '公开' ELSE '私有' END AS IS_PUBLIC,
+        GRP.NAME AS GROUP_NAME,
+        CASE PJT.STATUS WHEN 'ACTIVE' THEN '正常' ELSE '禁用' END AS STATUS_DESC,
+        DATE_FORMAT(PJT.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
         FROM PJT_PROJECT PJT
         LEFT JOIN PJT_USER_PROJECT_ASN PSN
-            ON PSN.PROJECT_ID = PJT.ID
+        ON PSN.PROJECT_ID = PJT.ID
         LEFT JOIN AC_USER_ACCT USER
-            ON USER.ID = PSN.USER_ACCT_ID
+        ON USER.ID = PSN.USER_ACCT_ID
+        LEFT JOIN PJT_PROJECT_GROUP GRP ON PJT.GROUP_ID = GRP.ID
         <where>
-            <if test="sp.params.userId != null and sp.params.userId &gt;0">
+            <if test="sp.params.userId != null and sp.params.userId &gt;0 and sp.params.role !='SYSADMIN'">
                 AND USER.ID = #{sp.params.userId}
             </if>
 
-
             <if test="sp.params.projectName != null and sp.params.projectName != ''">
-                AND UPPER (NAME) LIKE CONCAT('%', UPPER(#{sp.params.projectName}), '%')
+                AND UPPER (PJT.NAME) LIKE CONCAT('%', UPPER(#{sp.params.projectName}), '%')
             </if>
 
             <if test="sp.params.description != null and sp.params.description != ''">
-                AND UPPER (DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+                AND UPPER (PJT.DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
             </if>
         </where>
         <choose>
             <when test="sp.orderColumnNo == 0">
-                ORDER BY NAME
+                ORDER BY PJT.NAME
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 1">
-                ORDER BY DESCRIPTION
+                ORDER BY PJT.DESCRIPTION
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 2">
-                ORDER BY STATUS
+                ORDER BY PJT.STATUS
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 3">
-                ORDER BY IS_PUBLIC
+                ORDER BY PJT.IS_PUBLIC
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 4">
-                ORDER BY CREATED_AT
+                ORDER BY PJT.CREATED_AT
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
         </choose>
@@ -55,6 +62,54 @@
                            ON PSN.PROJECT_ID = PJT.ID
                  LEFT JOIN AC_USER_ACCT USER
                            ON USER.ID = PSN.USER_ACCT_ID
-        WHERE USER.ID = #{userId} AND PJT.STATUS = 'ACTIVE'
+        WHERE USER.ID = #{userId}
+          AND PJT.STATUS = 'ACTIVE'
     </select>
+
+    <select id="searchProjectGroup" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.admin.entity.ProjectGroup">
+        SELECT GRP.*
+        FROM PJT_PROJECT_GROUP GRP
+        LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
+        <where>
+            <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
+                AND PSN.ACCT_USER_ID = #{sp.params.userId}
+            </if>
+
+            <if test="sp.params.groupName != null and sp.params.groupName != ''">
+                AND UPPER (GRP.NAME) LIKE CONCAT('%', UPPER(#{sp.params.groupName}), '%')
+            </if>
+
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER (GRP.DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+            </if>
+        </where>
+
+        <choose>
+            <when test="sp.orderColumnNo == 0">
+                ORDER BY GRP.NAME
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 1">
+                ORDER BY GRP.DESCRIPTION
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+        </choose>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="getProjectGroupUnderUser" resultType="org.legion.aegis.admin.entity.ProjectGroup">
+        SELECT GRP.*
+        FROM PJT_PROJECT_GROUP GRP
+        LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
+        <where>
+            <if test="param2 != 'SYSADMIN'">
+                AND PSN.ACCT_USER_ID = #{param1}
+            </if>
+        </where>
+
+    </select>
+
 </mapper>

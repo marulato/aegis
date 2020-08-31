@@ -1,10 +1,14 @@
 package org.legion.aegis.admin.controller;
 
 import org.legion.aegis.admin.dto.ProjectDto;
+import org.legion.aegis.admin.dto.ProjectGroupDto;
 import org.legion.aegis.admin.entity.Module;
 import org.legion.aegis.admin.entity.Project;
+import org.legion.aegis.admin.entity.ProjectGroup;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.admin.validator.ModuleValidator;
+import org.legion.aegis.admin.vo.ProjectGroupVO;
+import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
@@ -15,13 +19,13 @@ import org.legion.aegis.common.consts.SystemConsts;
 import org.legion.aegis.common.exception.RecordsNotFoundException;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.BeanUtils;
+import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.*;
@@ -37,12 +41,17 @@ public class ProjectMgrController {
     }
 
     @GetMapping("/web/project")
-    public String getProjectDisplayPage(HttpServletRequest request) {
+    public String getProjectPage() {
         return "admin/projectList";
     }
 
+    @GetMapping("/web/projectGroup")
+    public String getProjectGroupPage() {
+        return "admin/projectGroupList";
+    }
+
     @GetMapping("/web/project/{id}")
-    public ModelAndView display(@PathVariable("id") String id) throws Exception{
+    public ModelAndView display(@PathVariable("id") String id) {
         ModelAndView modelAndView = new ModelAndView("admin/projectDisplay");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
         //ProjectDto dto = BeanUtils.mapFromPO(project, ProjectDto.class, null);
@@ -53,16 +62,20 @@ public class ProjectMgrController {
         return modelAndView;
     }
 
-    @GetMapping("/web/project/acknowledge")
-    public String acknowledge() {
-        return "admin/projectAcknowledge";
+    @GetMapping("/web/project/add")
+    public ModelAndView addProjectPage(HttpServletRequest request) throws Exception {
+        ModelAndView modelAndView = new ModelAndView("admin/projectAdd");
+        AppContext context = AppContext.getAppContext(request);
+        modelAndView.addObject("currentRootPath", new File(SystemConsts.ROOT_STORAGE_PATH).getCanonicalPath());
+        modelAndView.addObject("groupList", projectService.
+                getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId()));
+        modelAndView.addObject("stageList", MasterCodeUtils.getMasterCodeByType("project.stage.default"));
+        return modelAndView;
     }
 
-    @GetMapping("/web/project/add")
-    public ModelAndView add() throws Exception {
-        ModelAndView modelAndView = new ModelAndView("admin/projectAdd");
-        modelAndView.addObject("currentRootPath", new File(SystemConsts.ROOT_STORAGE_PATH).getCanonicalPath());
-        return modelAndView;
+    @GetMapping("/web/projectGroup/add")
+    public String addGroupPage() {
+        return "admin/projectGroupAdd";
     }
 
     @PostMapping("/web/project/add")
@@ -169,9 +182,10 @@ public class ProjectMgrController {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
-        List<Project> projectList = projectService.search(searchParam);
-        List<ProjectDto> dtoList = projectService.toDtoView(projectList);
-        manager.addDataObject(new SearchResult<>(dtoList, searchParam));
+        searchParam.addParam("role", appContext.getCurrentRole().getId());
+        List<ProjectVO> projectList = projectService.search(searchParam);
+        //List<ProjectVO> dtoList = projectService.toProjectView(projectList);
+        manager.addDataObject(new SearchResult<>(projectList, searchParam));
         return manager.respond();
     }
 
@@ -180,7 +194,7 @@ public class ProjectMgrController {
     public AjaxResponseBody retrieveProject(@PathVariable("id") String id) throws Exception {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
-        manager.addDataObject(projectService.toDtoView(project));
+        manager.addDataObject(projectService.toProjectView(project));
         return manager.respond();
     }
 
@@ -210,8 +224,54 @@ public class ProjectMgrController {
         return manager.respond();
     }
 
-    @GetMapping("/web/test")
-    public void test() throws Exception {
-        throw new Exception();
+    @PostMapping("/web/projectGroup/list")
+    @ResponseBody
+    public AjaxResponseBody searchGroup(@RequestBody SearchParam searchParam, HttpServletRequest request) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext appContext = AppContext.getAppContext(request);
+        searchParam.addParam("userId", appContext.getUserId());
+        searchParam.addParam("role", appContext.getCurrentRole().getId());
+        List<ProjectGroup> projectGroupList = projectService.searchGroup(searchParam);
+        List<ProjectGroupVO> dtoList = new ArrayList<>();
+        for (ProjectGroup group : projectGroupList) {
+            dtoList.add(new ProjectGroupVO(group));
+        }
+        manager.addDataObject(new SearchResult<>(dtoList, searchParam));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/projectGroup/add")
+    @ResponseBody
+    public AjaxResponseBody addProjectGroup(ProjectGroup projectGroup) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Map<String, List<String>> errors = CommonValidator.doValidation(projectGroup, null);
+        if (!errors.isEmpty()) {
+            manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            manager.addValidations(errors);
+        } else {
+            projectService.saveProjectGroup(projectGroup);
+        }
+        return manager.respond();
+    }
+
+    @GetMapping("/web/projectGroup/{id}/modify")
+    public ModelAndView prepareModifyGroup(@PathVariable("id") String id) {
+        ModelAndView modelAndView = new ModelAndView("admin/projectGroupModify");
+        modelAndView.addObject("group", projectService.getProjectGroupById(StringUtils.parseIfIsLong(id)));
+        return modelAndView;
+    }
+
+    @GetMapping("/web/projectGroup/{id}")
+    public ModelAndView prepareDisplayGroup(@PathVariable("id") String id) {
+        ModelAndView modelAndView = new ModelAndView("admin/projectGroupDisplay");
+        modelAndView.addObject("group", projectService.getProjectGroupById(StringUtils.parseIfIsLong(id)));
+        modelAndView.addObject("projects", projectService.getProjectsUnderGroup(StringUtils.parseIfIsLong(id)));
+        return modelAndView;
+    }
+
+    @PostMapping("/web/projectGroup")
+    @ResponseBody
+    public AjaxResponseBody saveProjectGroup(ProjectGroup projectGroup) throws Exception {
+        return addProjectGroup(projectGroup);
     }
 }

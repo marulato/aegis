@@ -1,9 +1,9 @@
 package org.legion.aegis.admin.dto;
 
-
-import org.apache.commons.io.FilenameUtils;
 import org.legion.aegis.admin.entity.Project;
+import org.legion.aegis.admin.entity.ProjectGroup;
 import org.legion.aegis.admin.service.ProjectService;
+import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.BaseDto;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.SpringUtils;
@@ -14,6 +14,7 @@ import org.legion.aegis.common.validation.ValidateWithMethodList;
 import org.legion.aegis.common.validation.ValidateWithRegex;
 
 import java.io.File;
+import java.util.List;
 
 public class ProjectDto extends BaseDto {
 
@@ -35,7 +36,11 @@ public class ProjectDto extends BaseDto {
     @ValidateWithMethod(method = "validateModule", message = "")
     private String[] module;
 
-    private String statusCode;
+    @ValidateWithMethod(method = "validateGroup", message = "")
+    private String group;
+
+    private String stage;
+
 
     private boolean validatePathAvailable(String filePath) {
         ProjectService service = SpringUtils.getBean(ProjectService.class);
@@ -64,6 +69,18 @@ public class ProjectDto extends BaseDto {
     private boolean validatePathName(String name) {
         if (StringUtils.isNotBlank(name)) {
             return name.matches("[\\w\\-]+");
+        }
+        return false;
+    }
+
+    private boolean validateGroup(String group) {
+        AppContext context = AppContext.getFromWebThread();
+        ProjectService service = SpringUtils.getBean(ProjectService.class);
+        List<ProjectGroup> groupList = service.getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId());
+        for (ProjectGroup projectGroup : groupList) {
+            if (group.equals(String.valueOf(projectGroup.getId()))) {
+                return true;
+            }
         }
         return false;
     }
@@ -132,11 +149,19 @@ public class ProjectDto extends BaseDto {
         this.module = module;
     }
 
-    public String getStatusCode() {
-        return statusCode;
+    public String getGroup() {
+        return group;
     }
 
-    public void setStatusCode(String statusCode) {
-        this.statusCode = statusCode;
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 }

@@ -34,7 +34,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('3')"></div>
+  <div th:replace="/include/sidebar::leftmenu('3.2')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -75,8 +75,30 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
+                      <label for="group" data-required="true">项目组</label>
+                      <select class="custom-select" name="group" id="group">
+                        <option th:each="grp, stats:${groupList}" th:value="${grp.id}" th:text="${grp.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
                       <label for="name" data-required="true">项目名</label>
                       <input class="form-control" type="text" name="name" id="name">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="stage" data-required="true">阶段</label>
+                      <select class="custom-select" name="stage" id="stage">
+                        <option th:each="stage, stats:${stageList}" th:value="${stage.code}" th:text="${stage.description}"></option>
+                      </select>
                     </div>
                   </div>
                 </div>

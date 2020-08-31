@@ -86,4 +86,21 @@ INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
 VALUES ('issue.resolution.default', 'UNSOLVABLE', 'Unsolvable', '无法处理', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
+--
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('project.stage.default', 'DEV', 'Developing', '开发阶段', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('project.stage.default', 'SIT', 'Self Internal Test', '系统集成测试', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('project.stage.default', 'UAT', 'User Acceptance Testing', '用户验收测试', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('project.stage.default', 'PRD', 'Production', '线上维护', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
 

@@ -13,6 +13,8 @@ public abstract class BaseDto implements Serializable, Cloneable {
     private String createdBy;
     private String updatedAt;
     private String updatedBy;
+    private String role;
+    private String userId;
 
     public <T> void mapParameters(HttpServletRequest request, T dto) throws Exception {
         if (dto != null) {
@@ -54,5 +56,21 @@ public abstract class BaseDto implements Serializable, Cloneable {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

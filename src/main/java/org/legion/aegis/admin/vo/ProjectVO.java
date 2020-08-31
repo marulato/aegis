@@ -1,16 +1,11 @@
-package org.legion.aegis.admin.entity;
+package org.legion.aegis.admin.vo;
 
+import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.common.base.BasePO;
-import org.legion.aegis.common.jpa.annotation.Entity;
-import org.legion.aegis.common.jpa.annotation.NotColumn;
-import org.legion.aegis.common.jpa.annotation.PrimaryKey;
-import java.util.Date;
-import java.util.List;
+import org.legion.aegis.common.base.BaseVO;
 
-@Entity(tableName = "PJT_PROJECT")
-public class Project extends BasePO {
+public class ProjectVO extends BaseVO {
 
-    @PrimaryKey(autoIncrement = true)
     private Long id;
     private String name;
     private Long groupId;
@@ -19,11 +14,15 @@ public class Project extends BasePO {
     private String description;
     private String stage;
     private String status;
-
-    @NotColumn
-    private List<Module> modules;
-    @NotColumn
+    private String role;
     private String groupName;
+    private String statusDesc;
+
+    public ProjectVO() {}
+
+    public ProjectVO(Project po) {
+        super(po);
+    }
 
     public Long getId() {
         return id;
@@ -39,6 +38,14 @@ public class Project extends BasePO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 
     public String getFilePath() {
@@ -65,30 +72,6 @@ public class Project extends BasePO {
         this.description = description;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<Module> getModules() {
-        return modules;
-    }
-
-    public void setModules(List<Module> modules) {
-        this.modules = modules;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
-
     public String getStage() {
         return stage;
     }
@@ -97,11 +80,35 @@ public class Project extends BasePO {
         this.stage = stage;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public String getGroupName() {
         return groupName;
     }
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getStatusDesc() {
+        return statusDesc;
+    }
+
+    public void setStatusDesc(String statusDesc) {
+        this.statusDesc = statusDesc;
     }
 }

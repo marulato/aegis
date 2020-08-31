@@ -17,8 +17,8 @@ public interface MasterCodeDAO {
     @Select("SELECT * FROM CM_MASTER_CODE WHERE TYPE = #{param1} AND CODE = #{param2}")
     MasterCode getMasterCode(String type, String code);
 
-    @Select("SELECT * FROM CM_MASTER_CODE")
-    List<MasterCode> getAllMasterCodes();
+    @Select("SELECT * FROM CM_MASTER_CODE WHERE IS_CACHED = 'Y'")
+    List<MasterCode> getAllCacheNeededMasterCodes();
 
     @Select("SELECT * FROM CM_MASTER_CODE WHERE TYPE = #{type}")
     List<MasterCode> getMasterCodeByType(String type);

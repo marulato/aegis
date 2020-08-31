@@ -34,7 +34,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('3')"></div>
+  <div th:replace="/include/sidebar::leftmenu('3.2')"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -124,8 +124,10 @@
                 <thead>
                 <tr>
                   <th>项目名</th>
+                  <th>项目组</th>
                   <th>描述</th>
                   <th>状态</th>
+                  <th>阶段</th>
                   <th>权限</th>
                   <th>创建日期</th>
                   <th>操作</th>
@@ -279,15 +281,17 @@
             },
             columns: [
                 {"data": "name", "defaultContent": "-"},
+                {"data": "groupName", "defaultContent": "-"},
                 {"data": "description", "defaultContent": "-"},
-                {"data": "statusCode", "defaultContent": "-"},
+                {"data": "statusDesc", "defaultContent": "-"},
+                {"data": "stage", "defaultContent": "-"},
                 {"data": "isPublic", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
                 {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
                         var banBtn = "";
-                    if (full.status == 'ACTIVE') {
+                    if (full.status === 'ACTIVE' && full.role === 'SYSADMIN') {
                         banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan("+full.id+")' title='禁用'><i class='fa fa-ban'></i></a>";
-                    } else {
+                    } else if (full.role === 'SYSADMIN') {
                         banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showActivate("+full.id+")' title='启用'><i class='fa fa-check-square'></i></a>";
                     }
                         return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
