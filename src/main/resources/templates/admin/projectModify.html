@@ -75,6 +75,17 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
+                      <label for="group">项目组</label>
+                      <select class="custom-select" type="text" name="group" id="group" th:value="${group.id}" readonly>
+                        <option th:value="${group.id}" th:text="${group.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
                       <label for="name">项目名</label>
                       <input class="form-control" type="text" name="name" id="name" th:value="${project.name}">
                       <input type="hidden" name="projectId" id="projectId" th:value="${project.id}">
@@ -89,6 +100,17 @@
                       <br/>
                       <input class="form-control" type="checkbox" name="isPublicSwitch" id="isPublicSwitch">
                       <input type="hidden" name="isPublic" id="isPublic" th:value="${project.isPublic}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="stage">阶段</label>
+                      <select class="custom-select" name="stage" id="stage" th:value="${project.stage}">
+                        <option th:each="stage, stats:${stageList}" th:value="${stage.code}" th:text="${stage.description}"></option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -162,7 +184,7 @@
                         <tr th:each="m, stats:${project.modules}">
                           <td th:text="${stats.count}"></td>
                           <td th:text="${m.name}"></td>
-                          <td th:text="${m.description}"></td>
+                          <td th:text="${(m.description == null || m.description.trim() == '') ? '-' : m.description}"></td>
                           <td><button class="btn btn-default btn-sm" th:onclick="showModify([[${m.id}]]);"><i class="fa fa-edit"></i></button></td>
                           <td><button class="btn btn-default btn-sm" th:onclick="showDelete([[${m.id}]]);"><i class="fa fa-trash"></i></button></td>
                         </tr>

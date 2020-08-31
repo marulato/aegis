@@ -80,32 +80,65 @@
                 <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">项目组</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${group.name}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">项目名</span>
                       <span class="info-box-number text-center text-muted mb-0" th:text="${project.name}"></span>
                     </div>
                   </div>
                 </div>
+              </div>
+              <div class="row">
                 <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">查看权限</span>
-                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.isPublic == 'Y' ? '公开' : '私有'}"></span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${project.isPublic == 'Y' ? '公开' : '私有'}"></span>
                     </div>
                   </div>
                 </div>
+              </div>
+              <div class="row">
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">阶段</span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${project.stage}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
                 <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">状态</span>
-                      <span class="info-box-number text-center text-muted mb-0" th:text="${project.status == 'ACTIVE' ? '正常':'已过期'}"></span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${project.status == 'ACTIVE' ? '正常':'禁用'}"></span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div class="row">
                 <div class="col-12 col-sm-3">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
                       <span class="info-box-text text-center text-muted">创建时间</span>
-                      <span class="info-box-number text-center text-muted mb-0" th:text="${#dates.format(project.createdAt, 'yyyy/MM/dd')}"></span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${#dates.format(project.createdAt, 'yyyy/MM/dd')}"></span>
                     </div>
                   </div>
                 </div>
@@ -122,14 +155,13 @@
                 <div class="col-md-6">
                   <div class="callout callout-info">
                     <h6><strong>描述</strong></h6>
-                    <p th:text="${project.description}"></p>
+                    <p th:text="${(project.description == null || project.description.trim() == '') ? '-' : project.description}"></p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
         <div class="col-12">
           <div class="card">
             <div class="card-header">
@@ -155,11 +187,11 @@
                       </tr>
                       </thead>
                       <tbody id="tbody">
-                        <tr th:each="obj, stats:${project.modules}">
-                          <td th:text="${stats.count}"></td>
-                          <td th:text="${obj.name}"></td>
-                          <td th:text="${obj.description}"></td>
-                        </tr>
+                      <tr th:each="obj, stats:${project.modules}">
+                        <td th:text="${stats.count}"></td>
+                        <td th:text="${obj.name}"></td>
+                        <td th:text="${obj.description}"></td>
+                      </tr>
                       </tbody>
                     </table>
                   </div>
@@ -169,25 +201,28 @@
           </div>
         </div>
       </div>
-      <!-- /.row -->
-
-      <!-- /.row (main row) -->
-    <!-- /.container-fluid -->
       <div class="col-12">
         <div class="row">
           <div class="col-md-6">
-            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/project'">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px"
+                    onclick="location.href='/web/project'">
               <i class="fa fa-chevron-left"></i>
-              返回</button>
+              返回
+            </button>
           </div>
         </div>
       </div>
-      <br/>
-  </section>
+
+    </section>
+  </div>
+  <!-- /.row -->
+
+  <!-- /.row (main row) -->
+  <!-- /.container-fluid -->
   <!-- /.content -->
 </div>
 <!-- /.content-wrapper -->
-  <div th:replace="/include/footer::footer"></div>
+<div th:replace="/include/footer::footer"></div>
 
 <!-- Control Sidebar -->
 <aside class="control-sidebar control-sidebar-dark">

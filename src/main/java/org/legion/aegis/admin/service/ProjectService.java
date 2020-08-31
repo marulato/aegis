@@ -5,6 +5,7 @@ import org.legion.aegis.admin.dao.ProjectDAO;
 import org.legion.aegis.admin.dto.ProjectDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
+import org.legion.aegis.admin.vo.ProjectGroupVO;
 import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.SearchParam;
@@ -77,6 +78,7 @@ public class ProjectService {
             if (project != null) {
                 project.setName(dto.getName());
                 project.setDescription(dto.getDescription());
+                project.setStage(dto.getStage());
                 //project.setFilePath(dto.getFilePath());
                 project.setIsPublic(dto.getIsPublic());
                 JPAExecutor.update(project);
@@ -180,12 +182,12 @@ public class ProjectService {
         }
     }
 
-    public List<ProjectGroup> searchGroup(SearchParam param) {
+    public List<ProjectGroupVO> searchGroup(SearchParam param) {
         return projectDAO.searchProjectGroup(param);
     }
 
     public void saveProjectGroup(ProjectGroup group) {
-        if (group != null && group.getId() > 0) {
+        if (group != null && group.getId() != null && group.getId() > 0) {
             ProjectGroup projectGroup = getProjectGroupById(group.getId());
             projectGroup.setName(group.getName());
             projectGroup.setDescription(group.getDescription());

@@ -1,7 +1,6 @@
 package org.legion.aegis.admin.controller;
 
 import org.legion.aegis.admin.dto.ProjectDto;
-import org.legion.aegis.admin.dto.ProjectGroupDto;
 import org.legion.aegis.admin.entity.Module;
 import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.admin.entity.ProjectGroup;
@@ -18,7 +17,6 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.consts.SystemConsts;
 import org.legion.aegis.common.exception.RecordsNotFoundException;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
-import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
@@ -54,11 +52,9 @@ public class ProjectMgrController {
     public ModelAndView display(@PathVariable("id") String id) {
         ModelAndView modelAndView = new ModelAndView("admin/projectDisplay");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
-        //ProjectDto dto = BeanUtils.mapFromPO(project, ProjectDto.class, null);
-        if (project == null) {
-            throw new RecordsNotFoundException();
-        }
+        ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
         modelAndView.addObject("project", project);
+        modelAndView.addObject("group", projectGroup);
         return modelAndView;
     }
 
@@ -96,10 +92,10 @@ public class ProjectMgrController {
     public ModelAndView prepareModify(@PathVariable("id") String id) {
         ModelAndView modelAndView = new ModelAndView("admin/projectModify");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
-        if (project == null) {
-            throw new RecordsNotFoundException();
-        }
+        ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
         modelAndView.addObject("project", project);
+        modelAndView.addObject("group", projectGroup);
+        modelAndView.addObject("stageList", MasterCodeUtils.getMasterCodeByType("project.stage.default"));
         return modelAndView;
     }
 
@@ -231,11 +227,8 @@ public class ProjectMgrController {
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
         searchParam.addParam("role", appContext.getCurrentRole().getId());
-        List<ProjectGroup> projectGroupList = projectService.searchGroup(searchParam);
+        List<ProjectGroupVO> projectGroupList = projectService.searchGroup(searchParam);
         List<ProjectGroupVO> dtoList = new ArrayList<>();
-        for (ProjectGroup group : projectGroupList) {
-            dtoList.add(new ProjectGroupVO(group));
-        }
         manager.addDataObject(new SearchResult<>(dtoList, searchParam));
         return manager.respond();
     }

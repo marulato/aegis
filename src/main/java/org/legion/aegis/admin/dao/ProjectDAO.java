@@ -3,6 +3,7 @@ package org.legion.aegis.admin.dao;
 import org.apache.ibatis.annotations.*;
 import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.admin.entity.ProjectGroup;
+import org.legion.aegis.admin.vo.ProjectGroupVO;
 import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.jpa.SimpleSQLGenerator;
@@ -31,7 +32,7 @@ public interface ProjectDAO {
 
     List<Project> getProjectsUnderUser(Long userId);
 
-    List<ProjectGroup> searchProjectGroup(@Param("sp") SearchParam param);
+    List<ProjectGroupVO> searchProjectGroup(@Param("sp") SearchParam param);
 
     @Select("SELECT * FROM PJT_PROJECT_GROUP WHERE ID = #{id}")
     ProjectGroup getProjectGroupById(Long id);

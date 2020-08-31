@@ -4,6 +4,7 @@
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.admin.vo.ProjectVO">
         SELECT PJT.NAME,
+        PJT.ID,
         PJT.DESCRIPTION,
         PJT.STATUS,
         PJT.STAGE,
@@ -67,14 +68,18 @@
     </select>
 
     <select id="searchProjectGroup" parameterType="org.legion.aegis.common.base.SearchParam"
-            resultType="org.legion.aegis.admin.entity.ProjectGroup">
-        SELECT GRP.*
+            resultType="org.legion.aegis.admin.vo.ProjectGroupVO">
+        SELECT GRP.ID,
+        GRP.NAME,
+        GRP.DESCRIPTION,
+        GRP.CREATED_BY,
+        DATE_FORMAT(PJT.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
         FROM PJT_PROJECT_GROUP GRP
         LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
         LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
         <where>
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
-                AND PSN.ACCT_USER_ID = #{sp.params.userId}
+                AND PSN.USER_ACCT_ID = #{sp.params.userId}
             </if>
 
             <if test="sp.params.groupName != null and sp.params.groupName != ''">
@@ -106,7 +111,7 @@
         LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
         <where>
             <if test="param2 != 'SYSADMIN'">
-                AND PSN.ACCT_USER_ID = #{param1}
+                AND PSN.USER_ACCT_ID = #{param1}
             </if>
         </where>
 

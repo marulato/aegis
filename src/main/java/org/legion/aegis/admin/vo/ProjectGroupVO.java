@@ -5,19 +5,21 @@ import org.legion.aegis.common.base.BaseVO;
 
 public class ProjectGroupVO extends BaseVO {
 
+    public ProjectGroupVO() {}
+
     public ProjectGroupVO(ProjectGroup po) {
         super(po);
     }
 
-    private String id;
+    private Long id;
     private String name;
     private String description;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
