@@ -2,8 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.legion.aegis.admin.dao.UserAccountDAO">
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
-            resultType="org.legion.aegis.admin.dto.UserSearchDto">
-        SELECT USER.ID,
+            resultType="org.legion.aegis.admin.vo.UserSearchVO">
+        SELECT DISTINCT
+        USER.ID,
         USER.LOGIN_ID,
         USER.NAME,
         USER.EMAIL,
@@ -37,7 +38,9 @@
             </if>
 
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
-                AND PSN.PROJECT_ID IN (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+                AND PSN.PROJECT_ID IN
+                    (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+                AND ASN.ROLE_ID != #{sp.params.role}
             </if>
         </where>
 
@@ -68,5 +71,40 @@
             </when>
         </choose>
         LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchUserProjects" parameterType="long" resultType="org.legion.aegis.admin.vo.UserProjectVO">
+        SELECT
+               PJT.NAME AS PROJECT_NAME,
+               PJT.ID AS PROJECT_ID,
+               GRP.ID AS GROUP_ID,
+               GRP.NAME AS GROUP_NAME,
+               DATE_FORMAT(PSN.CREATED_AT, '%Y/%m/%d') AS ASSIGNED_AT,
+               PSN.CREATED_BY AS ASSIGNED_BY
+
+        FROM PJT_PROJECT PJT
+            LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PJT.ID = PSN.PROJECT_ID
+            LEFT JOIN PJT_PROJECT_GROUP GRP ON PJT.GROUP_ID = GRP.ID
+            WHERE PSN.USER_ACCT_ID = #{userId}
+    </select>
+
+    <select id="searchUserInfo" parameterType="long" resultType="org.legion.aegis.admin.vo.UserAccountVO">
+        SELECT
+               USER.ID,
+               USER.NAME,
+               USER.LOGIN_ID,
+               USER.LAST_LOGIN_SUCCESS_DT AS LAST_LOGIN_AT,
+               USER.EMAIL,
+               ROLE.ROLE_NAME,
+               USER.STATUS,
+               CASE USER.STATUS WHEN 'A' THEN '正常'
+                   WHEN 'L' THEN '已锁定' WHEN 'I' THEN '未激活'
+                   WHEN 'E' THEN '已过期' WHEN 'V' THEN '已注销' END AS STATUS_DESC,
+               DATE_FORMAT(USER.ACTIVATED_AT, '%Y/%m/%d') AS ACTIVATED_AT,
+               DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT
+        FROM AC_USER_ACCT USER
+            LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
+            LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
+        WHERE USER.ID = #{userId}
     </select>
 </mapper>

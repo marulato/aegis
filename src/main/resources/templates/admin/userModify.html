@@ -33,7 +33,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('5.1')"></div>
+  <div th:replace="/include/sidebar::leftmenu('5.1', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -92,32 +92,12 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="project">项目</label>
-                      <select class="custom-select" name="project" id="project"></select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="role">权限</label>
-                      <select class="custom-select" type="text" name="role" id="role"></select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="effectiveRange">有效期</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          <i class="far fa-calendar-alt"></i>
-                        </span>
+                      <label>延长有效期至</label>
+                      <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#reservationdate"/>
+                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                          <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
-                        <input id="effectiveRange" name="effectiveRange" class="form-control" type="text">
                       </div>
                     </div>
                   </div>
@@ -132,7 +112,7 @@
       <div class="col-12">
         <div class="row">
           <div class="col-md-6">
-            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/user'">
               <i class="fa fa-chevron-left"></i>
               返回</button>
           </div>
@@ -184,8 +164,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        $('#effectiveRange').daterangepicker({
-            format: 'YYYY/MM/DD'
+        $('#reservationdate').datetimepicker({
+            format: 'L'
         });
     });
 

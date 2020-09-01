@@ -43,6 +43,10 @@ public class AppContext implements Serializable {
         return null;
     }
 
+    public String getRoleId() {
+        return currentRole.getId();
+    }
+
     public void setAppContext() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes)
                 RequestContextHolder.currentRequestAttributes();

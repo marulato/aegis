@@ -33,7 +33,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('5.1')"></div>
+  <div th:replace="/include/sidebar::leftmenu('5.1', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -60,11 +60,6 @@
       <div class="container-fluid">
         <form id="mainForm">
           <div class="col-12">
-            <div class="alert alert-success alert-dismissible" style="display: none">
-              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-              <h5><i class="icon fas fa-check"></i> Alert!</h5>
-              Success alert preview. This alert is dismissable.
-            </div>
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">用户信息</h3>
@@ -77,43 +72,72 @@
               <!-- /.card-header -->
               <div class="card-body">
                 <dl class="row">
+                  <dt class="col-sm-4">登录ID</dt>
+                  <dd class="col-sm-8" th:text="${user.loginId}"></dd>
+
                   <dt class="col-sm-4">用户名</dt>
-                  <dd class="col-sm-8">AEGIS</dd>
+                  <dd class="col-sm-8" th:text="${user.name}"></dd>
 
                   <dt class="col-sm-4">邮箱</dt>
-                  <dd class="col-sm-8">351975711@qq.com</dd>
+                  <dd class="col-sm-8" th:text="${user.email}"></dd>
 
                   <dt class="col-sm-4">状态</dt>
-                  <dd class="col-sm-8">正常</dd>
+                  <dd class="col-sm-8" th:text="${user.statusDesc}"></dd>
 
                   <dt class="col-sm-4">权限</dt>
-                  <dd class="col-sm-8">Developer</dd>
-
-                  <dt class="col-sm-4">项目组</dt>
-                  <dd class="col-sm-8">iFAMS</dd>
+                  <dd class="col-sm-8" th:text="${user.roleName}"></dd>
 
                   <dt class="col-sm-4">有效期</dt>
-                  <dd class="col-sm-8">2020/01/01 - 2025/12/31</dd>
+                  <dd class="col-sm-8" th:text="${user.activatedAt} + ' - ' + ${user.deactivatedAt}"></dd>
                 </dl>
               </div>
-              <div class="card-footer">
-                <div class="col-12">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/user'">
-                        <i class="fa fa-chevron-left"></i>
-                        返回
-                      </button>
-                    </div>
-                  </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">项目信息</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
                 </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="projectTable" class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>项目组</th>
+                      <th>项目</th>
+                      <th>邀请人</th>
+                      <th>加入日期</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="project, stats:${projects}">
+                      <td th:text="${project.groupName}"></td>
+                      <td th:text="${project.projectName}"></td>
+                      <td th:text="${project.assignedBy}"></td>
+                      <td th:text="${project.assignedAt}"></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </form>
       </div>
 
-
+      <div class="col-12">
+        <div class="row">
+          <div class="col-md-6">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/user'">
+              <i class="fa fa-chevron-left"></i>
+              返回
+            </button>
+          </div>
+        </div>
+      </div>
       <br/>
       <!-- /.row -->
 

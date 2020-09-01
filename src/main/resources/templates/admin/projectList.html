@@ -34,7 +34,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('3.2')"></div>
+  <div th:replace="/include/sidebar::leftmenu('3.2', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -77,6 +77,17 @@
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
+                    <label for="projectGroup">项目组</label>
+                    <select class="custom-select" name="projectGroup" id="projectGroup">
+                      <option th:value="0">全部</option>
+                      <option th:each="group, stats:${groupList}" th:value="${group.id}" th:text="${group.name}"></option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
                     <label for="projectName">项目名</label>
                     <input class="form-control" type="text" name="projectName" id="projectName">
                   </div>
@@ -100,7 +111,8 @@
                     </button>
                   </div>
                   <div class="col-md-6">
-                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="refresh()">
+                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px"
+                            onclick="refresh()">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
@@ -113,7 +125,8 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">项目列表</h3>
-              <button type="button" class="btn btn-success btn-sm float-right" onclick="location.href='/web/project/add'">
+              <button type="button" class="btn btn-success btn-sm float-right"
+                      onclick="location.href='/web/project/add'">
                 <i class="fas fa-plus"></i>
                 添加
               </button>
@@ -141,18 +154,18 @@
           </div>
         </div>
       </div>
-  <!-- /.container-fluid -->
-  </section>
-  <!-- /.content -->
-</div>
-<!-- /.content-wrapper -->
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
   <div th:replace="/include/footer::footer"></div>
 
-<!-- Control Sidebar -->
-<aside class="control-sidebar control-sidebar-dark">
-  <!-- Control sidebar content goes here -->
-</aside>
-<!-- /.control-sidebar -->
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
 
@@ -177,27 +190,31 @@
         </div>
         <input type="hidden" name="projectDelId" id="projectDelId">
         <dl class="row">
-            <dt class="col-sm-4">名称</dt>
-            <dd class="col-sm-8" id="pjt_name"></dd>
+          <dt class="col-sm-4">名称</dt>
+          <dd class="col-sm-8" id="pjt_name"></dd>
 
-            <dt class="col-sm-4">描述</dt>
-            <dd class="col-sm-8" id="pjt_desc"></dd>
+          <dt class="col-sm-4">描述</dt>
+          <dd class="col-sm-8" id="pjt_desc"></dd>
 
-            <dt class="col-sm-4">状态</dt>
-            <dd class="col-sm-8" id="pjt_status"></dd>
+          <dt class="col-sm-4">状态</dt>
+          <dd class="col-sm-8" id="pjt_status"></dd>
 
-            <dt class="col-sm-4">权限</dt>
-            <dd class="col-sm-8" id="pjt_isPublic"></dd>
+          <dt class="col-sm-4">权限</dt>
+          <dd class="col-sm-8" id="pjt_isPublic"></dd>
 
-            <dt class="col-sm-4">创建日期</dt>
-            <dd class="col-sm-8" id="pjt_createdAt"></dd>
+          <dt class="col-sm-4">创建日期</dt>
+          <dd class="col-sm-8" id="pjt_createdAt"></dd>
 
-          </dl>
+        </dl>
       </div>
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
-        <button type="button" id="ban_btn" class="btn btn-danger" style="font-size: 14px;display: none" onclick="doBan()">确认禁用</button>
-        <button type="button" id="activate_btn" class="btn btn-success" style="font-size: 14px;display: none" onclick="doActivate()">确认启用</button>
+        <button type="button" id="ban_btn" class="btn btn-danger" style="font-size: 14px;display: none"
+                onclick="doBan()">确认禁用
+        </button>
+        <button type="button" id="activate_btn" class="btn btn-success" style="font-size: 14px;display: none"
+                onclick="doActivate()">确认启用
+        </button>
       </div>
     </div>
     <!-- /.modal-content -->
@@ -229,7 +246,7 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
-  var tableView = {};
+    var tableView = {};
     document.addEventListener('DOMContentLoaded', function () {
         tableView = $('#projectTable').DataTable({
             "processing": true,
@@ -239,7 +256,7 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-            "aLengthMenu":[10,20,50],
+            "aLengthMenu": [10, 20, 50],
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
@@ -247,12 +264,13 @@
                 var pageNo = (data.start) / data.length + 1;
                 var obj = {
                     projectName: $("#projectName").val(),
-                    description: $("#description").val()
+                    description: $("#description").val(),
+                    projectGroup: $("#projectGroup").val()
                 }
                 var args = {
                     pageNo: pageNo,
                     pageSize: pageSize,
-                    orderColumnNo:data.order[0]["column"],
+                    orderColumnNo: data.order[0]["column"],
                     order: data.order[0]["dir"],
                     draw: data.draw,
                     params: obj
@@ -263,8 +281,8 @@
                     type: "post",
                     data: JSON.stringify(args),
                     contentType: "application/json",
-                    dataType:"json",
-                    cache : false,
+                    dataType: "json",
+                    cache: false,
                     success: function (res) {
                         var tableList = res.data[0];
                         var returnData = {};
@@ -287,17 +305,19 @@
                 {"data": "stage", "defaultContent": "-"},
                 {"data": "isPublic", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
-                {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
+                {
+                    "data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
                         var banBtn = "";
-                    if (full.status === 'ACTIVE' && full.role === 'SYSADMIN') {
-                        banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan("+full.id+")' title='禁用'><i class='fa fa-ban'></i></a>";
-                    } else if (full.role === 'SYSADMIN') {
-                        banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showActivate("+full.id+")' title='启用'><i class='fa fa-check-square'></i></a>";
-                    }
-                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-edit'></i></a>"
+                        if (full.status === 'ACTIVE' && full.role === 'SYSADMIN') {
+                            banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan(" + full.id + ")' title='禁用'><i class='fa fa-ban'></i></a>";
+                        } else if (full.role === 'SYSADMIN') {
+                            banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showActivate(" + full.id + ")' title='启用'><i class='fa fa-check-square'></i></a>";
+                        }
+                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display(" + full.id + ")' title='查看'><i class='fa fa-clipboard'></i></a>" +
+                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify(" + full.id + ")' title='修改'><i class='fa fa-edit'></i></a>"
                             + banBtn;
-                    }}
+                    }
+                }
             ],
             language: aegis.locale
         });
@@ -306,107 +326,109 @@
     toastr.options = aegis.toastrOptions;
 
     function refresh() {
-      tableView.draw();
+        tableView.draw();
     }
 
     function display(id) {
-      location.href = "/web/project/" + id;
+        location.href = "/web/project/" + id;
     }
 
-  function modify(id) {
-      location.href = "/web/project/" + id + "/modify";
-  }
+    function modify(id) {
+        location.href = "/web/project/" + id + "/modify";
+    }
 
-  function showBan(id) {
-      $("#ban_alert").show();
-      $("#activate_info").hide();
-      $("#ban_btn").show();
-      $("#activate_btn").hide();
-      $.ajax({
-          url: "/web/project/" + id + "/retrieve",
-          type: "get",
-          dataType: "json",
-          success: function (res) {
-              var obj = res.data[0];
-              $("#modalDeleteTitle").text("禁用：" + obj.name);
-              initModal(obj);
-              $("#modal_delete").modal("show");
-          },
-          error: function () {
-            location.href = "/web/error";
-          }
-      });
-  }
+    function showBan(id) {
+        $("#ban_alert").show();
+        $("#activate_info").hide();
+        $("#ban_btn").show();
+        $("#activate_btn").hide();
+        $.ajax({
+            url: "/web/project/" + id + "/retrieve",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                var obj = res.data[0];
+                $("#modalDeleteTitle").text("禁用：" + obj.name);
+                initModal(obj);
+                $("#modal_delete").modal("show");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
 
-  function showActivate(id) {
-      $("#ban_alert").hide();
-      $("#activate_info").show();
-      $("#ban_btn").hide();
-      $("#activate_btn").show();
-      $.ajax({
-          url: "/web/project/" + id + "/retrieve",
-          type: "get",
-          dataType: "json",
-          success: function (res) {
-              var obj = res.data[0];
-              $("#modalDeleteTitle").text("启用：" + obj.name);
-              initModal(obj);
-              $("#modal_delete").modal("show");
-          },
-          error: function () {
-              location.href = "/web/error";
-          }
-      });
-  }
+    function showActivate(id) {
+        $("#ban_alert").hide();
+        $("#activate_info").show();
+        $("#ban_btn").hide();
+        $("#activate_btn").show();
+        $.ajax({
+            url: "/web/project/" + id + "/retrieve",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                var obj = res.data[0];
+                $("#modalDeleteTitle").text("启用：" + obj.name);
+                initModal(obj);
+                $("#modal_delete").modal("show");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
 
-  function initModal(obj) {
-      $("#projectDelId").val(obj.id);
-      $("#pjt_name").html(obj.name);
-      $("#pjt_desc").html(obj.description);
-      $("#pjt_status").html(obj.status);
-      $("#pjt_isPublic").html(obj.isPublic);
-      $("#pjt_createdAt").html(obj.createdAt);
-  }
+    function initModal(obj) {
+        $("#projectDelId").val(obj.id);
+        $("#pjt_name").html(obj.name);
+        $("#pjt_desc").html((obj.description == null || obj.description == '') ? '-' : obj.description);
+        $("#pjt_status").html(obj.status == 'ACTIVE' ? '正常' : '禁用');
+        $("#pjt_isPublic").html(obj.isPublic == 'Y' ? '公开' : '私有');
+        $("#pjt_createdAt").html(obj.createdAt);
+    }
 
     function reset() {
-      $("#projectName").val('');
-      $("#description").val('');
-      refresh();
+        $("#projectName").val('');
+        $("#description").val('');
+        refresh();
     }
 
     function doBan() {
         var id = $("#projectDelId").val();
-      $.ajax({
-        url: "/web/project/" + id + "/ban",
-        type: "post",
-          dataType: "json",
-          success: function (res) {
-            $("#modal_delete").modal("hide");
-            tableView.draw();
-            toastr.success("禁用成功");
-          },
-          error: function () {
-              location.href = "/web/error";
-          }
-      });
+        $.ajax({
+            url: "/web/project/ban",
+            type: "post",
+            data: {"id": id},
+            dataType: "json",
+            success: function (res) {
+                $("#modal_delete").modal("hide");
+                tableView.draw();
+                toastr.success("禁用成功");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
     }
 
-  function doActivate() {
-      var id = $("#projectDelId").val();
-      $.ajax({
-          url: "/web/project/" + id + "/activate",
-          type: "post",
-          dataType: "json",
-          success: function (res) {
-              $("#modal_delete").modal("hide");
-              tableView.draw();
-              toastr.success("启用成功");
-          },
-          error: function () {
-              location.href = "/web/error";
-          }
-      });
-  }
+    function doActivate() {
+        var id = $("#projectDelId").val();
+        $.ajax({
+            url: "/web/project/activate",
+            type: "post",
+            dataType: "json",
+            data: {"id": id},
+            success: function (res) {
+                $("#modal_delete").modal("hide");
+                tableView.draw();
+                toastr.success("启用成功");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
 </script>
 </body>
 </html>

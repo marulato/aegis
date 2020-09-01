@@ -3,7 +3,8 @@
 <mapper namespace="org.legion.aegis.admin.dao.ProjectDAO">
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.admin.vo.ProjectVO">
-        SELECT PJT.NAME,
+        SELECT DISTINCT
+        PJT.NAME,
         PJT.ID,
         PJT.DESCRIPTION,
         PJT.STATUS,
@@ -12,12 +13,16 @@
         GRP.NAME AS GROUP_NAME,
         CASE PJT.STATUS WHEN 'ACTIVE' THEN '正常' ELSE '禁用' END AS STATUS_DESC,
         DATE_FORMAT(PJT.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
-        FROM PJT_PROJECT PJT
+        FROM
+             PJT_PROJECT PJT
         LEFT JOIN PJT_USER_PROJECT_ASN PSN
-        ON PSN.PROJECT_ID = PJT.ID
+            ON PSN.PROJECT_ID = PJT.ID
         LEFT JOIN AC_USER_ACCT USER
-        ON USER.ID = PSN.USER_ACCT_ID
-        LEFT JOIN PJT_PROJECT_GROUP GRP ON PJT.GROUP_ID = GRP.ID
+            ON USER.ID = PSN.USER_ACCT_ID
+        LEFT JOIN AC_USER_ROLE_ASSIGN ASN
+            ON ASN.USER_ACCT_ID = USER.ID
+        LEFT JOIN PJT_PROJECT_GROUP GRP
+            ON PJT.GROUP_ID = GRP.ID
         <where>
             <if test="sp.params.userId != null and sp.params.userId &gt;0 and sp.params.role !='SYSADMIN'">
                 AND USER.ID = #{sp.params.userId}
@@ -29,6 +34,10 @@
 
             <if test="sp.params.description != null and sp.params.description != ''">
                 AND UPPER (PJT.DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+            </if>
+
+            <if test="sp.params.projectGroup != null and sp.params.projectGroup !='0'.toString()">
+                AND PJT.GROUP_ID = #{sp.params.projectGroup}
             </if>
         </where>
         <choose>
@@ -69,11 +78,11 @@
 
     <select id="searchProjectGroup" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.admin.vo.ProjectGroupVO">
-        SELECT GRP.ID,
+        SELECT DISTINCT GRP.ID,
         GRP.NAME,
         GRP.DESCRIPTION,
         GRP.CREATED_BY,
-        DATE_FORMAT(PJT.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
+        DATE_FORMAT(GRP.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
         FROM PJT_PROJECT_GROUP GRP
         LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
         LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
@@ -105,7 +114,7 @@
     </select>
 
     <select id="getProjectGroupUnderUser" resultType="org.legion.aegis.admin.entity.ProjectGroup">
-        SELECT GRP.*
+        SELECT DISTINCT GRP.*
         FROM PJT_PROJECT_GROUP GRP
         LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
         LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID

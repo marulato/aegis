@@ -1,9 +1,11 @@
-package org.legion.aegis.admin.dto;
+package org.legion.aegis.admin.vo;
+
+import org.legion.aegis.common.base.BaseVO;
 
 import java.io.Serializable;
 import java.util.Date;
 
-public class UserSearchDto implements Serializable {
+public class UserSearchVO extends BaseVO {
 
     private Long id;
     private String loginId;

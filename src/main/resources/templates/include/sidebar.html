@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<aside class="main-sidebar elevation-4 sidebar-light-primary" th:fragment="leftmenu(selected)">
+<aside class="main-sidebar elevation-4 sidebar-light-primary" th:fragment="leftmenu(selected, role)">
   <!-- Brand Logo -->
   <a href="/web/index" class="brand-link">
     <img th:src="@{/dist/img/AdminLTELogo.png}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
@@ -73,7 +73,7 @@
             </p>
           </a>
         </li>
-        <li th:class="${(selected == '3.1' || selected == '3.2') ? 'nav-item menu-open' : 'nav-item'}">
+        <li th:if="${role == 'SYSADMIN' || role == 'DEV_S'}" th:class="${(selected == '3.1' || selected == '3.2') ? 'nav-item menu-open' : 'nav-item'}">
           <a href="#"  th:class="${(selected == '3.1' || selected == '3.2')  ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-th"></i>
             <p>
@@ -82,10 +82,10 @@
             </p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item">
+            <li class="nav-item" th:if="${role == 'SYSADMIN'}">
               <a href="/web/projectGroup" th:class="${selected == '3.1' ? 'nav-link active' : 'nav-link'}">
                 <i class="far fa-circle nav-icon"></i>
-                <p>项目组</p>
+                <p>项目组管理</p>
               </a>
             </li>
             <li class="nav-item">

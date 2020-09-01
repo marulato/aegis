@@ -15,7 +15,7 @@ public class BaseVO {
 
     public BaseVO() {}
 
-    public BaseVO(BasePO po) {
+    public  BaseVO(BasePO po) {
         if (po != null) {
             Class<?> poClass = po.getClass();
             Class<?> voClass = this.getClass();
@@ -25,7 +25,7 @@ public class BaseVO {
             for (Field poField : poFields) {
                 try {
                     Field voField = voClass.getDeclaredField(poField.getName());
-                    BeanUtils.setValue(voField, voClass, this, String.valueOf(BeanUtils.getValue(poField, poClass, po)));
+                    BeanUtils.setValue(voField, voClass, this, BeanUtils.getValue(poField, poClass, po));
                 } catch (Exception ignored) {
 
                 }

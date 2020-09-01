@@ -3,9 +3,11 @@ package org.legion.aegis.admin.service;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.legion.aegis.admin.dao.UserAccountDAO;
 import org.legion.aegis.admin.dto.UserDto;
-import org.legion.aegis.admin.dto.UserSearchDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.generator.NewUserEmailGenerator;
+import org.legion.aegis.admin.vo.UserAccountVO;
+import org.legion.aegis.admin.vo.UserProjectVO;
+import org.legion.aegis.admin.vo.UserSearchVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.consts.AppConsts;
@@ -184,9 +186,17 @@ public class UserAccountService {
         }
     }
 
-    public List<UserSearchDto> searchUsers(SearchParam searchParam) {
-        List<UserSearchDto> userSearchDtos = userAccountDAO.search(searchParam);
+    public List<UserSearchVO> searchUsers(SearchParam searchParam) {
+        List<UserSearchVO> userSearchDtos = userAccountDAO.search(searchParam);
         return userSearchDtos;
+    }
+
+    public List<UserProjectVO> searchUserProjects(Long userId) {
+        return userAccountDAO.searchUserProjects(userId);
+    }
+
+    public UserAccountVO searchUserInfo(Long userId) {
+        return userAccountDAO.searchUserInfo(userId);
     }
 
 

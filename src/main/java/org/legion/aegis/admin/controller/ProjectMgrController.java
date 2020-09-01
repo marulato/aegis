@@ -9,6 +9,7 @@ import org.legion.aegis.admin.validator.ModuleValidator;
 import org.legion.aegis.admin.vo.ProjectGroupVO;
 import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.aop.permission.RequiresRoles;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
@@ -39,26 +40,38 @@ public class ProjectMgrController {
     }
 
     @GetMapping("/web/project")
-    public String getProjectPage() {
-        return "admin/projectList";
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public ModelAndView getProjectPage(HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView("admin/projectList");
+        AppContext context = AppContext.getAppContext(request);
+        modelAndView.addObject("role", context.getRoleId());
+        modelAndView.addObject("groupList", projectService.
+                getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId()));
+        return modelAndView;
     }
 
     @GetMapping("/web/projectGroup")
-    public String getProjectGroupPage() {
-        return "admin/projectGroupList";
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
+    public ModelAndView getProjectGroupPage(HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView("admin/projectGroupList");
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
+        return modelAndView;
     }
 
     @GetMapping("/web/project/{id}")
-    public ModelAndView display(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public ModelAndView display(@PathVariable("id") String id, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/projectDisplay");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
         ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
         modelAndView.addObject("project", project);
         modelAndView.addObject("group", projectGroup);
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
     @GetMapping("/web/project/add")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView addProjectPage(HttpServletRequest request) throws Exception {
         ModelAndView modelAndView = new ModelAndView("admin/projectAdd");
         AppContext context = AppContext.getAppContext(request);
@@ -66,16 +79,21 @@ public class ProjectMgrController {
         modelAndView.addObject("groupList", projectService.
                 getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId()));
         modelAndView.addObject("stageList", MasterCodeUtils.getMasterCodeByType("project.stage.default"));
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
     @GetMapping("/web/projectGroup/add")
-    public String addGroupPage() {
-        return "admin/projectGroupAdd";
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
+    public ModelAndView addGroupPage(HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView("admin/projectGroupAdd");
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
+        return modelAndView;
     }
 
     @PostMapping("/web/project/add")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody addProject(ProjectDto dto, HttpServletRequest request) throws Exception {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
@@ -89,13 +107,15 @@ public class ProjectMgrController {
     }
 
     @GetMapping("/web/project/{id}/modify")
-    public ModelAndView prepareModify(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public ModelAndView prepareModify(@PathVariable("id") String id, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/projectModify");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
         ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
         modelAndView.addObject("project", project);
         modelAndView.addObject("group", projectGroup);
         modelAndView.addObject("stageList", MasterCodeUtils.getMasterCodeByType("project.stage.default"));
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
@@ -108,6 +128,7 @@ public class ProjectMgrController {
 
     @GetMapping("/web/project/module/{id}")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody retrieveForModify(@PathVariable("id") String id) {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Module module = projectService.getModuleById(StringUtils.parseIfIsLong(id));
@@ -117,6 +138,7 @@ public class ProjectMgrController {
 
     @PostMapping("/web/project")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody saveProject(ProjectDto dto) throws Exception {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
@@ -131,6 +153,7 @@ public class ProjectMgrController {
 
     @PostMapping("/web/project/module")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody saveModule(@RequestBody Map<String, String> params) {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         String id = params.get("moduleId");
@@ -174,38 +197,43 @@ public class ProjectMgrController {
 
     @PostMapping("/web/project/list")
     @ResponseBody
-    public AjaxResponseBody search(@RequestBody SearchParam searchParam, HttpServletRequest request) throws Exception {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public AjaxResponseBody searchProject(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
         searchParam.addParam("role", appContext.getCurrentRole().getId());
         List<ProjectVO> projectList = projectService.search(searchParam);
-        //List<ProjectVO> dtoList = projectService.toProjectView(projectList);
+        for (ProjectVO vo : projectList) {
+            vo.setRole(appContext.getRoleId());
+        }
         manager.addDataObject(new SearchResult<>(projectList, searchParam));
         return manager.respond();
     }
 
     @GetMapping("/web/project/{id}/retrieve")
     @ResponseBody
-    public AjaxResponseBody retrieveProject(@PathVariable("id") String id) throws Exception {
+    public AjaxResponseBody retrieveProject(@PathVariable("id") String id) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
-        manager.addDataObject(projectService.toProjectView(project));
+        manager.addDataObject(new ProjectVO(project));
         return manager.respond();
     }
 
-    @PostMapping("/web/project/{id}/ban")
+    @PostMapping("/web/project/ban")
     @ResponseBody
-    public AjaxResponseBody banProject(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public AjaxResponseBody banProject(@RequestParam("id") String id) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
         projectService.banProject(project);
         return manager.respond();
     }
 
-    @PostMapping("/web/project/{id}/activate")
+    @PostMapping("/web/project/activate")
     @ResponseBody
-    public AjaxResponseBody activateProject(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public AjaxResponseBody activateProject(@RequestParam("id") String id) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
         projectService.activateProject(project);
@@ -222,19 +250,20 @@ public class ProjectMgrController {
 
     @PostMapping("/web/projectGroup/list")
     @ResponseBody
-    public AjaxResponseBody searchGroup(@RequestBody SearchParam searchParam, HttpServletRequest request) throws Exception {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
+    public AjaxResponseBody searchGroup(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
         searchParam.addParam("role", appContext.getCurrentRole().getId());
         List<ProjectGroupVO> projectGroupList = projectService.searchGroup(searchParam);
-        List<ProjectGroupVO> dtoList = new ArrayList<>();
-        manager.addDataObject(new SearchResult<>(dtoList, searchParam));
+        manager.addDataObject(new SearchResult<>(projectGroupList, searchParam));
         return manager.respond();
     }
 
     @PostMapping("/web/projectGroup/add")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     public AjaxResponseBody addProjectGroup(ProjectGroup projectGroup) throws Exception {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Map<String, List<String>> errors = CommonValidator.doValidation(projectGroup, null);
@@ -248,22 +277,27 @@ public class ProjectMgrController {
     }
 
     @GetMapping("/web/projectGroup/{id}/modify")
-    public ModelAndView prepareModifyGroup(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
+    public ModelAndView prepareModifyGroup(@PathVariable("id") String id, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/projectGroupModify");
         modelAndView.addObject("group", projectService.getProjectGroupById(StringUtils.parseIfIsLong(id)));
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
     @GetMapping("/web/projectGroup/{id}")
-    public ModelAndView prepareDisplayGroup(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
+    public ModelAndView prepareDisplayGroup(@PathVariable("id") String id, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/projectGroupDisplay");
         modelAndView.addObject("group", projectService.getProjectGroupById(StringUtils.parseIfIsLong(id)));
         modelAndView.addObject("projects", projectService.getProjectsUnderGroup(StringUtils.parseIfIsLong(id)));
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
     @PostMapping("/web/projectGroup")
     @ResponseBody
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     public AjaxResponseBody saveProjectGroup(ProjectGroup projectGroup) throws Exception {
         return addProjectGroup(projectGroup);
     }

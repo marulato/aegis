@@ -4,7 +4,10 @@ import org.legion.aegis.admin.dto.UserDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.admin.service.UserAccountService;
+import org.legion.aegis.admin.vo.UserAccountVO;
+import org.legion.aegis.admin.vo.UserProjectVO;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.aop.permission.RequiresRoles;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
@@ -37,6 +40,7 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user/add")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView redirectAddUserPage(HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/userAdd");
         modelAndView.addObject("projects", projectService.
@@ -46,36 +50,31 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView redirectUserPage(HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/userList");
         modelAndView.addObject("roles", accountService.getAllRolesForSearchSelector());
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         modelAndView.addObject("projects", projectService.
                 getAllProjectsForSearchSelector(AppContext.getAppContext(request).getUserId()));
         return modelAndView;
     }
 
     @GetMapping("/web/user/{id}")
-    public ModelAndView display(@PathVariable("id") String id) {
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public ModelAndView display(@PathVariable("id") String id, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView("admin/userDisplay");
-        UserAccount userAccount = accountService.getUserById(StringUtils.parseIfIsLong(id));
-        List<UserProjectAssign> projectAssignList = accountService.getUserProjectAssignments(StringUtils.parseIfIsLong(id));
-        List<UserRoleAssign> roleAssignList = accountService.getRoleAssigments(StringUtils.parseIfIsLong(id));
-        List<UserRole> roleList = new ArrayList<>();
-        List<Project> projectList = new ArrayList<>();
-        for (UserRoleAssign roleAssign : roleAssignList) {
-            UserRole role = accountService.getRoleById(roleAssign.getRoleId());
-            roleList.add(role);
-        }
-        for (UserProjectAssign projectAssign : projectAssignList) {
-            projectList.add(projectService.getProjectById(projectAssign.getProjectId(), false));
-        }
-        modelAndView.addObject("user", userAccount);
-        modelAndView.addObject("roles", roleList);
-        modelAndView.addObject("projects", projectList);
+        Long userId = StringUtils.parseIfIsLong(id);
+        UserAccountVO userVO = accountService.searchUserInfo(userId);
+        List<UserProjectVO> projectVOList = accountService.searchUserProjects(userId);
+        modelAndView.addObject("user", userVO);
+        modelAndView.addObject("projects", projectVOList);
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
     }
 
     @PostMapping("/web/user/add")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     @ResponseBody
     public void addUser(@RequestBody UserDto userDto) throws Exception {
         Map<String, List<String>> errors = CommonValidator.doValidation(userDto, null);
@@ -95,6 +94,7 @@ public class UserAccountController {
     }
 
     @PostMapping("/web/user/list")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     @ResponseBody
     public AjaxResponseBody search(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
@@ -103,6 +103,14 @@ public class UserAccountController {
         searchParam.addParam("role", appContext.getCurrentRole().getId());
         manager.addDataObject(new SearchResult<>(accountService.searchUsers(searchParam), searchParam));
         return manager.respond();
+    }
+
+    @GetMapping("/web/user/{id}/modify")
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    public ModelAndView prepareModify(@PathVariable("id") String id, HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView("admin/userModify");
+        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
+        return modelAndView;
     }
 
 }

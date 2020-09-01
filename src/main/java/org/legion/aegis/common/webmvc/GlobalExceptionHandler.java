@@ -1,5 +1,6 @@
 package org.legion.aegis.common.webmvc;
 
+import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,5 +19,10 @@ public class GlobalExceptionHandler {
         return new ModelAndView("errors/500");
     }
 
+    @ExceptionHandler(PermissionDeniedException.class)
+    public ModelAndView permissionDenied(Exception e) {
+        log.error("", e);
+        return new ModelAndView("errors/permissionDenied");
+    }
 
 }

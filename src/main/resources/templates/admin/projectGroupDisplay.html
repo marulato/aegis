@@ -34,7 +34,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('3.1')"></div>
+  <div th:replace="/include/sidebar::leftmenu('3.1', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -100,7 +100,7 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="projectTable" class="table table-bordered table-striped">
+              <table id="projectTable" class="table table-striped">
                 <thead>
                 <tr>
                   <th>项目名</th>

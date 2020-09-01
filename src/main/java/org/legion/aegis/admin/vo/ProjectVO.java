@@ -1,7 +1,6 @@
 package org.legion.aegis.admin.vo;
 
 import org.legion.aegis.admin.entity.Project;
-import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.base.BaseVO;
 
 public class ProjectVO extends BaseVO {
