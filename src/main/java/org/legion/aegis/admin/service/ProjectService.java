@@ -13,6 +13,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +38,8 @@ public class ProjectService {
         return projectDAO.getAllProjects();
     }
 
-    public List<Project> getAllProjectsForSearchSelector(Long userId) {
-        List<Project> projects = projectDAO.getProjectsUnderUser(userId);
+    public List<Project> getAllProjectsForSearchSelector(Long userId, String roleId) {
+        List<Project> projects = projectDAO.getAllProjectsUnderUser(userId, roleId);
         Project project = new Project();
         project.setId(0L);
         project.setName("请选择");
@@ -108,13 +109,6 @@ public class ProjectService {
                             JPAExecutor.save(mod);
                         }
                     }
-                }
-                if (!AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getCurrentRole().getId())) {
-                    UserProjectAssign projectAssign = new UserProjectAssign();
-                    projectAssign.setProjectId(project.getId());
-                    projectAssign.setUserAcctId(context.getUserId());
-                    projectAssign.setAssignReason("New Project Created by " + context.getLoginId());
-                    JPAExecutor.save(projectAssign);
                 }
             }
         }
@@ -207,6 +201,18 @@ public class ProjectService {
 
     public List<ProjectGroup> getProjectGroupUnderUser(Long userId, String role) {
         return projectDAO.getProjectGroupUnderUser(userId, role);
+    }
+
+    public void verifyRequest(Long projectId, AppContext context) {
+        if (context != null && projectId != null) {
+            Project requested = getProjectById(projectId, false);
+            List<Project> projectList = projectDAO.getAllProjectsUnderUser(context.getUserId(), context.getRoleId());
+            if (!projectList.contains(requested)) {
+                throw new PermissionDeniedException("User [" + context.getLoginId()
+                        + "] tried to access INACCESSIBLE Project ID [" + requested + "]");
+            }
+
+        }
     }
 
 }

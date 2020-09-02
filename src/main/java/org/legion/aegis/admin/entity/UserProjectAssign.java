@@ -8,6 +8,7 @@ public class UserProjectAssign extends BasePO {
 
     private Long userAcctId;
     private Long projectId;
+    private Long groupId;
     private String assignReason;
 
     public Long getUserAcctId() {
@@ -24,6 +25,14 @@ public class UserProjectAssign extends BasePO {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 
     public String getAssignReason() {

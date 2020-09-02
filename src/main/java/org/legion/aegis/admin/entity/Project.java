@@ -1,5 +1,6 @@
 package org.legion.aegis.admin.entity;
 
+import com.google.common.base.Objects;
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
 import org.legion.aegis.common.jpa.annotation.NotColumn;
@@ -19,6 +20,26 @@ public class Project extends BasePO {
     private String description;
     private String stage;
     private String status;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Project)) return false;
+        Project project = (Project) o;
+        return Objects.equal(id, project.id) &&
+                Objects.equal(name, project.name) &&
+                Objects.equal(groupId, project.groupId) &&
+                Objects.equal(filePath, project.filePath) &&
+                Objects.equal(isPublic, project.isPublic) &&
+                Objects.equal(description, project.description) &&
+                Objects.equal(stage, project.stage) &&
+                Objects.equal(status, project.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, name, groupId, filePath, isPublic, description, stage, status);
+    }
 
     @NotColumn
     private List<Module> modules;

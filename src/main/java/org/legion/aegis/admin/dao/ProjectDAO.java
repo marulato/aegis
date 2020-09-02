@@ -30,7 +30,7 @@ public interface ProjectDAO {
     @Select("SELECT * FROM PJT_PROJECT WHERE IS_PUBLIC = #{isPublic}")
     List<Project> getProjectsByIsPublic(String isPublic);
 
-    List<Project> getProjectsUnderUser(Long userId);
+    List<Project> getAllProjectsUnderUser(Long userId, String roleId);
 
     List<ProjectGroupVO> searchProjectGroup(@Param("sp") SearchParam param);
 

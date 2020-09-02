@@ -8,7 +8,9 @@
         USER.LOGIN_ID,
         USER.NAME,
         USER.EMAIL,
-        USER.STATUS,
+        CASE USER.STATUS WHEN 'A' THEN '正常'
+        WHEN 'L' THEN '已锁定' WHEN 'I' THEN '未激活'
+        WHEN 'E' THEN '已过期' WHEN 'V' THEN '已注销' END AS STATUS,
         DATE_FORMAT(USER.LAST_LOGIN_SUCCESS_DT, '%Y/%m/%d %T') AS LAST_LOGIN_SUCCESS_DT,
         DATE_FORMAT(USER.ACTIVATED_AT, '%Y/%m/%d') AS ACTIVATED_AT,
         DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT,
@@ -36,11 +38,20 @@
             <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
                 AND PJT.ID = #{sp.params.project}
             </if>
-
+            <!--SYSADMIN can search all users regardless of their roles-->
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
-                AND PSN.PROJECT_ID IN
-                    (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
-                AND ASN.ROLE_ID != #{sp.params.role}
+
+                AND PSN.GROUP_ID IN
+                    (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+
+                <!--DEV_S / QA_S is NOT allowed to search his/herself-->
+                <if test="sp.params.role == 'DEV_S'">
+                    AND ASN.ROLE_ID = 'DEV'
+                </if>
+
+                <if test="sp.params.role == 'QA_S'">
+                    AND ASN.ROLE_ID = 'QA'
+                </if>
             </if>
         </where>
 

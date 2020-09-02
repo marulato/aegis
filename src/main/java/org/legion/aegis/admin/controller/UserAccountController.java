@@ -42,21 +42,24 @@ public class UserAccountController {
     @GetMapping("/web/user/add")
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView redirectAddUserPage(HttpServletRequest request) {
+        AppContext context = AppContext.getAppContext(request);
         ModelAndView modelAndView = new ModelAndView("admin/userAdd");
         modelAndView.addObject("projects", projectService.
-                getAllProjectsForSearchSelector(AppContext.getAppContext(request).getUserId()));
+                getAllProjectsForSearchSelector(context.getUserId(), context.getRoleId()));
         modelAndView.addObject("roles", accountService.getAllRoles());
+        modelAndView.addObject("role", context.getRoleId());
         return modelAndView;
     }
 
     @GetMapping("/web/user")
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView redirectUserPage(HttpServletRequest request) {
+        AppContext context = AppContext.getAppContext(request);
         ModelAndView modelAndView = new ModelAndView("admin/userList");
         modelAndView.addObject("roles", accountService.getAllRolesForSearchSelector());
-        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
+        modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("projects", projectService.
-                getAllProjectsForSearchSelector(AppContext.getAppContext(request).getUserId()));
+                getAllProjectsForSearchSelector(context.getUserId(), context.getRoleId()));
         return modelAndView;
     }
 

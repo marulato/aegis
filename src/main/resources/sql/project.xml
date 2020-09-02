@@ -3,6 +3,8 @@
 <mapper namespace="org.legion.aegis.admin.dao.ProjectDAO">
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.admin.vo.ProjectVO">
+
+        <!--Only For SYSADMIN, DEV_S, and QA_S-->
         SELECT DISTINCT
         PJT.NAME,
         PJT.ID,
@@ -16,7 +18,7 @@
         FROM
              PJT_PROJECT PJT
         LEFT JOIN PJT_USER_PROJECT_ASN PSN
-            ON PSN.PROJECT_ID = PJT.ID
+            ON PSN.GROUP_ID = PJT.GROUP_ID
         LEFT JOIN AC_USER_ACCT USER
             ON USER.ID = PSN.USER_ACCT_ID
         LEFT JOIN AC_USER_ROLE_ASSIGN ASN
@@ -65,15 +67,22 @@
         LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
     </select>
 
-    <select id="getProjectsUnderUser" parameterType="long" resultType="org.legion.aegis.admin.entity.Project">
-        SELECT PJT.*
-        FROM PJT_PROJECT PJT
-                 LEFT JOIN PJT_USER_PROJECT_ASN PSN
-                           ON PSN.PROJECT_ID = PJT.ID
-                 LEFT JOIN AC_USER_ACCT USER
-                           ON USER.ID = PSN.USER_ACCT_ID
-        WHERE USER.ID = #{userId}
-          AND PJT.STATUS = 'ACTIVE'
+    <select id="getAllProjectsUnderUser" resultType="org.legion.aegis.admin.entity.Project">
+        SELECT *
+            FROM PJT_PROJECT
+                WHERE ID IN
+                      (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1})
+        <if test="param2 =='DEV_S' or param2 =='QA_S'">
+            UNION ALL
+            SELECT DISTINCT PJT.*
+                FROM PJT_PROJECT PJT
+                    WHERE GROUP_ID IN
+                        (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND PROJECT_ID IS NULL)
+        </if>
+        <if test="param2 == 'SYSADMIN'">
+            UNION ALL
+            SELECT * FROM PJT_PROJECT
+        </if>
     </select>
 
     <select id="searchProjectGroup" parameterType="org.legion.aegis.common.base.SearchParam"
@@ -85,7 +94,7 @@
         DATE_FORMAT(GRP.CREATED_AT, '%Y/%m/%d') AS CREATED_AT
         FROM PJT_PROJECT_GROUP GRP
         LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
-        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.GROUP_ID = PJT.GROUP_ID
         <where>
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
                 AND PSN.USER_ACCT_ID = #{sp.params.userId}
@@ -117,7 +126,7 @@
         SELECT DISTINCT GRP.*
         FROM PJT_PROJECT_GROUP GRP
         LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
-        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.PROJECT_ID = PJT.ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.GROUP_ID = PJT.GROUP_ID
         <where>
             <if test="param2 != 'SYSADMIN'">
                 AND PSN.USER_ACCT_ID = #{param1}

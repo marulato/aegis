@@ -108,8 +108,8 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="stage">阶段</label>
-                      <select class="custom-select" name="stage" id="stage" th:value="${project.stage}">
-                        <option th:each="stage, stats:${stageList}" th:value="${stage.code}" th:text="${stage.description}"></option>
+                      <select class="custom-select" name="stage" id="stage">
+                        <option th:each="stage, stats:${stageList}" th:selected="${project.stage == stage.code}" th:value="${stage.code}" th:text="${stage.description}"></option>
                       </select>
                     </div>
                   </div>
@@ -447,6 +447,7 @@
             moduleId: $("#moduleId").val(),
             moduleName: $("#moduleName").val(),
             moduleDesc: $("#moduleDesc").val(),
+            projectId: $("#projectId").val(),
             action: "modify"
         };
       $.ajax({

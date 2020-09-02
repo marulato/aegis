@@ -1,5 +1,6 @@
 package org.legion.aegis.admin.entity;
 
+import com.google.common.base.Objects;
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
@@ -12,6 +13,22 @@ public class Module extends BasePO {
     private Long projectId;
     private String name;
     private String description;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Module)) return false;
+        Module module = (Module) o;
+        return Objects.equal(id, module.id) &&
+                Objects.equal(projectId, module.projectId) &&
+                Objects.equal(name, module.name) &&
+                Objects.equal(description, module.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, projectId, name, description);
+    }
 
     public Long getId() {
         return id;

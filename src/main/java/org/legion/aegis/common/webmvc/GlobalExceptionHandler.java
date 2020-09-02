@@ -15,13 +15,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ModelAndView serverError(Exception e) {
-        log.error("", e);
+        log.error(e.getMessage(), e);
+        if (e instanceof PermissionDeniedException) {
+            return permissionDenied((PermissionDeniedException) e);
+        }
         return new ModelAndView("errors/500");
     }
 
     @ExceptionHandler(PermissionDeniedException.class)
-    public ModelAndView permissionDenied(Exception e) {
-        log.error("", e);
+    public ModelAndView permissionDenied(PermissionDeniedException e) {
+        //log.error(e.getMessage(), e);
         return new ModelAndView("errors/permissionDenied");
     }
 

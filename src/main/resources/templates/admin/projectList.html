@@ -309,7 +309,7 @@
                     "data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
                         var banBtn = "";
                         if (full.status === 'ACTIVE' && full.role === 'SYSADMIN') {
-                            banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan(" + full.id + ")' title='禁用'><i class='fa fa-ban'></i></a>";
+                            banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showBan(" + full.id + ")' title='停用'><i class='fa fa-ban'></i></a>";
                         } else if (full.role === 'SYSADMIN') {
                             banBtn = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showActivate(" + full.id + ")' title='启用'><i class='fa fa-check-square'></i></a>";
                         }
@@ -348,7 +348,7 @@
             dataType: "json",
             success: function (res) {
                 var obj = res.data[0];
-                $("#modalDeleteTitle").text("禁用：" + obj.name);
+                $("#modalDeleteTitle").text("停用：" + obj.name);
                 initModal(obj);
                 $("#modal_delete").modal("show");
             },
@@ -383,7 +383,7 @@
         $("#projectDelId").val(obj.id);
         $("#pjt_name").html(obj.name);
         $("#pjt_desc").html((obj.description == null || obj.description == '') ? '-' : obj.description);
-        $("#pjt_status").html(obj.status == 'ACTIVE' ? '正常' : '禁用');
+        $("#pjt_status").html(obj.status == 'ACTIVE' ? '正常' : '停用');
         $("#pjt_isPublic").html(obj.isPublic == 'Y' ? '公开' : '私有');
         $("#pjt_createdAt").html(obj.createdAt);
     }
@@ -404,7 +404,7 @@
             success: function (res) {
                 $("#modal_delete").modal("hide");
                 tableView.draw();
-                toastr.success("禁用成功");
+                toastr.success("停用成功");
             },
             error: function () {
                 location.href = "/web/error";

@@ -9,6 +9,7 @@ import org.legion.aegis.admin.validator.ModuleValidator;
 import org.legion.aegis.admin.vo.ProjectGroupVO;
 import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.aop.permission.RequiresRoles;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
@@ -21,6 +22,7 @@ import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
+import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,7 @@ import java.util.*;
 public class ProjectMgrController {
 
     private final ProjectService projectService;
+    public static final String SESSION_KEY = "SESSION_PROJECT";
 
     @Autowired
     public ProjectMgrController(ProjectService projectService) {
@@ -47,6 +50,7 @@ public class ProjectMgrController {
         modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("groupList", projectService.
                 getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId()));
+        SessionManager.removeAttribute(SESSION_KEY);
         return modelAndView;
     }
 
@@ -61,6 +65,7 @@ public class ProjectMgrController {
     @GetMapping("/web/project/{id}")
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView display(@PathVariable("id") String id, HttpServletRequest request) {
+        projectService.verifyRequest(StringUtils.parseIfIsLong(id), AppContext.getAppContext(request));
         ModelAndView modelAndView = new ModelAndView("admin/projectDisplay");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
         ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
@@ -109,13 +114,16 @@ public class ProjectMgrController {
     @GetMapping("/web/project/{id}/modify")
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public ModelAndView prepareModify(@PathVariable("id") String id, HttpServletRequest request) {
+        AppContext context = AppContext.getAppContext(request);
+        projectService.verifyRequest(StringUtils.parseIfIsLong(id), context);
         ModelAndView modelAndView = new ModelAndView("admin/projectModify");
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), true);
         ProjectGroup projectGroup = projectService.getProjectGroupById(project.getGroupId());
         modelAndView.addObject("project", project);
         modelAndView.addObject("group", projectGroup);
         modelAndView.addObject("stageList", MasterCodeUtils.getMasterCodeByType("project.stage.default"));
-        modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
+        modelAndView.addObject("role", context.getRoleId());
+        SessionManager.setAttribute(SESSION_KEY, project);
         return modelAndView;
     }
 
@@ -140,6 +148,7 @@ public class ProjectMgrController {
     @ResponseBody
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody saveProject(ProjectDto dto) throws Exception {
+        verifyRequest(dto.getProjectId());
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
         if (!errors.isEmpty()) {
@@ -216,6 +225,7 @@ public class ProjectMgrController {
     public AjaxResponseBody retrieveProject(@PathVariable("id") String id) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
+        SessionManager.setAttribute(SESSION_KEY, project);
         manager.addDataObject(new ProjectVO(project));
         return manager.respond();
     }
@@ -224,6 +234,7 @@ public class ProjectMgrController {
     @ResponseBody
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody banProject(@RequestParam("id") String id) {
+        verifyRequest(id);
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
         projectService.banProject(project);
@@ -234,6 +245,7 @@ public class ProjectMgrController {
     @ResponseBody
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody activateProject(@RequestParam("id") String id) {
+        verifyRequest(id);
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         Project project = projectService.getProjectById(StringUtils.parseIfIsLong(id), false);
         projectService.activateProject(project);
@@ -300,5 +312,12 @@ public class ProjectMgrController {
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     public AjaxResponseBody saveProjectGroup(ProjectGroup projectGroup) throws Exception {
         return addProjectGroup(projectGroup);
+    }
+
+    private void verifyRequest(String projectId) {
+        Project obj = (Project) SessionManager.getAttribute(SESSION_KEY);
+        if (obj == null || !obj.getId().toString().equals(projectId)) {
+            throw new PermissionDeniedException("请求参数与预期不一致");
+        }
     }
 }

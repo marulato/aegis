@@ -19,6 +19,21 @@ public class SessionManager {
         return request.getSession(false);
     }
 
+    public static void setAttribute(String name, Object object) {
+        if (name != null && object != null) {
+            getSession().setAttribute(name, object);
+        }
+    }
+
+    public static Object getAttribute(String name) {
+        return getSession().getAttribute(name);
+    }
+
+    public static void removeAttribute(String name) {
+        getSession().removeAttribute(name);
+    }
+
+
 
     public static String getIpAddress(HttpServletRequest request) {
         if (request != null) {
