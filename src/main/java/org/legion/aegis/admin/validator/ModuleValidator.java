@@ -30,7 +30,7 @@ public class ModuleValidator implements BaseValidator {
         if (StringUtils.isNotBlank(moduleDesc) && moduleDesc.length() > 500) {
             errors.put("moduleDesc", "请输入正确的描述，不超过500字符");
         }
-        Project requested = (Project) SessionManager.getAttribute(ProjectMgrController.SESSION_PROJECT_KEY);
+        Project requested = (Project) SessionManager.getAttribute(ProjectMgrController.SESSION_KEY);
         Project current = service.getProjectById(StringUtils.parseIfIsLong(projectId), true);
         if (current == null || !current.equals(requested)) {
             errors.put("projectId", "拒绝访问，请求参数与预期不一致");
