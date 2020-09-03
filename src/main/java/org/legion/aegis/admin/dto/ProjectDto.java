@@ -8,41 +8,37 @@ import org.legion.aegis.common.base.BaseDto;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
-import org.legion.aegis.common.validation.IsIn;
-import org.legion.aegis.common.validation.ValidateWithMethod;
-import org.legion.aegis.common.validation.ValidateWithMethodList;
-import org.legion.aegis.common.validation.ValidateWithRegex;
-
-import java.io.File;
+import org.legion.aegis.common.validation.*;
 import java.util.List;
 
 public class ProjectDto extends BaseDto {
 
     private String id;
     private String projectId;
-    @ValidateWithRegex(regex = ".{1,64}", message = "请输入项目名，不超过64字符")
+    @MatchesPattern(pattern = ".{1,64}", message = "请输入项目名，不超过64字符")
     private String name;
-    @ValidateWithMethodList(methodList = {
-            @ValidateWithMethod(method = "validatePathAvailable", message = "文件夹已被其他项目使用"),
-            @ValidateWithMethod(method = "validatePathName", message = "命名只能包含数字，字母，下划线和减号"),
+    @NotBlank(message = "不能为空")
+    @ValidateWithMethod.List({
+            @ValidateWithMethod(methodName = "validatePathName", message = "名字只能包含数字，字母和减号"),
+            @ValidateWithMethod(methodName = "validatePathAvailable", message = "该路径已被占用")
     })
     private String filePath;
-    @IsIn(value = {AppConsts.YES, AppConsts.NO}, message = "请选择正确的权限")
+    @MemberOf(value = {AppConsts.YES, AppConsts.NO}, message = "请选择正确的权限")
     private String isPublic;
-    @ValidateWithRegex(regex = ".{0,500}", message = "请输入描述，不超过500字符")
+    @MatchesPattern(pattern = ".{0,500}", message = "请输入描述，不超过500字符")
     private String description;
     private String status;
 
-    @ValidateWithMethod(method = "validateModule", message = "")
+    @ValidateWithMethod(methodName = "validateModule", message = "")
     private String[] module;
 
-    @ValidateWithMethod(method = "validateGroup", message = "")
+    @ValidateWithMethod(methodName = "validateGroup", message = "")
     private String group;
 
     private String stage;
 
 
-    private boolean validatePathAvailable(String filePath) {
+    public boolean validatePathAvailable(String filePath) {
         ProjectService service = SpringUtils.getBean(ProjectService.class);
         Project project = service.getProjectById(StringUtils.parseIfIsLong(projectId), false);
         if (project != null && project.getFilePath().equals(filePath)) {
@@ -51,7 +47,7 @@ public class ProjectDto extends BaseDto {
         return service.isPathAvailable(filePath);
     }
 
-    private boolean validateModule(String[] module) {
+    public boolean validateModule(String[] module) {
         if (module != null) {
             for (String s : module) {
                 String[] details = s.split("&&");
@@ -66,14 +62,14 @@ public class ProjectDto extends BaseDto {
         return true;
     }
 
-    private boolean validatePathName(String name) {
+    public boolean validatePathName(String name) {
         if (StringUtils.isNotBlank(name)) {
             return name.matches("[\\w\\-]+");
         }
         return false;
     }
 
-    private boolean validateGroup(String group) {
+    public boolean validateGroup(String group) {
         AppContext context = AppContext.getFromWebThread();
         ProjectService service = SpringUtils.getBean(ProjectService.class);
         List<ProjectGroup> groupList = service.getProjectGroupUnderUser(context.getUserId(), context.getCurrentRole().getId());

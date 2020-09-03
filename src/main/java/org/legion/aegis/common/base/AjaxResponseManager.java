@@ -5,6 +5,8 @@ import org.legion.aegis.common.cache.CachePool;
 import org.legion.aegis.common.cache.ICache;
 import org.legion.aegis.common.cache.MasterCodeCache;
 import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.common.validation.ConstraintViolation;
+
 import java.util.*;
 
 public class AjaxResponseManager {
@@ -33,12 +35,12 @@ public class AjaxResponseManager {
         }
     }
 
-    public void addValidations(Map<String, List<String>> errorMap) {
-        if (errorMap != null && !errorMap.isEmpty()) {
-            Set<String> fieldSet = errorMap.keySet();
-            for (String field : fieldSet) {
-                addError(field, errorMap.get(field).get(0));
+    public void addValidations(List<ConstraintViolation> violations) {
+        for (ConstraintViolation violation : violations) {
+            if (StringUtils.isNotBlank(errorCodes.get(violation.getValidatedFieldName()))) {
+                continue;
             }
+            errorCodes.put(violation.getValidatedFieldName(), violation.getMessage());
         }
     }
 

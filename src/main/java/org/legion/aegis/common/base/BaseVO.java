@@ -1,8 +1,7 @@
 package org.legion.aegis.common.base;
 
-import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.DateUtils;
-
+import org.legion.aegis.common.utils.Reflections;
 import java.lang.reflect.Field;
 import java.util.Date;
 
@@ -25,7 +24,7 @@ public class BaseVO {
             for (Field poField : poFields) {
                 try {
                     Field voField = voClass.getDeclaredField(poField.getName());
-                    BeanUtils.setValue(voField, voClass, this, BeanUtils.getValue(poField, poClass, po));
+                    Reflections.setValue(voField, voClass, this, Reflections.getValue(poField, poClass, po));
                 } catch (Exception ignored) {
 
                 }
@@ -34,8 +33,8 @@ public class BaseVO {
             for (Field auditField : auditFields) {
                 try {
                     Field voAuditField = baseVOClass.getDeclaredField(auditField.getName());
-                    BeanUtils.setValue(voAuditField, baseVOClass, this,
-                            DateUtils.getDateString((Date) BeanUtils.getValue(auditField, basePOClass, po), "yyyy/MM/dd"));
+                    Reflections.setValue(voAuditField, baseVOClass, this,
+                            DateUtils.getDateString((Date) Reflections.getValue(auditField, basePOClass, po), "yyyy/MM/dd"));
                 } catch (Exception ignored) {
 
                 }

@@ -5,7 +5,9 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidateWithMethodList {
+public @interface NotBlank {
 
-    ValidateWithMethod[] methodList();
+    String message();
+
+    String profile() default "";
 }

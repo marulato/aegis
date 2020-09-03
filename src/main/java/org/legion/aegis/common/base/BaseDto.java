@@ -1,11 +1,9 @@
 package org.legion.aegis.common.base;
 
-import org.legion.aegis.common.utils.BeanUtils;
+import org.legion.aegis.common.utils.Reflections;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 public abstract class BaseDto implements Serializable, Cloneable {
 
@@ -21,7 +19,7 @@ public abstract class BaseDto implements Serializable, Cloneable {
             Class<?> type = dto.getClass();
             Field[] allFields = type.getDeclaredFields();
             for (Field field : allFields) {
-                BeanUtils.setValue(field, type, dto, request.getParameter(field.getName()));
+                Reflections.setValue(field, type, dto, request.getParameter(field.getName()));
             }
         }
     }

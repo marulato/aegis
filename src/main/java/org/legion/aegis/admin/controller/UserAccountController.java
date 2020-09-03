@@ -16,6 +16,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
+import org.legion.aegis.common.validation.ConstraintViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -80,8 +81,8 @@ public class UserAccountController {
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     @ResponseBody
     public void addUser(@RequestBody UserDto userDto) throws Exception {
-        Map<String, List<String>> errors = CommonValidator.doValidation(userDto, null);
-        if (errors.isEmpty()) {
+        List<ConstraintViolation> violations = CommonValidator.validate(userDto, null);
+        if (violations.isEmpty()) {
             UserAccount userAccount = BeanUtils.mapFromDto(userDto, UserAccount.class);
             userAccount.setDomain(AppConsts.USER_DOMAIN_INTRANET);
             userAccount.setDisplayName(userAccount.getLoginId());

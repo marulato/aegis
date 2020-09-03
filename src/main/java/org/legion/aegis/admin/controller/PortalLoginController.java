@@ -13,6 +13,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.LogUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
+import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,10 +65,10 @@ public class PortalLoginController {
     @ResponseBody
     public AjaxResponseBody login(UserAccount webUser, HttpServletRequest request) throws Exception {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-        Map<String, List<String>> errorMap = CommonValidator.doValidation(webUser, null);
-        if (!errorMap.isEmpty()) {
+        List<ConstraintViolation> violations = CommonValidator.validate(webUser, null);
+        if (!violations.isEmpty()) {
             responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-            responseMgr.addValidations(errorMap);
+            responseMgr.addValidations(violations);
         } else {
             LoginStatus loginStatus = loginService.login(webUser, request);
             if (loginStatus == LoginStatus.SUCCESS) {

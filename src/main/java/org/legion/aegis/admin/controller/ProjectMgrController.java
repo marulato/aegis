@@ -22,6 +22,7 @@ import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
+import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -101,10 +102,10 @@ public class ProjectMgrController {
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
     public AjaxResponseBody addProject(ProjectDto dto, HttpServletRequest request) throws Exception {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
-        Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
-        if (!errors.isEmpty()) {
+        List<ConstraintViolation> violations = CommonValidator.validate(dto, null);
+        if (!violations.isEmpty()) {
             responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-            responseMgr.addValidations(errors);
+            responseMgr.addValidations(violations);
         } else {
             projectService.saveNewProject(dto, AppContext.getAppContext(request));
         }
@@ -150,10 +151,10 @@ public class ProjectMgrController {
     public AjaxResponseBody saveProject(ProjectDto dto) throws Exception {
         verifyRequest(dto.getProjectId());
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
-        Map<String, List<String>> errors = CommonValidator.doValidation(dto, null);
-        if (!errors.isEmpty()) {
+        List<ConstraintViolation> violations = CommonValidator.validate(dto, null);
+        if (!violations.isEmpty()) {
             responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-            responseMgr.addValidations(errors);
+            responseMgr.addValidations(violations);
         } else {
             projectService.updateProject(dto);
         }
@@ -278,10 +279,10 @@ public class ProjectMgrController {
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     public AjaxResponseBody addProjectGroup(ProjectGroup projectGroup) throws Exception {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
-        Map<String, List<String>> errors = CommonValidator.doValidation(projectGroup, null);
-        if (!errors.isEmpty()) {
+        List<ConstraintViolation> violations = CommonValidator.validate(projectGroup, null);
+        if (!violations.isEmpty()) {
             manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-            manager.addValidations(errors);
+            manager.addValidations(violations);
         } else {
             projectService.saveProjectGroup(projectGroup);
         }

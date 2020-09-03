@@ -5,9 +5,11 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IsIn {
+public @interface Length {
 
-    String[] value();
+    int min() default 0;
+
+    int max() default Integer.MAX_VALUE;
 
     String message();
 

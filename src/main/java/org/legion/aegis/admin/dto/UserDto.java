@@ -7,23 +7,22 @@ import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.utils.ValidationUtils;
+import org.legion.aegis.common.validation.MatchesPattern;
 import org.legion.aegis.common.validation.ValidateWithMethod;
-import org.legion.aegis.common.validation.ValidateWithRegex;
 
-import java.util.Arrays;
 import java.util.Date;
 
 public class UserDto extends BaseDto {
 
-    @ValidateWithRegex(regex = ValidationUtils.LOGIN_ID_REGEX, message = "用户名只能包含数字，字母和下划线，长度4~16位")
+    @MatchesPattern(pattern = ValidationUtils.LOGIN_ID_REGEX, message = "用户名只能包含数字，字母和下划线，长度4~16位")
     private String loginId;
-    @ValidateWithRegex(regex = ValidationUtils.SINGLE_EMAIL_REGEX, message = "请检查邮箱地址的格式")
+    @MatchesPattern(pattern = ValidationUtils.SINGLE_EMAIL_REGEX, message = "请检查邮箱地址的格式")
     private String email;
-    @ValidateWithMethod(method = "validateProject", message = "请添加正确的项目")
+    @ValidateWithMethod(methodName = "validateProject", message = "请添加正确的项目")
     private String[] project;
-    @ValidateWithMethod(method = "validateRole", message = "请选择正确的权限")
+    @ValidateWithMethod(methodName = "validateRole", message = "请选择正确的权限")
     private String role;
-    @ValidateWithMethod(method = "validateRange", message = "请选择正确的日期范围")
+    @ValidateWithMethod(methodName = "validateRange", message = "请选择正确的日期范围")
     private String effectiveRange;
     private String password;
 
