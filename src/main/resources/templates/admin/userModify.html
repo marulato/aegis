@@ -23,7 +23,7 @@
   <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
 
   <!-- Daterange picker -->
-  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.min.css}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -92,13 +92,8 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label>延长有效期至</label>
-                      <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#reservationdate"/>
-                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                          <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                        </div>
-                      </div>
+                      <label for="deactivate">延长有效期至</label>
+                        <input class="form-control" type="text" name="deactivate" id="deactivate"/>
                     </div>
                   </div>
                 </div>
@@ -152,9 +147,9 @@
 <!-- Bootstrap 4 -->
 <script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<!-- daterangepicker -->
-<script th:src="@{/plugins/moment/moment.min.js}"></script>
-<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<!-- datepicker -->
+<script th:src="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.min.js}"></script>
+<script th:src="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.zh-CN.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
@@ -164,8 +159,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        $('#reservationdate').datetimepicker({
-            format: 'L'
+        $("#deactivate").datepicker({
+            language: "zh-CN"
         });
     });
 
