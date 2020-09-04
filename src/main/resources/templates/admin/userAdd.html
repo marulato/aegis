@@ -94,7 +94,7 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label for="role" data-required="true">权限</label>
-                      <select class="custom-select" type="text" name="role" id="role">
+                      <select class="custom-select" type="text" name="role" id="role" onchange="retrieveProject(this.value)">
                         <option th:each="role, stat:${roles}" th:value="${role.id}" th:text="${role.roleName}"></option>
                       </select>
 
@@ -118,13 +118,14 @@
                   </div>
                 </div>
 
-                <div class="row">
+                <div class="row" id="projectDiv">
                   <div class="col-md-9">
                     <div class="form-group">
                       <label for="projectSelector" data-required="true">项目</label>
                       <div class="select2-blue">
                         <select class="select2" multiple="multiple" data-dropdown-css-class="select2-blue" name="projectSelector" id="projectSelector" style="width: 100%;">
-                          <option th:each="project, stat:${projects}" th:value="${project.id}" th:text="${project.name}"></option>
+                          <!--<option th:if="${role != 'SYSADMIN'}" th:each="project, stat:${projects}" th:value="${project.id}" th:text="${project.name}"></option>
+                          <option th:if="${role == 'SYSADMIN'}" th:each="group, stat:${groups}" th:value="${group.id}" th:text="${group.name}"></option>-->
                         </select>
                         <!--<span>&nbsp;&nbsp;</span>
                         <button type="button" class="btn btn-default btn-sm" onclick="addProject()">
@@ -210,6 +211,7 @@
             closeOnSelect: false,
             tag: true
         });
+        retrieveProject($("#role").val());
     });
 
 
@@ -234,6 +236,26 @@
           }
       });
 
+    }
+
+    function retrieveProject(role) {
+        if (role === 'SYSADMIN') {
+            $("#projectDiv").hide();
+        } else {
+            $("#projectDiv").show();
+            $.ajax({
+                url: "/web/user/selectProject/" + role,
+                type: "get",
+                dataType: "json",
+                success: function (res) {
+                    $("#projectSelector").empty();
+                    $.each(res.data, function (idx, obj) {
+                        var options = "<option value='" + obj.id + "'>" + obj.name + "</option>";
+                        $("#projectSelector").append(options);
+                    });
+                }
+            });
+        }
     }
 
 

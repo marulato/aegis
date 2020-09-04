@@ -41,12 +41,14 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user/add")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     public ModelAndView redirectAddUserPage(HttpServletRequest request) {
         AppContext context = AppContext.getAppContext(request);
         ModelAndView modelAndView = new ModelAndView("admin/userAdd");
-        modelAndView.addObject("projects", projectService.
+/*        modelAndView.addObject("projects", projectService.
                 getAllProjectsForSearchSelector(context.getUserId(), context.getRoleId()));
+        modelAndView.addObject("groups", projectService.
+                getProjectGroupUnderUser(context.getUserId(), context.getRoleId()));*/
         modelAndView.addObject("roles", accountService.getAllRoles());
         modelAndView.addObject("role", context.getRoleId());
         return modelAndView;
@@ -78,9 +80,10 @@ public class UserAccountController {
     }
 
     @PostMapping("/web/user/add")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     @ResponseBody
-    public void addUser(@RequestBody UserDto userDto) throws Exception {
+    public AjaxResponseBody addUser(@RequestBody UserDto userDto) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         List<ConstraintViolation> violations = CommonValidator.validate(userDto, null);
         if (violations.isEmpty()) {
             UserAccount userAccount = BeanUtils.mapFromDto(userDto, UserAccount.class);
@@ -94,7 +97,11 @@ public class UserAccountController {
             }
             UserAccount createdUser = accountService.createUser(userAccount, List.of(role), projects);
             accountService.sendAcknowledgementEmail(createdUser);
+        } else {
+            manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            manager.addValidations(violations);
         }
+        return manager.respond();
     }
 
     @PostMapping("/web/user/list")
@@ -115,6 +122,21 @@ public class UserAccountController {
         ModelAndView modelAndView = new ModelAndView("admin/userModify");
         modelAndView.addObject("role", AppContext.getAppContext(request).getRoleId());
         return modelAndView;
+    }
+
+    @GetMapping("/web/user/selectProject/{roleId}")
+    @ResponseBody
+    public AjaxResponseBody retrieveProjectSelector(@PathVariable("roleId") String roleId) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        if (AppConsts.ROLE_QA_SUPERVISOR.equals(roleId) || AppConsts.ROLE_DEV_SUPERVISOR.equals(roleId)) {
+            List<ProjectGroup> groupList = projectService.getProjectGroupUnderUser(context.getUserId(), context.getRoleId());
+            manager.addDataObjects(groupList);
+        } else {
+            List<Project> projectList = projectService.getAllProjects();
+            manager.addDataObjects(projectList);
+        }
+        return manager.respond();
     }
 
 }

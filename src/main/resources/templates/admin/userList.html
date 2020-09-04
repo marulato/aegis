@@ -131,9 +131,9 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">用户列表</h3>
-              <button type="button" class="btn btn-success btn-sm float-right" onclick="location.href = '/web/user/add'">
+              <button th:if="${role == 'SYSADMIN'}" type="button" class="btn btn-success btn-sm float-right" onclick="location.href = '/web/user/add'">
                 <i class="fas fa-plus"></i>
-                添加
+                &nbsp;创建新用户
               </button>
             </div>
             <!-- /.card-header -->
