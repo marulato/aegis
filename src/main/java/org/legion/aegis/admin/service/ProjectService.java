@@ -3,12 +3,14 @@ package org.legion.aegis.admin.service;
 import org.legion.aegis.admin.dao.ModuleDAO;
 import org.legion.aegis.admin.dao.ProjectDAO;
 import org.legion.aegis.admin.dto.ProjectDto;
+import org.legion.aegis.admin.dto.ProjectGroupDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
 import org.legion.aegis.admin.vo.ProjectGroupVO;
 import org.legion.aegis.admin.vo.ProjectVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.SearchParam;
+import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.BeanUtils;
@@ -18,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProjectService {
@@ -34,17 +34,37 @@ public class ProjectService {
         this.moduleDAO = moduleDAO;
     }
 
-    public List<Project> getAllProjects() {
-        return projectDAO.getAllProjects();
+    public List<Project> getAllProjects(boolean onlyActive, boolean onlyPrivate) {
+        List<Project> projectList = projectDAO.getAllProjects();
+        if (onlyActive) {
+            projectList.removeIf(project -> AppConsts.STATUS_BANNED.equals(project.getStatus()));
+        }
+        if (onlyPrivate) {
+            projectList.removeIf(project -> AppConsts.YES.equals(project.getIsPublic()));
+        }
+        return projectList;
     }
 
     public List<Project> getAllProjectsForSearchSelector(Long userId, String roleId) {
         List<Project> projects = projectDAO.getAllProjectsUnderUser(userId, roleId);
+        for (Project project : projects) {
+            ProjectGroup projectGroup = projectDAO.getProjectGroupById(project.getGroupId());
+            project.setName(projectGroup.getName() + " - " + project.getName());
+        }
+        projects.sort(Comparator.comparing(Project::getName));
         Project project = new Project();
         project.setId(0L);
         project.setName("请选择");
         projects.add(0, project);
         return projects;
+    }
+
+    public List<Project> getProjectsForDevAndQA(Long userId) {
+        return projectDAO.getAllProjectsUnderUser(userId, null);
+    }
+
+    public List<Project> getProjectsUnderSupervisor(Long userId, String roleId) {
+        return projectDAO.getAllProjectsUnderUser(userId, roleId);
     }
 
     public List<Project> getProjectsByIsPublic(String isPublic) {
@@ -61,8 +81,10 @@ public class ProjectService {
         return project;
     }
 
-    public List<ProjectVO> search(SearchParam param) {
-        return projectDAO.search(param);
+    public SearchResult<ProjectVO> search(SearchParam param) {
+        SearchResult<ProjectVO> searchResult = new SearchResult<>(projectDAO.search(param), param);
+        searchResult.setTotalCounts(projectDAO.searchProjectCount(param));
+        return searchResult;
     }
 
     public Module getModuleById(Long id) {
@@ -176,8 +198,10 @@ public class ProjectService {
         }
     }
 
-    public List<ProjectGroupVO> searchGroup(SearchParam param) {
-        return projectDAO.searchProjectGroup(param);
+    public SearchResult<ProjectGroupVO> searchGroup(SearchParam param) {
+        SearchResult<ProjectGroupVO> searchResult = new SearchResult<>(projectDAO.searchProjectGroup(param), param);
+        searchResult.setTotalCounts(projectDAO.searchGroupCount(param));
+        return searchResult;
     }
 
     public void saveProjectGroup(ProjectGroup group) {
@@ -199,6 +223,10 @@ public class ProjectService {
         return projectDAO.getProjectsUnderGroup(groupId);
     }
 
+    public List<ProjectGroup> getAllProjectGroup() {
+        return projectDAO.getProjectGroupUnderUser(null, AppConsts.ROLE_SYSTEM_ADMIN);
+    }
+
     public List<ProjectGroup> getProjectGroupUnderUser(Long userId, String role) {
         return projectDAO.getProjectGroupUnderUser(userId, role);
     }
@@ -215,4 +243,13 @@ public class ProjectService {
         }
     }
 
+    public List<Project> getProjectSelector() {
+        List<Project> projectList = getAllProjects(true, false);
+        for (Project project : projectList) {
+            ProjectGroup group = getProjectGroupById(project.getGroupId());
+            project.setName(group.getName() + " - " + project.getName());
+        }
+        projectList.sort(Comparator.comparing(Project::getName));
+        return projectList;
+    }
 }

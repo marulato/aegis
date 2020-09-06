@@ -16,6 +16,7 @@ public class UserSearchVO extends BaseVO {
     private String activatedAt;
     private String deactivatedAt;
     private String role;
+    private String roleId;
     private String project;
 
     public Long getId() {
@@ -90,6 +91,14 @@ public class UserSearchVO extends BaseVO {
         this.role = role;
     }
 
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
+
     public String getProject() {
         return project;
     }
@@ -97,4 +106,5 @@ public class UserSearchVO extends BaseVO {
     public void setProject(String project) {
         this.project = project;
     }
+
 }

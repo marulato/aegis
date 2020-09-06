@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.legion.aegis.admin.dao.UserAccountDAO">
+
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.admin.vo.UserSearchVO">
         SELECT DISTINCT
@@ -15,6 +16,7 @@
         DATE_FORMAT(USER.ACTIVATED_AT, '%Y/%m/%d') AS ACTIVATED_AT,
         DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT,
         ROLE.ROLE_NAME AS ROLE,
+        ROLE.ID AS ROLE_ID,
         PJT.NAME AS PROJECT
         FROM AC_USER_ACCT USER
         LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
@@ -32,7 +34,7 @@
             </if>
 
             <if test="sp.params.roleParam != null and sp.params.roleParam != '' and sp.params.roleParam != '0'.toString()">
-                AND ROLE.ID = #{sp.params.role}
+                AND ROLE.ID = #{sp.params.roleParam}
             </if>
 
             <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
@@ -54,7 +56,7 @@
                 </if>
             </if>
         </where>
-
+        GROUP BY USER.ID
         <choose>
             <when test="sp.orderColumnNo == 0">
                 ORDER BY LOGIN_ID
@@ -81,13 +83,63 @@
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
         </choose>
-        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize};
     </select>
 
-    <select id="searchUserProjects" parameterType="long" resultType="org.legion.aegis.admin.vo.UserProjectVO">
+
+
+    <select id="searchCount" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="integer">
+        SELECT COUNT(*) FROM (
+        SELECT DISTINCT USER.ID
+        FROM AC_USER_ACCT USER
+        LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
+        LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.USER_ACCT_ID = USER.ID
+        LEFT JOIN PJT_PROJECT PJT ON PJT.ID = PSN.PROJECT_ID
+        LEFT JOIN PJT_PROJECT_GROUP GRP ON PJT.GROUP_ID = GRP.ID
+        <where>
+            <if test="sp.params.loginId != null and sp.params.loginId != ''">
+                AND UPPER(LOGIN_ID) LIKE CONCAT ('%', UPPER(#{sp.params.loginId}), '%')
+            </if>
+
+            <if test="sp.params.email != null and sp.params.email != ''">
+                AND UPPER(EMAIL) LIKE CONCAT ('%', UPPER(#{sp.params.email}), '%')
+            </if>
+
+            <if test="sp.params.roleParam != null and sp.params.roleParam != '' and sp.params.roleParam != '0'.toString()">
+                AND ROLE.ID = #{sp.params.roleParam}
+            </if>
+
+            <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
+                AND PJT.ID = #{sp.params.project}
+            </if>
+            <!--SYSADMIN can search all users regardless of their roles-->
+            <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
+
+                AND PSN.GROUP_ID IN
+                (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+
+                <!--DEV_S / QA_S is NOT allowed to search his/herself-->
+                <if test="sp.params.role == 'DEV_S'">
+                    AND ASN.ROLE_ID = 'DEV'
+                </if>
+
+                <if test="sp.params.role == 'QA_S'">
+                    AND ASN.ROLE_ID = 'QA'
+                </if>
+            </if>
+        </where>
+        GROUP BY USER.ID) AS T
+    </select>
+
+
+
+    <select id="searchUserProjects" resultType="org.legion.aegis.admin.vo.UserProjectVO">
         SELECT
                PJT.NAME AS PROJECT_NAME,
                PJT.ID AS PROJECT_ID,
+               PJT.IS_PUBLIC AS IS_PUBLIC,
                GRP.ID AS GROUP_ID,
                GRP.NAME AS GROUP_NAME,
                DATE_FORMAT(PSN.CREATED_AT, '%Y/%m/%d') AS ASSIGNED_AT,
@@ -96,7 +148,23 @@
         FROM PJT_PROJECT PJT
             LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PJT.ID = PSN.PROJECT_ID
             LEFT JOIN PJT_PROJECT_GROUP GRP ON PJT.GROUP_ID = GRP.ID
-            WHERE PSN.USER_ACCT_ID = #{userId}
+            WHERE PSN.USER_ACCT_ID = #{param1}
+        <if test="param2 == 'DEV_S' || param2 == 'QA_S'">
+            UNION ALL
+            SELECT
+            PJT.NAME AS PROJECT_NAME,
+            PJT.ID AS PROJECT_ID,
+            PJT.IS_PUBLIC AS IS_PUBLIC,
+            GRP.ID AS GROUP_ID,
+            GRP.NAME AS GROUP_NAME,
+            DATE_FORMAT(PSN.CREATED_AT, '%Y/%m/%d') AS ASSIGNED_AT,
+            PSN.CREATED_BY AS ASSIGNED_BY
+
+            FROM PJT_PROJECT PJT
+            LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PJT.GROUP_ID = PSN.GROUP_ID
+            LEFT JOIN PJT_PROJECT_GROUP GRP ON PSN.GROUP_ID = GRP.ID
+            WHERE PSN.USER_ACCT_ID = #{param1}
+        </if>
     </select>
 
     <select id="searchUserInfo" parameterType="long" resultType="org.legion.aegis.admin.vo.UserAccountVO">
@@ -107,6 +175,7 @@
                USER.LAST_LOGIN_SUCCESS_DT AS LAST_LOGIN_AT,
                USER.EMAIL,
                ROLE.ROLE_NAME,
+               ROLE.ID AS ROLE_ID,
                USER.STATUS,
                CASE USER.STATUS WHEN 'A' THEN '正常'
                    WHEN 'L' THEN '已锁定' WHEN 'I' THEN '未激活'
@@ -117,5 +186,13 @@
             LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
             LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
         WHERE USER.ID = #{userId}
+    </select>
+
+    <select id="getUserUnderSupervisor" resultType="org.legion.aegis.admin.entity.UserAccount">
+        SELECT DISTINCT USER.*
+        FROM AC_USER_ACCT USER
+                 LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.USER_ACCT_ID = USER.ID
+        WHERE PSN.GROUP_ID IN
+              (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{supervisorId})
     </select>
 </mapper>

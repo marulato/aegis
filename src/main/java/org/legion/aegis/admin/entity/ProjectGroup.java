@@ -4,6 +4,8 @@ import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
 
+import java.util.Objects;
+
 @Entity(tableName = "PJT_PROJECT_GROUP")
 public class ProjectGroup extends BasePO {
 
@@ -11,6 +13,21 @@ public class ProjectGroup extends BasePO {
     private Long id;
     private String name;
     private String description;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProjectGroup group = (ProjectGroup) o;
+        return id.equals(group.id) &&
+                name.equals(group.name) &&
+                Objects.equals(description, group.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description);
+    }
 
     public Long getId() {
         return id;

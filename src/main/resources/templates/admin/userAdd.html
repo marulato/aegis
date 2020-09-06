@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard</title>
+  <title>AEGIS Issue Tracker</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -75,8 +75,17 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="loginId" data-required="true">用户名</label>
+                      <label for="loginId" data-required="true">账号</label>
                       <input class="form-control" type="text" name="loginId" id="loginId">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="name" data-required="true">用户名</label>
+                      <input class="form-control" type="text" name="name" id="name">
                     </div>
                   </div>
                 </div>
@@ -146,7 +155,7 @@
                         返回</button>
                     </div>
                     <div class="col-md-6">
-                      <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="submitAction()">
+                      <button type="button" class="btn btn-primary float-left" id="submitBtn" style="font-size: 14px" onclick="submitAction()">
                         <i class="fa fa-check"></i>
                         提交</button>
                     </div>
@@ -175,6 +184,21 @@
     <!-- Control sidebar content goes here -->
   </aside>
   <!-- /.control-sidebar -->
+</div>
+
+<div class="modal fade" id="waitingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <p><img th:src="@{/dist/img/loading.gif}" style="width: 60px; height: 60px">正在处理，请稍后</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
 </div>
 <!-- ./wrapper -->
 
@@ -205,7 +229,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         aegis.required();
         $('#effectiveRange').daterangepicker({
-            format: 'YYYY/MM/DD'
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
         });
         $("#projectSelector").select2({
             closeOnSelect: false,
@@ -214,11 +240,25 @@
         retrieveProject($("#role").val());
     });
 
+    function showWaiting() {
+        $('#waitingModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    }
+    function dismissWaiting() {
+        $('#waitingModal').modal('hide');
+    }
+
 
     function submitAction() {
-      aegis.loading();
+        showWaiting();
+      aegis.clearErrors();
+      $("#submitBtn").attr("disabled", true);
       var formData = {
           loginId: $("#loginId").val(),
+          name: $("#name").val(),
           email: $("#email").val(),
           role: $("#role").val(),
           effectiveRange: $("#effectiveRange").val(),
@@ -232,7 +272,19 @@
           data: JSON.stringify(formData),
           dataType: "json",
           success: function (res) {
-
+              if (res.status == 221) {
+                  setTimeout(function () {
+                      dismissWaiting();
+                      aegis.showErrors(res.data);
+                  }, 500);
+                  $("#submitBtn").removeAttr("disabled")
+              } else {
+                  var id = res.data[0];
+                  location.href = "/web/user/add/" + id;
+              }
+          },
+          error:function () {
+            location.href = "/web/error";
           }
       });
 

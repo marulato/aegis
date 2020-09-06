@@ -67,6 +67,44 @@
         LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
     </select>
 
+
+    <select id="searchProjectCount" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="integer">
+
+        <!--Only For SYSADMIN, DEV_S, and QA_S-->
+        SELECT COUNT(*) FROM (
+        SELECT DISTINCT
+        PJT.NAME
+        FROM
+        PJT_PROJECT PJT
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN
+        ON PSN.GROUP_ID = PJT.GROUP_ID
+        LEFT JOIN AC_USER_ACCT USER
+        ON USER.ID = PSN.USER_ACCT_ID
+        LEFT JOIN AC_USER_ROLE_ASSIGN ASN
+        ON ASN.USER_ACCT_ID = USER.ID
+        LEFT JOIN PJT_PROJECT_GROUP GRP
+        ON PJT.GROUP_ID = GRP.ID
+        <where>
+            <if test="sp.params.userId != null and sp.params.userId &gt;0 and sp.params.role !='SYSADMIN'">
+                AND USER.ID = #{sp.params.userId}
+            </if>
+
+            <if test="sp.params.projectName != null and sp.params.projectName != ''">
+                AND UPPER (PJT.NAME) LIKE CONCAT('%', UPPER(#{sp.params.projectName}), '%')
+            </if>
+
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER (PJT.DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+            </if>
+
+            <if test="sp.params.projectGroup != null and sp.params.projectGroup !='0'.toString()">
+                AND PJT.GROUP_ID = #{sp.params.projectGroup}
+            </if>
+        </where>) AS T
+
+    </select>
+
     <select id="getAllProjectsUnderUser" resultType="org.legion.aegis.admin.entity.Project">
         SELECT *
             FROM PJT_PROJECT
@@ -120,6 +158,28 @@
             </when>
         </choose>
         LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchGroupCount" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="integer">
+        SELECT COUNT(*) FROM (
+        SELECT DISTINCT GRP.ID
+        FROM PJT_PROJECT_GROUP GRP
+        LEFT JOIN PJT_PROJECT PJT ON GRP.ID = PJT.GROUP_ID
+        LEFT JOIN PJT_USER_PROJECT_ASN PSN ON PSN.GROUP_ID = PJT.GROUP_ID
+        <where>
+            <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
+                AND PSN.USER_ACCT_ID = #{sp.params.userId}
+            </if>
+
+            <if test="sp.params.groupName != null and sp.params.groupName != ''">
+                AND UPPER (GRP.NAME) LIKE CONCAT('%', UPPER(#{sp.params.groupName}), '%')
+            </if>
+
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER (GRP.DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+            </if>
+        </where>) AS T
     </select>
 
     <select id="getProjectGroupUnderUser" resultType="org.legion.aegis.admin.entity.ProjectGroup">

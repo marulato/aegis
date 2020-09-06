@@ -92,21 +92,17 @@
             success: function (res) {
                 var obj = res.data;
                 if (res.status === 200) {
-                    if (obj[0] === 0) {
+                    if (obj[0] === 0 && obj[1] == null) {
                         land(1);
-                    } else {
-                        //select role;
-                        $.each(obj, function (index, element) {
-                            $("#roleModalBody").append('<div class="row" onmouseover="modalMouseOver(this)" onmouseleave="modalMouseLeave(this)"><span onclick="land(\'' + element.roleId + '\')" style="text-align: center; width: 100%; height: 100%; line-height: 3em">' + element.description + '</span></div>');
-                        });
-                        $("#roleModal").modal({backdrop: 'static', show: true})
+                    } else if (obj[1] === "FirstLogin") {
+                        location.href = "/web/login/changePassword";
                     }
                 } else if(res.status === 221) {
                     aegis.showErrors(obj);
                 }
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                aegis.clearErrors();
+            error: function () {
+                location.href = "/web/error";
             }
         });
     }

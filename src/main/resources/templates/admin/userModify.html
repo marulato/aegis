@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard</title>
+  <title>AEGIS Issue Tracker</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -19,11 +19,14 @@
 
   <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
   <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/select2/css/select2.min.css}">
   <!-- Theme style -->
   <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
 
   <!-- Daterange picker -->
   <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
+
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -47,7 +50,7 @@
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">主页</a></li>
-              <li class="breadcrumb-item active">添加用户</li>
+              <li class="breadcrumb-item active">修改用户</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -74,8 +77,9 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="username">用户名</label>
-                      <input class="form-control" type="text" name="username" id="username">
+                      <label for="name">用户名</label>
+                      <input class="form-control" type="text" name="name" id="name" th:value="${user.name}">
+                      <input class="form-control" type="hidden" name="userId" id="userId" th:value="${user.id}">
                     </div>
                   </div>
                 </div>
@@ -84,7 +88,7 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label for="email">邮箱</label>
-                      <input class="form-control" type="email" name="email" id="email">
+                      <input class="form-control" type="email" name="email" id="email" th:value="${user.email}">
                     </div>
                   </div>
                 </div>
@@ -92,9 +96,169 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label for="deactivate">延长有效期至</label>
-                        <input class="form-control" type="text" name="deactivate" id="deactivate"/>
+                      <label for="deactivateAt">延长有效期至</label>
+                        <input class="form-control" type="text" name="deactivateAt" id="deactivateAt" th:value="${#dates.format(user.deactivatedAt, 'yyyy/MM/dd')}"/>
                     </div>
+                  </div>
+                </div>
+
+                <div class="row" id="projectDiv">
+                  <div class="col-md-9">
+                    <div class="form-group">
+                      <label for="projectSelector" data-required="true">添加项目</label>
+                      <div class="select2-blue">
+                        <select class="select2" multiple="multiple" data-dropdown-css-class="select2-blue" name="projectSelector" id="projectSelector" style="width: 100%;">
+                          <option th:each="select, stats:${selector}" th:value="${select.id}" th:text="${select.name}"></option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-primary" onclick="save()">
+                  <i class="fa fa-save"></i>
+                  &nbsp;保存
+                </button>
+                <span>&nbsp;</span>
+                <button type="button" class="btn btn-danger" th:if="${user.status == 'A' && role == 'SYSADMIN'}">
+                  <i class="fa fa-lock"></i>
+                  &nbsp;锁定
+                </button>
+                <span th:if="${user.status == 'A'}">&nbsp;</span>
+                <button type="button" class="btn btn-danger" th:if="${user.status == 'L' && role == 'SYSADMIN'}">
+                  <i class="fa fa-unlock"></i>
+                  &nbsp;解锁
+                </button>
+                <span th:if="${user.status == 'L'}">&nbsp;</span>
+                <button th:if="${role == 'SYSADMIN'}" type="button" class="btn btn-warning" onclick="showResetPassword()">
+                  <i class="fa fa-key"></i>
+                  &nbsp;重置密码
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">所在项目组</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <table id="groupTable" class="table table-striped">
+                      <thead>
+                      <tr>
+                        <th>项目组</th>
+                        <th>邀请人</th>
+                        <th>加入日期</th>
+                        <th>操作</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr th:each="group, stats:${groups}">
+                        <td th:text="${group.groupName}"></td>
+                        <td th:text="${group.assignedBy}"></td>
+                        <td th:text="${group.assignedAt}"></td>
+                        <td>
+                          <button th:if="${group.hasPermission || role == 'SYSADMIN'}" type="button" class="btn btn-danger btn-sm" th:onclick="showDeleteGroup([[${group.groupId}]]);">
+                            <i class="fa fa-user-slash"></i>
+                            &nbsp;移出此项目组
+                          </button>
+                        </td>
+                      </tr>
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card"  th:if="${user.roleId == 'DEV' || user.roleId == 'QA'}">
+              <div class="card-header">
+                <h3 class="card-title">授权的私有项目</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <table id="projectTable" class="table table-striped">
+                      <thead>
+                      <tr>
+                        <th>项目组</th>
+                        <th>项目</th>
+                        <th>邀请人</th>
+                        <th>加入日期</th>
+                        <th>操作</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr th:if="${#lists.isEmpty(projects)}">
+                        <td colspan="5" style="text-align: center">没有数据</td>
+                      </tr>
+                      <tr th:each="project, stats:${projects}">
+                        <td th:text="${project.groupName}"></td>
+                        <td th:text="${project.projectName}"></td>
+                        <td th:text="${project.assignedBy}"></td>
+                        <td th:text="${project.assignedAt}"></td>
+                        <td>
+                          <button th:if="${project.hasPermission || role == 'SYSADMIN'}" type="button" class="btn btn-danger btn-sm" th:onclick="showDeleteProject([[${project.projectId}]]);">
+                            <i class="fa fa-user-slash"></i>
+                            &nbsp;移出此项目
+                          </button>
+                        </td>
+                      </tr>
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card"  th:if="${user.roleId == 'DEV' || user.roleId == 'QA'}">
+              <div class="card-header">
+                <h3 class="card-title">可见的公开项目</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <table id="publicTable" class="table table-striped">
+                      <thead>
+                      <tr>
+                        <th>项目组</th>
+                        <th>项目</th>
+                        <th>邀请人</th>
+                        <th>加入日期</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr th:if="${#lists.isEmpty(projects)}">
+                        <td colspan="5" style="text-align: center">没有数据</td>
+                      </tr>
+                      <tr th:each="pub, stats:${public}">
+                        <td th:text="${pub.groupName}"></td>
+                        <td th:text="${pub.projectName}"></td>
+                        <td th:text="${pub.assignedBy}"></td>
+                        <td th:text="${pub.assignedAt}"></td>
+                      </tr>
+
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -110,11 +274,6 @@
             <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/user'">
               <i class="fa fa-chevron-left"></i>
               返回</button>
-          </div>
-          <div class="col-md-6">
-            <button type="button" class="btn btn-primary float-left" style="font-size: 14px">
-              <i class="fa fa-check"></i>
-              提交</button>
           </div>
         </div>
       </div>
@@ -135,6 +294,103 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+<!--Delete Modal-->
+<div class="modal fade" id="modal_delete_project">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalDeleteTitle">Title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" id="ban_alert">
+          <h5><i class="icon fas fa-exclamation-triangle"></i>请注意</h5>
+          移出项目后此用户将无法查看该隶属于项目下的所有内容，所在项目组的公开项目不受影响
+        </div>
+        <div class="row">
+          <input type="hidden" name="projectId" id="projectId">
+          <h5 id="confirmAlert"></h5>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" style="font-size: 14px" onclick="removeProject()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal_delete_group">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalGroupTitle">Title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" >
+          <h5><i class="icon fas fa-exclamation-triangle"></i>请注意</h5>
+          退出项目组后将同时退出该项目组下的所有公开项目，此用户将无法查看该项目组下的所有项目及其内容
+        </div>
+        <div class="row">
+          <input type="hidden" name="groupId" id="groupId">
+          <h5 id="confirmAlert2"></h5>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" style="font-size: 14px" onclick="removeGroup()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+<div class="modal fade" id="modal_resetPassword">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >重置密码</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="pwd1">新密码</label>
+              <input class="form-control" type="password" name="pwd1" id="pwd1">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="pwd2">确认新密码</label>
+              <input class="form-control" type="password" name="pwd2" id="pwd2">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="resetPassword()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
 
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
@@ -150,19 +406,177 @@
 <!-- datepicker -->
 <script th:src="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.min.js}"></script>
 <script th:src="@{/plugins/bootstrap-datepicker/bootstrap-datepicker.zh-CN.min.js}"></script>
+<script th:src="@{/plugins/select2/js/select2.full.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
 <script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        $("#deactivate").datepicker({
+        $("#deactivateAt").datepicker({
             language: "zh-CN"
         });
+        $("#projectSelector").select2({
+            closeOnSelect: false,
+            tag: true
+        });
+
     });
+
+    toastr.options = { // toastr配置
+        "closeButton": false, //是否显示关闭按钮
+        "debug": false, //是否使用debug模式
+        "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+        "positionClass": "toast-top-right",//显示的动画时间
+        "showDuration": "200", //显示的动画时间
+        "hideDuration": "300", //消失的动画时间
+        "timeOut": "1000", //展现时间
+        "extendedTimeOut": "500", //加长展示时间
+        "showEasing": "swing", //显示时的动画缓冲方式
+        "hideEasing": "linear", //消失时的动画缓冲方式
+        "showMethod": "fadeIn", //显示时的动画方式
+        "hideMethod": "fadeOut" //消失时的动画方式
+    }
+
+    toastr.options.onHidden = function() {
+        location.reload();
+    }
+
+    function showDeleteProject(projectId) {
+        $("#projectId").val(projectId);
+        var id = $("#userId").val();
+        $.ajax({
+            url: "/web/user/"+ id +"/modify/" + projectId,
+            type: "get",
+            data: {type:"project"},
+            dataType: "json",
+            success: function (res) {
+              var obj = res.data[0];
+              $("#modalDeleteTitle").html("退出项目：" + obj.name);
+              $("#confirmAlert").html("确认退出项目：" + obj.name + " 吗？")
+            }
+        });
+        $("#modal_delete_project").modal({backdrop: true, show: true});
+    }
+    function showDeleteGroup(groupId) {
+        $("#groupId").val(groupId);
+        var id = $("#userId").val();
+        $.ajax({
+            url: "/web/user/"+ id +"/modify/" + groupId,
+            type: "get",
+            data: {type:"group"},
+            dataType: "json",
+            success: function (res) {
+                var obj = res.data[0];
+                $("#modalGroupTitle").html("退出项目组：" + obj.name);
+                $("#confirmAlert2").html("确认退出项目组：" + obj.name + " 吗？")
+            }
+        });
+        $("#modal_delete_group").modal({backdrop: true, show: true});
+    }
+
+
+    function removeProject() {
+        var id = $("#userId").val();
+        var obj = {
+            projectId: $("#projectId").val()
+        }
+        $.ajax({
+            url: "/web/user/" + id + "/modify/removeProject",
+            data: JSON.stringify(obj),
+            type: "post",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                $("#modal_delete_project").modal("hide");
+                toastr.success("修改成功！");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function removeGroup() {
+        var id = $("#userId").val();
+        var obj = {
+            groupId: $("#groupId").val()
+        }
+        $.ajax({
+            url: "/web/user/"+ id +"/modify/removeGroup",
+            data: JSON.stringify(obj),
+            type: "post",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                $("#modal_delete_group").modal("hide");
+                toastr.success("修改成功！");
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function save() {
+        aegis.clearErrors();
+        var id = $("#userId").val();
+        var obj = {
+            name: $("#name").val(),
+            email: $("#email").val(),
+            deactivateAt: $("#deactivateAt").val(),
+            projectSelector: $("#projectSelector").select2('val'),
+            userId: id
+        }
+        $.ajax({
+            url: "/web/user/"+ id +"/modify/save",
+            data: JSON.stringify(obj),
+            type: "post",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    toastr.success("修改成功！");
+                } else {
+                    aegis.showErrors(res.data);
+                }
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
+    }
+
+    function showResetPassword() {
+      $("#modal_resetPassword").modal("show");
+    }
+
+    function resetPassword() {
+        var obj = {
+            pwd1: $("#pwd1").val(),
+            pwd2: $("#pwd2").val()
+        }
+        $.ajax({
+            url: "/web/user/resetPassword",
+            type: "post",
+            data: JSON.stringify(obj),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    $("#modal_resetPassword").modal("hide");
+                    toastr.success("修改成功！");
+                } else {
+                    aegis.showErrors(res.data);
+                }
+            }
+        });
+    }
 
 </script>
 </body>

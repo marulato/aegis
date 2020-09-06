@@ -32,29 +32,30 @@ public class BeanUtils {
                 }
                 if (targetField.getType() == dtoField.getType()) {
                     Reflections.setValue(targetField, type, instance, Reflections.getValue(dtoField, dtoType, dto));
-                }
-                if (targetField.getType() == Date.class || targetField.getType() == java.sql.Date.class) {
-                    String dateString = (String) Reflections.getValue(dtoField, dtoType, dto);
-                    if (StringUtils.isNotBlank(dateString)) {
-                        Reflections.setValue(targetField, type, instance, DateUtils.parseDatetime(dateString));
+                } else {
+                    if (targetField.getType() == Date.class || targetField.getType() == java.sql.Date.class) {
+                        String dateString = (String) Reflections.getValue(dtoField, dtoType, dto);
+                        if (StringUtils.isNotBlank(dateString)) {
+                            Reflections.setValue(targetField, type, instance, DateUtils.parseDatetime(dateString));
+                        }
                     }
-                }
-                if (targetField.getType() == int.class || targetField.getType() == Integer.class) {
-                    String intString = (String) Reflections.getValue(dtoField, dtoType, dto);
-                    if (StringUtils.isNotBlank(intString)) {
-                        Reflections.setValue(targetField, type, instance, Integer.parseInt(intString));
+                    if (targetField.getType() == int.class || targetField.getType() == Integer.class) {
+                        String intString = (String) Reflections.getValue(dtoField, dtoType, dto);
+                        if (StringUtils.isNotBlank(intString)) {
+                            Reflections.setValue(targetField, type, instance, Integer.parseInt(intString));
+                        }
                     }
-                }
-                if (targetField.getType() == long.class || targetField.getType() == Long.class) {
-                    String longString = (String) Reflections.getValue(dtoField, dtoType, dto);
-                    if (StringUtils.isNotBlank(longString)) {
-                        Reflections.setValue(targetField, type, instance, Long.parseLong(longString));
+                    if (targetField.getType() == long.class || targetField.getType() == Long.class) {
+                        String longString = (String) Reflections.getValue(dtoField, dtoType, dto);
+                        if (StringUtils.isNotBlank(longString)) {
+                            Reflections.setValue(targetField, type, instance, Long.parseLong(longString));
+                        }
                     }
-                }
-                if (targetField.getType() == double.class || targetField.getType() == Double.class) {
-                    String doubleString = (String) Reflections.getValue(dtoField, dtoType, dto);
-                    if (StringUtils.isNotBlank(doubleString)) {
-                        Reflections.setValue(targetField, type, instance, Double.parseDouble(doubleString));
+                    if (targetField.getType() == double.class || targetField.getType() == Double.class) {
+                        String doubleString = (String) Reflections.getValue(dtoField, dtoType, dto);
+                        if (StringUtils.isNotBlank(doubleString)) {
+                            Reflections.setValue(targetField, type, instance, Double.parseDouble(doubleString));
+                        }
                     }
                 }
             }

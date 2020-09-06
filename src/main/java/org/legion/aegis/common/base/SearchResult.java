@@ -18,7 +18,6 @@ public class  SearchResult <E> implements Serializable {
         this.resultList = new ArrayList<>();
         if (resultList != null) {
             this.resultList.addAll(resultList);
-            totalCounts = resultList.size();
             draw = param.getDraw();
         }
     }

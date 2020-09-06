@@ -42,13 +42,6 @@
             <td width="100%" colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td width="10%" class="header" ><br/><b> 项目 </b></td>
-            <td width="90%" class="content" ><br/><b> : &nbsp;&nbsp; ${project} </b></td>
-          </tr>
-          <tr>
-            <td width="100%" colspan="2">&nbsp;</td>
-          </tr>
-          <tr>
             <td width="10%" class="header" ><br/><b> 开通日期 </b></td>
             <td width="90%" class="content" ><br/><b> : &nbsp;&nbsp; ${dateGenerated} </b></td>
           </tr>

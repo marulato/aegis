@@ -60,6 +60,11 @@
       <div class="container-fluid">
         <form id="mainForm">
           <div class="col-12">
+            <div class="alert alert-success alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <h5><i class="icon fas fa-check"></i> 账户创建成功！</h5>
+              账户 <span th:text="${user.loginId}"></span>已创建成功，已向对应的邮件地址发送通知邮件
+            </div>
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">用户信息</h3>
@@ -71,59 +76,42 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <dl class="row">
-                  <dt class="col-sm-4">登录ID</dt>
-                  <dd class="col-sm-8" th:text="${user.loginId}"></dd>
+                <div class="row">
+                  <dl class="row">
+                    <dt class="col-sm-4">登录ID</dt>
+                    <dd class="col-sm-8" th:text="${user.loginId}"></dd>
 
-                  <dt class="col-sm-4">用户名</dt>
-                  <dd class="col-sm-8" th:text="${user.name}"></dd>
+                    <dt class="col-sm-4">用户名</dt>
+                    <dd class="col-sm-8" th:text="${user.name}"></dd>
 
-                  <dt class="col-sm-4">邮箱</dt>
-                  <dd class="col-sm-8" th:text="${user.email}"></dd>
+                    <dt class="col-sm-4">邮箱</dt>
+                    <dd class="col-sm-8" th:text="${user.email}"></dd>
 
-                  <dt class="col-sm-4">状态</dt>
-                  <dd class="col-sm-8" th:text="${user.statusDesc}"></dd>
+                    <dt class="col-sm-4">状态</dt>
+                    <dd class="col-sm-8" th:text="${user.statusDesc}"></dd>
 
-                  <dt class="col-sm-4">权限</dt>
-                  <dd class="col-sm-8" th:text="${user.roleName}"></dd>
+                    <dt class="col-sm-4">权限</dt>
+                    <dd class="col-sm-8" th:text="${user.roleName}"></dd>
 
-                  <dt class="col-sm-4">有效期</dt>
-                  <dd class="col-sm-8" th:text="${user.activatedAt} + ' - ' + ${user.deactivatedAt}"></dd>
-                </dl>
-              </div>
-            </div>
+                    <dt class="col-sm-4">有效期</dt>
+                    <dd class="col-sm-8" th:text="${user.activatedAt} + ' - ' + ${user.deactivatedAt}"></dd>
 
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">项目信息</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
-                    <i class="fas fa-minus"></i>
-                  </button>
+                    <dt class="col-sm-4">项目（组）</dt>
+                    <dd class="col-sm-8" th:each="pjt, stats:${projects}" th:text="${pjt.projectName}"></dd>
+                  </dl>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <button type="button" class="btn btn-success btn-block" onclick="download()">
+                      <i class="fa fa-download"></i>
+                      下载通知PDF
+                    </button>
+                  </div>
                 </div>
               </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table id="projectTable" class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>项目组</th>
-                      <th>项目</th>
-                      <th>邀请人</th>
-                      <th>加入日期</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:each="project, stats:${projects}">
-                      <td th:text="${project.groupName}"></td>
-                      <td th:text="${project.projectName}"></td>
-                      <td th:text="${project.assignedBy}"></td>
-                      <td th:text="${project.assignedAt}"></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </div>
+
           </div>
         </form>
       </div>
@@ -182,6 +170,10 @@
 
 
     });
+
+    function download() {
+      location.href = "/web/user/add/download";
+    }
 
 </script>
 </body>

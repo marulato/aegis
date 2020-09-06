@@ -8,6 +8,7 @@ public class UserAccountVO extends BaseVO {
     private String loginId;
     private String name;
     private String email;
+    private String roleId;
     private String roleName;
     private String status;
     private String statusDesc;
@@ -45,6 +46,14 @@ public class UserAccountVO extends BaseVO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
     }
 
     public String getRoleName() {

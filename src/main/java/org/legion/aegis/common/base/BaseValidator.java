@@ -10,8 +10,9 @@ public interface BaseValidator {
         return new HashMap<>();
     }
 
-    default Map<String, String> doValidate(Map<String, String> params) {
+    default Map<String, String> doValidate(Map<String, Object> params) {
         return new HashMap<>();
     }
+
 
 }

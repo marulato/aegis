@@ -40,10 +40,10 @@ public class PortalLoginService {
                 appContext.setDomain(user.getDomain());
                 appContext.setAppContext(request);
                 appContext.setUserId(user.getId());
-                boolean isPwdMatch = userAcctService.isPasswordMatch(webUser.getPassword(), user.getPassword());
-                if (isPwdMatch) {
-                    String accountStatus = checkStatus(user);
-                    if (AppConsts.ACCOUNT_STATUS_ACTIVE.equals(accountStatus)) {
+                String accountStatus = checkStatus(user);
+                if (AppConsts.ACCOUNT_STATUS_ACTIVE.equals(accountStatus)) {
+                    boolean isPwdMatch = userAcctService.isPasswordMatch(webUser.getPassword(), user.getPassword());
+                    if (isPwdMatch) {
                         status = LoginStatus.SUCCESS;
                         List<UserRoleAssign> userRoleAssigns = userAcctService.getActiveRoleAssignById(user.getId());
                         List<UserRole> roles = new ArrayList<>();
@@ -51,20 +51,21 @@ public class PortalLoginService {
                             UserRole role = userAcctService.getRoleById(userRoleAssign.getRoleId());
                             roles.add(role);
                         }
+                        webUser.setIsFirstLogin(user.getIsFirstLogin());
                         appContext.setAllRoles(roles);
-                    } else if (AppConsts.ACCOUNT_STATUS_INACTIVE.equals(accountStatus)) {
-                        status = LoginStatus.ACCOUNT_INACTIVE;
-                    } else if (AppConsts.ACCOUNT_STATUS_EXPIRED.equals(accountStatus)) {
-                        status = LoginStatus.ACCOUNT_EXPIRED;
-                    } else if (AppConsts.ACCOUNT_STATUS_LOCKED.equals(accountStatus)) {
-                        status = LoginStatus.ACCOUNT_LOCKED;
-                    } else if (AppConsts.ACCOUNT_STATUS_FROZEN.equals(accountStatus)) {
-                        status = LoginStatus.ACCOUNT_FROZEN;
-                    } else if (AppConsts.ACCOUNT_STATUS_VOIDED.equals(accountStatus)) {
-                        status = LoginStatus.VOIDED;
+                    } else {
+                        status = LoginStatus.INVALID_PASS;
                     }
-                } else {
-                    status = LoginStatus.INVALID_PASS;
+                } else if (AppConsts.ACCOUNT_STATUS_INACTIVE.equals(accountStatus)) {
+                    status = LoginStatus.ACCOUNT_INACTIVE;
+                } else if (AppConsts.ACCOUNT_STATUS_EXPIRED.equals(accountStatus)) {
+                    status = LoginStatus.ACCOUNT_EXPIRED;
+                } else if (AppConsts.ACCOUNT_STATUS_LOCKED.equals(accountStatus)) {
+                    status = LoginStatus.ACCOUNT_LOCKED;
+                } else if (AppConsts.ACCOUNT_STATUS_FROZEN.equals(accountStatus)) {
+                    status = LoginStatus.ACCOUNT_FROZEN;
+                } else if (AppConsts.ACCOUNT_STATUS_VOIDED.equals(accountStatus)) {
+                    status = LoginStatus.VOIDED;
                 }
                 logLogin(user, status, request);
             } else {
@@ -83,22 +84,22 @@ public class PortalLoginService {
                 user.setLastLoginIp(SessionManager.getIpAddress(request));
                 user.setLastLoginSuccessDt(user.getLastLoginAttemptDt());
                 user.setLoginFailedTimes(0);
-                if (StringUtils.isBlank(user.getIsFirstLogin())) {
-                    user.setIsFirstLogin(AppConsts.YES);
-                }
+                //user.setIsFirstLogin(AppConsts.NO);
             } else if (status == LoginStatus.INVALID_PASS) {
                 user.setLoginFailedTimes(user.getLoginFailedTimes() + 1);
-                int maxFailedTimes = 0;
+                Integer maxFailedTimes = 0;
                 String maxFailedTimesStr = ConfigUtils.get("security.login.maxFailedTimes");
                 if (StringUtils.isBlank(maxFailedTimesStr) || !StringUtils.isInteger(maxFailedTimesStr)
                         || Integer.parseInt(maxFailedTimesStr) <= 1 ) {
                     maxFailedTimes = 10;
+                } else {
+                    maxFailedTimes = StringUtils.parseIfIsInteger(maxFailedTimesStr);
                 }
-                if (user.getLoginFailedTimes() >= maxFailedTimes) {
+                if (maxFailedTimes != null && user.getLoginFailedTimes() >= maxFailedTimes) {
                     user.setStatus(AppConsts.ACCOUNT_STATUS_LOCKED);
                 }
             } else {
-                user.setLoginFailedTimes(0);
+                user.setLoginFailedTimes(user.getLoginFailedTimes() + 1);
             }
             UserLoginHistory loginHistory = new UserLoginHistory();
             loginHistory.setUserAcctId(user.getId());

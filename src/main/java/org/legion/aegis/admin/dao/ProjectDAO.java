@@ -41,4 +41,9 @@ public interface ProjectDAO {
     List<Project> getProjectsUnderGroup(Long id);
 
     List<ProjectGroup> getProjectGroupUnderUser(Long userId, String role);
+
+    Integer searchProjectCount(@Param("sp") SearchParam param);
+
+    Integer searchGroupCount(@Param("sp") SearchParam param);
+
 }

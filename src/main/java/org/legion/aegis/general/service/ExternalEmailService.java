@@ -107,10 +107,18 @@ public class ExternalEmailService {
     }
 
     public void sendEmail(String[] sentTo, String[] cc, String subject, String content) throws Exception {
+        String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
+        if (!StringUtils.parseBoolean(isEmailEnabled)) {
+            return;
+        }
         sendEmail(ConfigUtils.get("server.smtp.username"), sentTo, cc, subject, content, null, null);
     }
 
     public void sendEmail(EmailEntity emailEntity) throws Exception {
+        String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
+        if (!StringUtils.parseBoolean(isEmailEnabled)) {
+            return;
+        }
         if (emailEntity != null) {
             String[] sentTo = emailEntity.getSentTo().split(";");
             String[] ccTo = emailEntity.getCc().split(";");

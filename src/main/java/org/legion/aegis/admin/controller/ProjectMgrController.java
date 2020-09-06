@@ -164,13 +164,13 @@ public class ProjectMgrController {
     @PostMapping("/web/project/module")
     @ResponseBody
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
-    public AjaxResponseBody saveModule(@RequestBody Map<String, String> params) {
+    public AjaxResponseBody saveModule(@RequestBody Map<String, Object> params) {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
-        String id = params.get("moduleId");
-        String projectId = params.get("projectId");
-        String moduleName = params.get("moduleName");
-        String moduleDesc = params.get("moduleDesc");
-        String action = params.get("action");
+        String id = (String) params.get("moduleId");
+        String projectId = (String) params.get("projectId");
+        String moduleName = (String) params.get("moduleName");
+        String moduleDesc = (String) params.get("moduleDesc");
+        String action = (String) params.get("action");
         if (!"delete".equals(action)) {
             Map<String, String> errors = new ModuleValidator().doValidate(params);
             if (!errors.isEmpty()) {
@@ -213,11 +213,11 @@ public class ProjectMgrController {
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
         searchParam.addParam("role", appContext.getCurrentRole().getId());
-        List<ProjectVO> projectList = projectService.search(searchParam);
-        for (ProjectVO vo : projectList) {
+        SearchResult<ProjectVO> searchResult = projectService.search(searchParam);
+        for (ProjectVO vo : searchResult.getResultList()) {
             vo.setRole(appContext.getRoleId());
         }
-        manager.addDataObject(new SearchResult<>(projectList, searchParam));
+        manager.addDataObject(searchResult);
         return manager.respond();
     }
 
@@ -269,8 +269,7 @@ public class ProjectMgrController {
         AppContext appContext = AppContext.getAppContext(request);
         searchParam.addParam("userId", appContext.getUserId());
         searchParam.addParam("role", appContext.getCurrentRole().getId());
-        List<ProjectGroupVO> projectGroupList = projectService.searchGroup(searchParam);
-        manager.addDataObject(new SearchResult<>(projectGroupList, searchParam));
+        manager.addDataObject(projectService.searchGroup(searchParam));
         return manager.respond();
     }
 

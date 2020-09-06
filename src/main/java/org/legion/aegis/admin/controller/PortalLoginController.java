@@ -6,6 +6,7 @@ import org.legion.aegis.admin.entity.UserRole;
 import org.legion.aegis.admin.service.PortalLoginService;
 import org.legion.aegis.admin.service.UserAccountService;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.aop.permission.RequiresLogin;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
@@ -32,6 +33,7 @@ public class PortalLoginController {
 
     private final PortalLoginService loginService;
     private final UserAccountService accountService;
+    private static final String SESSION_KEY = "SESSION_USER";
 
     private static final Logger log = LoggerFactory.getLogger(PortalLoginController.class);
 
@@ -46,7 +48,7 @@ public class PortalLoginController {
      * @return Login page
      */
     @GetMapping("/web/login")
-    public String getLoginPage(HttpServletRequest request) {
+    public String getLoginPage() {
         log.info(LogUtils.around("Enter login page"));
         return "admin/login";
     }
@@ -55,6 +57,16 @@ public class PortalLoginController {
     public String getDefaultIndexPage(HttpServletRequest request) {
         log.info(LogUtils.around("Enter default Landing page"));
         return "index";
+    }
+
+    @GetMapping("/web/login/changePassword")
+    public String getChangePasswordPage() {
+        if (SessionManager.getAttribute(SESSION_KEY) != null) {
+            SessionManager.removeAttribute(SESSION_KEY);
+            return "admin/loginChangePwd";
+        } else {
+            throw new PermissionDeniedException();
+        }
     }
 
     /**
@@ -80,16 +92,20 @@ public class PortalLoginController {
                 } else {
                     responseMgr.addDataObject(0);
                 }
+                if (AppConsts.YES.equals(webUser.getIsFirstLogin())) {
+                    responseMgr.addDataObject("FirstLogin");
+                    SessionManager.setAttribute(SESSION_KEY, webUser);
+                }
             } else if (loginStatus == LoginStatus.ACCOUNT_EXPIRED) {
-                responseMgr.addError("userId", "账户已过期");
+                responseMgr.addError("loginId", "账户已过期");
             } else if (loginStatus == LoginStatus.ACCOUNT_LOCKED) {
-                responseMgr.addError("userId", "账户已锁定");
+                responseMgr.addError("loginId", "账户已锁定");
             } else if (loginStatus == LoginStatus.ACCOUNT_INACTIVE) {
-                responseMgr.addError("userId", "账户尚未启用");
+                responseMgr.addError("loginId", "账户尚未启用");
             } else if (loginStatus == LoginStatus.ACCOUNT_FROZEN) {
-                responseMgr.addError("userId", "账户已冻结");
+                responseMgr.addError("loginId", "账户已冻结");
             } else {
-                responseMgr.addError("userId", "");
+                responseMgr.addError("loginId", "");
                 responseMgr.addError("password", "用户名或密码不正确");
             }
         }

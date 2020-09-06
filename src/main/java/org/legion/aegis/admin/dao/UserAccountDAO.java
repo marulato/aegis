@@ -1,9 +1,6 @@
 package org.legion.aegis.admin.dao;
 
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.legion.aegis.admin.entity.UserAccount;
 import org.legion.aegis.admin.entity.UserProjectAssign;
 import org.legion.aegis.admin.entity.UserRole;
@@ -42,10 +39,26 @@ public interface UserAccountDAO {
 
     List<UserSearchVO> search(@Param("sp") SearchParam param);
 
+    Integer searchCount(@Param("sp") SearchParam param);
+
     @Select("SELECT * FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{userId}")
     List<UserProjectAssign> getUserProjectAssignments(Long userId);
 
-    List<UserProjectVO> searchUserProjects(Long userId);
+    @Select("SELECT * FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND GROUP_ID = #{param2} ")
+    List<UserProjectAssign> getUserProjectAssignmentsByUserIdAndGroup(Long userId, Long groupId);
+
+    @Select("SELECT * FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND PROJECT_ID = #{param2}")
+    UserProjectAssign getProjectAssignmentByUserIdAndProjectId(Long userId, Long projectId);
+
+    List<UserProjectVO> searchUserProjects(Long userId, String role);
 
     UserAccountVO searchUserInfo(Long userId);
+
+    List<UserAccount> getUserUnderSupervisor(Long supervisorId);
+
+    @Delete("DELETE FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND PROJECT_ID = #{param2}")
+    void deleteProjectAssign(Long userId, Long projectId);
+
+    @Delete("DELETE FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND GROUP_ID = #{param2}")
+    void deleteGroupAssign(Long userId, Long groupId);
 }

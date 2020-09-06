@@ -16,13 +16,13 @@ public class ModuleValidator implements BaseValidator {
 
 
     @Override
-    public Map<String, String> doValidate(Map<String, String> params) {
+    public Map<String, String> doValidate(Map<String, Object> params) {
         Map<String, String> errors = new HashMap<>();
-        String moduleName = params.get("moduleName");
-        String moduleDesc = params.get("moduleDesc");
-        String id = params.get("moduleId");
-        String projectId = params.get("projectId");
-        String action = params.get("action");
+        String moduleName = (String) params.get("moduleName");
+        String moduleDesc = (String) params.get("moduleDesc");
+        String id = (String) params.get("moduleId");
+        String projectId = (String) params.get("projectId");
+        String action = (String) params.get("action");
         ProjectService service = SpringUtils.getBean(ProjectService.class);
         if (StringUtils.isBlank(moduleName) || moduleName.length() > 64) {
             errors.put("moduleName", "请输入正确的名称，不超过64字符");

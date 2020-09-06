@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard</title>
+  <title>AEGIS Issue Tracker</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -111,12 +111,12 @@
               <div class="col-12">
                 <div class="row">
                   <div class="col-md-6">
-                    <button type="button" class="btn btn-default float-right" style="font-size: 14px">
+                    <button type="button" class="btn btn-default float-right" style="font-size: 14px" onclick="reset()">
                       <i class="fa fa-redo-alt"></i>
                       </button>
                   </div>
                   <div class="col-md-6">
-                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px">
+                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="refresh()">
                       <i class="fa fa-search"></i>
                       </button>
                   </div>
@@ -141,13 +141,14 @@
               <table id="userTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>
-                  <th>用户名</th>
-                  <th>邮箱</th>
-                  <th>类型</th>
-                  <th>项目</th>
-                  <th>状态</th>
-                  <th>上次登录时间</th>
-                  <th>操作</th>
+                  <th style="width: 10%">账号</th>
+                  <th style="width: 10%">用户名</th>
+                  <th style="width: 10%">邮箱</th>
+                  <th style="width: 10%">权限</th>
+                  <th style="width: 40%">项目 / 项目组</th>
+                  <th style="width: 5%">状态</th>
+                  <th style="width: 10%">上次登录时间</th>
+                  <th style="width: 5%">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -215,7 +216,7 @@
                 var obj = {
                     loginId : $("#loginId").val(),
                     email : $("#email").val(),
-                    role: $("#role").val(),
+                    roleParam: $("#roleParam").val(),
                     project: $("#project").val()
                 }
                 var args = {
@@ -247,6 +248,7 @@
             },
             columns: [
                 {"data": "loginId", "defaultContent": "-"},
+                {"data": "name", "defaultContent": "-"},
                 {"data": "email", "defaultContent": "-"},
                 {"data": "role", "defaultContent": "-"},
                 {"data": "project", "defaultContent": "-"},
@@ -254,8 +256,7 @@
                 {"data": "lastLoginSuccessDt", "defaultContent": "-"},
                 {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
                         return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-user-edit'></i></a>"+
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='showDelete("+full.id+")' title='解锁'><i class='fa fa-unlock-alt'></i></a>";
+                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-user-edit'></i></a>";
                     }}
             ],
             language: aegis.locale
@@ -273,6 +274,14 @@
     function refresh() {
       tableView.draw();
     }
+
+  function reset() {
+      $("#loginId").val('');
+      $("#email").val('');
+      $("#roleParam").val('0');
+      $("#project").val('0');
+      refresh();
+  }
 </script>
 </body>
 </html>

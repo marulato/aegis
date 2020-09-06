@@ -7,9 +7,11 @@ public class UserProjectVO extends BaseVO {
     private Long projectId;
     private Long groupId;
     private String projectName;
+    private String isPublic;
     private String groupName;
     private String assignedBy;
     private String assignedAt;
+    private boolean hasPermission;
 
     public Long getProjectId() {
         return projectId;
@@ -35,6 +37,14 @@ public class UserProjectVO extends BaseVO {
         this.projectName = projectName;
     }
 
+    public String getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(String isPublic) {
+        this.isPublic = isPublic;
+    }
+
     public String getGroupName() {
         return groupName;
     }
@@ -57,5 +67,13 @@ public class UserProjectVO extends BaseVO {
 
     public void setAssignedAt(String assignedAt) {
         this.assignedAt = assignedAt;
+    }
+
+    public boolean isHasPermission() {
+        return hasPermission;
+    }
+
+    public void setHasPermission(boolean hasPermission) {
+        this.hasPermission = hasPermission;
     }
 }
