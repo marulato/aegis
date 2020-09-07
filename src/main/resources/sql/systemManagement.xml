@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.legion.aegis.admin.dao.SystemMgrDAO">
+    <select id="searchIssueStatus" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.admin.vo.IssueStatusVO">
+        SELECT
+            STATUS_CODE,
+            DISPLAY_NAME,
+            DESCRIPTION,
+            COLOR,
+            CASE IS_SYSTEM WHEN 'Y' THEN '是' ELSE '否' END AS IS_SYSTEM,
+            DATE_FORMAT(CREATED_AT, '%Y/%m/%d') AS CREATED_AT
+        FROM CM_ISSUE_STATUS
+        <where>
+            <if test="sp.params.status != null and sp.params.status != ''">
+                AND STATUS_CODE = #{sp.params.status}
+            </if>
+            <if test="sp.params.displayName != null and sp.params.displayName != ''">
+                AND DISPLAY_NAME = #{sp.params.displayName}
+            </if>
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND DESCRIPTION = #{sp.params.description}
+            </if>
+        </where>
+        <choose>
+            <when test="sp.orderColumnNo == 0">
+                ORDER BY STATUS_CODE
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 1">
+                ORDER BY DISPLAY_NAME
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 2">
+                ORDER BY DESCRIPTION
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY IS_SYSTEM
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY COLOR
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY CREATED_AT
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+        </choose>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchIssueStatusCounts" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(STATUS_CODE) FROM CM_ISSUE_STATUS
+        <where>
+            <if test="sp.params.status != null and sp.params.status != ''">
+                AND STATUS_CODE = #{sp.params.status}
+            </if>
+            <if test="sp.params.displayName != null and sp.params.displayName != ''">
+                AND DISPLAY_NAME = #{sp.params.displayName}
+            </if>
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND DESCRIPTION = #{sp.params.description}
+            </if>
+        </where>
+    </select>
+</mapper>

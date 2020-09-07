@@ -212,11 +212,14 @@
                 aegis.callDataTableAjax("/web/systemManagement/issueStatus/list", obj, data, callback);
             },
             columns: [
-                {"data": "status", "defaultContent": "-"},
+                {"data": "statusCode", "defaultContent": "-"},
                 {"data": "displayName", "defaultContent": "-"},
                 {"data": "description", "defaultContent": "-"},
                 {"data": "isSystem", "defaultContent": "-"},
-                {"data": "color", "defaultContent": "-"},
+                {"data": "color", "defaultContent": "-", "render": function (data, type, full, meta) {
+                    return "<span style='width:50%; height: 30px; display: inline-block; background-color: "+full.color+"'>&nbsp;</span>" +
+                        "<span style='display: inline-block; width:50%; height: 30px;'>&nbsp;"+ full.color +"</span>";
+                    }},
                 {"data": "createdAt", "defaultContent": "-"},
                 {
                     "data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
