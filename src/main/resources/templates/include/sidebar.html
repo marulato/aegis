@@ -121,7 +121,7 @@
           </ul>
         </li>
 
-        <li th:class="${(selected == '5.1' || selected == '5.2') ? 'nav-item menu-open' : 'nav-item'}">
+        <li th:if="${role == 'SYSADMIN' || role == 'DEV_S' || role == 'QA_S'}" th:class="${(selected == '5.1' || selected == '5.2') ? 'nav-item menu-open' : 'nav-item'}">
           <a href="#" th:class="${(selected == '5.1' || selected == '5.2') ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-user-alt"></i>
             <p>
@@ -144,6 +144,32 @@
             </li>
           </ul>
         </li>
+
+        <li th:if="${role == 'SYSADMIN'}" th:class="${(selected == '6.1' || selected == '6.2') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#" th:class="${(selected == '6.1' || selected == '6.2') ? 'nav-link active' : 'nav-link'}">
+            <i class="nav-icon fas fa-tools"></i>
+            <p>
+              系统设置
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/web/systemManagement/issueStatus" th:class="${selected == '6.1'? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>问题状态配置</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" th:class="${selected == '6.2'? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>功能配置</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

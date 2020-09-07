@@ -88,3 +88,36 @@ aegis.toastrOptions = { // toastr配置
     "showMethod": "fadeIn", //显示时的动画方式
     "hideMethod": "fadeOut" //消失时的动画方式
 }
+
+aegis.callDataTableAjax = function (url, param, tableData, callback) {
+    var pageSize = tableData.length;
+    var pageNo = (tableData.start) / tableData.length + 1;
+    var args = {
+        pageNo: pageNo,
+        pageSize: pageSize,
+        orderColumnNo: tableData.order[0]["column"],
+        order: tableData.order[0]["dir"],
+        draw: tableData.draw,
+        params: param
+    };
+    $.ajax({
+        url: url,
+        type: "post",
+        data: JSON.stringify(args),
+        contentType: "application/json;charset=utf-8",
+        dataType: "json",
+        cache: false,
+        success: function (res) {
+            var tableList = res.data[0];
+            var returnData = {};
+            returnData.draw = tableList.draw;
+            returnData.recordsTotal = tableList.totalCounts;
+            returnData.recordsFiltered = tableList.totalCounts;
+            returnData.data = tableList.resultList;
+            callback(returnData);
+        },
+        error: function () {
+            location.href = "/web/error";
+        }
+    });
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard</title>
+  <title>AEGIS Issue Tracker</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -181,7 +181,7 @@
       <div class="modal-body">
         <div class="alert alert-warning" style="display:none" id="ban_alert">
           <h5><i class="icon fas fa-ban"></i>警告</h5>
-          禁用后该项目将仅对管理员可见，该项目将无法被授予其他用户，或被用于提交和查看问题
+          停用后该项目将仅对管理员可见，该项目将无法被授予其他用户，或被用于提交和查看问题
         </div>
 
         <div class="alert alert-info" id="activate_info" style="display:none">
@@ -210,7 +210,7 @@
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
         <button type="button" id="ban_btn" class="btn btn-danger" style="font-size: 14px;display: none"
-                onclick="doBan()">确认禁用
+                onclick="doBan()">确认停用
         </button>
         <button type="button" id="activate_btn" class="btn btn-success" style="font-size: 14px;display: none"
                 onclick="doActivate()">确认启用
@@ -260,42 +260,13 @@
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
-                var pageSize = data.length;
-                var pageNo = (data.start) / data.length + 1;
                 var obj = {
                     projectName: $("#projectName").val(),
                     description: $("#description").val(),
                     projectGroup: $("#projectGroup").val()
                 }
-                var args = {
-                    pageNo: pageNo,
-                    pageSize: pageSize,
-                    orderColumnNo: data.order[0]["column"],
-                    order: data.order[0]["dir"],
-                    draw: data.draw,
-                    params: obj
-                };
+                aegis.callDataTableAjax("/web/project/list", obj, data, callback);
 
-                $.ajax({
-                    url: "/web/project/list",
-                    type: "post",
-                    data: JSON.stringify(args),
-                    contentType: "application/json",
-                    dataType: "json",
-                    cache: false,
-                    success: function (res) {
-                        var tableList = res.data[0];
-                        var returnData = {};
-                        returnData.draw = tableList.draw;
-                        returnData.recordsTotal = tableList.totalCounts;
-                        returnData.recordsFiltered = tableList.totalCounts;
-                        returnData.data = tableList.resultList;
-                        callback(returnData);
-                    },
-                    error: function () {
-                        location.href = "/web/error";
-                    }
-                });
             },
             columns: [
                 {"data": "name", "defaultContent": "-"},

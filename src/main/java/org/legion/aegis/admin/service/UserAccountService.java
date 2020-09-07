@@ -119,7 +119,7 @@ public class UserAccountService {
     public List<UserRole> getAllRoles() {
         return userAccountDAO.getAllRoles();
     }
-    public List<UserRole> getAllRolesForSearchSelector() {
+    public List<UserRole> getRoleSelectorForSearch(AppContext context) {
         List<UserRole> roles = userAccountDAO.getAllRoles();
         UserRole userRole = new UserRole();
         userRole.setId("0");
@@ -234,7 +234,7 @@ public class UserAccountService {
                 if (groupNames.size() <= 3) {
                     vo.setProject(Joiner.on("<br/>").join(groupNames));
                 } else {
-                    vo.setProject(Joiner.on("<br/>").join(Lists.partition(groupNames, 3)) + "...");
+                    vo.setProject(Joiner.on("<br/>").join(CollectionUtils.subList(groupNames, 0, 3)) + "...");
                 }
             } else if (isDevQA(vo.getRoleId())) {
                 List<Project> projectList = projectService.getProjectsForDevAndQA(vo.getId());

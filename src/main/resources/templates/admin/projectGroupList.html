@@ -190,41 +190,11 @@
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
-                var pageSize = data.length;
-                var pageNo = (data.start) / data.length + 1;
                 var obj = {
                     groupName: $("#groupName").val(),
                     description: $("#description").val()
                 }
-                var args = {
-                    pageNo: pageNo,
-                    pageSize: pageSize,
-                    orderColumnNo:data.order[0]["column"],
-                    order: data.order[0]["dir"],
-                    draw: data.draw,
-                    params: obj
-                };
-
-                $.ajax({
-                    url: "/web/projectGroup/list",
-                    type: "post",
-                    data: JSON.stringify(args),
-                    contentType: "application/json",
-                    dataType:"json",
-                    cache : false,
-                    success: function (res) {
-                        var tableList = res.data[0];
-                        var returnData = {};
-                        returnData.draw = tableList.draw;
-                        returnData.recordsTotal = tableList.totalCounts;
-                        returnData.recordsFiltered = tableList.totalCounts;
-                        returnData.data = tableList.resultList;
-                        callback(returnData);
-                    },
-                    error: function () {
-                        location.href = "/web/error";
-                    }
-                });
+                aegis.callDataTableAjax("/web/projectGroup/list", obj, data, callback);
             },
             columns: [
                 {"data": "name", "defaultContent": "-"},

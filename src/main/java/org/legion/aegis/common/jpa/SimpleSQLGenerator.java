@@ -7,7 +7,7 @@ import org.legion.aegis.common.cache.ORMCache;
 
 public class SimpleSQLGenerator extends AbstractSQLGenerator {
 
-    private ORMCache ormCache = CachePool.getCache(ORMCache.KEY, ORMCache.class);
+    private final ORMCache ormCache = CachePool.getCache(ORMCache.KEY, ORMCache.class);
     @Override
     public String insert(BasePO entity) {
         StringBuilder insert = new StringBuilder();

@@ -20,7 +20,7 @@ public abstract class AbstractSQLGenerator {
             if (ormEntity.getPrimaryKeys().get(field) != null && ormEntity.getPrimaryKeys().get(field)) {
                 values.append("NULL, ");
             } else {
-                values.append("#{" + field + "}").append(", ");
+                values.append("#{").append(field).append("}").append(", ");
             }
         }
         columns.delete(columns.length() - 2, columns.length());
@@ -33,16 +33,14 @@ public abstract class AbstractSQLGenerator {
     protected String updateClause(ORMEntity ormEntity) {
         StringBuilder update = new StringBuilder();
         update.append(" SET ");
-        ormEntity.getFieldColumnMap().forEach((field, column) -> {
-            update.append(column).append(" = ").append("#{" + field + "}").append(", ");
-        });
+        ormEntity.getFieldColumnMap().forEach((field, column) ->
+                update.append(column).append(" = ").append("#{").append(field).append("}").append(", "));
         update.delete(update.length() - 2, update.length());
         return update.append(appendWhereClause(ormEntity)).toString();
     }
 
     protected String whereClause(ORMEntity ormEntity) {
-        StringBuilder where = new StringBuilder();
-        return where.append(appendWhereClause(ormEntity)).toString();
+        return String.valueOf(appendWhereClause(ormEntity));
     }
 
     private StringBuilder appendWhereClause(ORMEntity ormEntity) {

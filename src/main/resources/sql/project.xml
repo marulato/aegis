@@ -48,18 +48,26 @@
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 1">
-                ORDER BY PJT.DESCRIPTION
+                ORDER BY GRP.NAME
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 2">
-                ORDER BY PJT.STATUS
+                ORDER BY PJT.DESCRIPTION
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 3">
-                ORDER BY PJT.IS_PUBLIC
+                ORDER BY PJT.STATUS
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 4">
+                ORDER BY PJT.STAGE
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 5">
+                ORDER BY PJT.IS_PUBLIC
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 6">
                 ORDER BY PJT.CREATED_AT
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>

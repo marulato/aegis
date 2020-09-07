@@ -28,7 +28,7 @@
         <input type="hidden" name="browser" id="browser">
         <div class="input-group mb-3">
           <input type="password" class="form-control" name="pwd1" id="pwd1" placeholder="新密码">
-          <div class="input-group-append" name="loginId_append">
+          <div class="input-group-append" name="pwd1_append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>
             </div>
@@ -36,7 +36,7 @@
         </div>
         <div class="input-group mb-3">
           <input type="password" class="form-control" name="pwd2" id="pwd2" placeholder="确认密码">
-          <div class="input-group-append" name="password_append">
+          <div class="input-group-append" name="pwd2_append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
             </div>
@@ -44,7 +44,7 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <button type="button" class="btn btn-primary btn-block" onclick="">确认</button>
+            <button type="button" class="btn btn-primary btn-block" onclick="confirm()">确认</button>
           </div>
         </div>
       </form>
@@ -67,12 +67,29 @@
 
 <script>
 
-    function land(roleId) {
-        var role = "";
-        if (roleId !== 1) {
-            role = roleId;
-        }
-        location.href = "/web/login/landing/" + roleId;
+    function confirm() {
+        aegis.clearErrors();
+        var obj = {
+            pwd1: $("#pwd1").val(),
+            pwd2: $("#pwd2").val()
+        };
+        $.ajax({
+            url: "/web/login/changePassword",
+            type: "post",
+            data: JSON.stringify(obj),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+              if (res.status == 221) {
+                  aegis.showErrors(res.data);
+              } else {
+                  location.href = "/web/login/landing/default";
+              }
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        });
     }
 </script>
 </body>

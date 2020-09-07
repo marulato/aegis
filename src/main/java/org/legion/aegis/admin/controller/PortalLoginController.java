@@ -5,6 +5,7 @@ import org.legion.aegis.admin.entity.UserAccount;
 import org.legion.aegis.admin.entity.UserRole;
 import org.legion.aegis.admin.service.PortalLoginService;
 import org.legion.aegis.admin.service.UserAccountService;
+import org.legion.aegis.admin.validator.ResetPasswordValidator;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.aop.permission.RequiresLogin;
@@ -20,10 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -60,13 +58,13 @@ public class PortalLoginController {
     }
 
     @GetMapping("/web/login/changePassword")
-    public String getChangePasswordPage() {
-        if (SessionManager.getAttribute(SESSION_KEY) != null) {
-            SessionManager.removeAttribute(SESSION_KEY);
+    public String getChangePasswordPage(HttpServletRequest request) {
+        UserAccount userAccount = (UserAccount) SessionManager.getAttribute(SESSION_KEY);
+        if (userAccount != null && AppConsts.YES.equals(userAccount.getIsFirstLogin())) {
             return "admin/loginChangePwd";
-        } else {
-            throw new PermissionDeniedException();
         }
+        request.getSession().invalidate();
+        return "redirect:/web/login";
     }
 
     /**
@@ -94,6 +92,7 @@ public class PortalLoginController {
                 }
                 if (AppConsts.YES.equals(webUser.getIsFirstLogin())) {
                     responseMgr.addDataObject("FirstLogin");
+                    context.setLoggedIn(false);
                     SessionManager.setAttribute(SESSION_KEY, webUser);
                 }
             } else if (loginStatus == LoginStatus.ACCOUNT_EXPIRED) {
@@ -149,6 +148,26 @@ public class PortalLoginController {
         AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         if (appContext != null) {
             responseMgr.addDataObjects(appContext.getAllRoles());
+        }
+        return responseMgr.respond();
+    }
+
+    @PostMapping("/web/login/changePassword")
+    @ResponseBody
+    public AjaxResponseBody changePwdForFirstLogin(@RequestBody Map<String, Object> params) {
+        AjaxResponseManager responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Map<String, String> errors = new ResetPasswordValidator().doValidate(params);
+        if (!errors.isEmpty()) {
+            responseMgr = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            responseMgr.addErrors(errors);
+        } else {
+            UserAccount userAccount = (UserAccount) SessionManager.getAttribute(SESSION_KEY);
+            if (userAccount != null) {
+                UserAccount user = accountService.getUserByLoginId(userAccount.getLoginId());
+                userAccount.setIsFirstLogin(AppConsts.NO);
+                user.setIsFirstLogin(AppConsts.NO);
+                accountService.resetPassord(user, (String) params.get("pwd1"));
+            }
         }
         return responseMgr.respond();
     }

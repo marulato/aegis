@@ -32,7 +32,7 @@ public class PermissionAspect {
         List<String> roleIds = Arrays.asList(requiresRoles.value());
         Logical logical = requiresRoles.logical();
         AppContext context = AppContext.getFromWebThread();
-        if (context != null) {
+        if (context != null && context.isLoggedIn()) {
             log.info("Checking User -> " + context.getLoginId());
             List<String> allRoles = new ArrayList<>();
             for (UserRole role : context.getAllRoles()) {

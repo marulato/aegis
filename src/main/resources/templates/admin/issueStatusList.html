@@ -24,6 +24,7 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -33,7 +34,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('5.1', ${role})"></div>
+  <div th:replace="/include/sidebar::leftmenu('6.1', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -42,12 +43,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">用户管理</h1>
+            <h1 class="m-0 text-dark">问题状态管理</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">主页</a></li>
-              <li class="breadcrumb-item active">用户管理</li>
+              <li class="breadcrumb-item active">问题状态管理</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -58,8 +59,11 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
+
+
         <!-- table-->
         <div class="col-12">
+
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">搜索</h3>
@@ -73,36 +77,24 @@
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
-                    <label for="loginId">用户名</label>
-                    <input class="form-control" type="text" name="loginId" id="loginId">
+                    <label for="status">状态代码</label>
+                    <input type="text" class="form-control" name="status" id="status">
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
-                    <label for="email">邮箱</label>
-                    <input class="form-control" type="email" name="email" id="email">
+                    <label for="displayName">状态名称</label>
+                    <input type="text" class="form-control" name="displayName" id="displayName">
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col-md-4">
                   <div class="form-group">
-                    <label for="roleParam">用户类型</label>
-                    <select class="custom-select" type="text" name="roleParam" id="roleParam">
-                      <option th:each="role, stats:${roles}" th:value="${role.id}" th:text="${role.roleName}"></option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label for="project">所在项目</label>
-                    <select class="custom-select" type="text" name="project" id="project">
-                      <option th:each="project, stats:${projects}" th:value="${project.id}" th:text="${project.name}"></option>
-                    </select>
+                    <label for="description">状态描述</label>
+                    <input type="text" class="form-control" name="description" id="description">
                   </div>
                 </div>
               </div>
@@ -113,42 +105,41 @@
                   <div class="col-md-6">
                     <button type="button" class="btn btn-default float-right" style="font-size: 14px" onclick="reset()">
                       <i class="fa fa-redo-alt"></i>
-                      </button>
+                    </button>
                   </div>
                   <div class="col-md-6">
-                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px" onclick="refresh()">
+                    <button type="button" class="btn btn-primary float-left" style="font-size: 14px"
+                            onclick="refresh()">
                       <i class="fa fa-search"></i>
-                      </button>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
 
-        <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">用户列表</h3>
-              <button th:if="${role == 'SYSADMIN'}" type="button" class="btn btn-success btn-sm float-right" onclick="location.href = '/web/user/add'">
+              <h3 class="card-title">状态列表</h3>
+              <button type="button" class="btn btn-success btn-sm float-right"
+                      onclick="location.href='/web/systemManagement/issueStatus'">
                 <i class="fas fa-plus"></i>
-                &nbsp;创建新用户
+                添加
               </button>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="userTable" class="table table-bordered table-striped">
+              <table id="statusTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>
-                  <th style="width: 10%">账号</th>
-                  <th style="width: 10%">用户名</th>
-                  <th style="width: 10%">邮箱</th>
-                  <th style="width: 10%">权限</th>
-                  <th style="width: 40%">项目 / 项目组</th>
-                  <th style="width: 5%">状态</th>
-                  <th style="width: 10%">上次登录时间</th>
-                  <th style="width: 5%">操作</th>
+                  <th>状态代码</th>
+                  <th>状态名称</th>
+                  <th>描述</th>
+                  <th>系统预设</th>
+                  <th>颜色</th>
+                  <th>创建日期</th>
+                  <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -159,20 +150,21 @@
           </div>
         </div>
       </div>
-  <!-- /.container-fluid -->
-  </section>
-  <!-- /.content -->
-</div>
-<!-- /.content-wrapper -->
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
   <div th:replace="/include/footer::footer"></div>
 
-<!-- Control Sidebar -->
-<aside class="control-sidebar control-sidebar-dark">
-  <!-- Control sidebar content goes here -->
-</aside>
-<!-- /.control-sidebar -->
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+
 
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
@@ -189,6 +181,7 @@
 <script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
 <script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
 <script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/dist/js/adminlte.js}"></script>
 <!-- AdminLTE for demo purposes -->
@@ -197,9 +190,9 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
-  var tableView = {};
+    var tableView = {};
     document.addEventListener('DOMContentLoaded', function () {
-        tableView = $('#userTable').DataTable({
+        tableView = $('#statusTable').DataTable({
             "processing": true,
             "lengthChange": true,
             "searching": false,
@@ -207,54 +200,44 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-            "aLengthMenu":[10,20,50],
+            "aLengthMenu": [10, 20, 50],
             "bPaginate": true,
             "serverSide": true,
             ajax: function (data, callback, settings) {
                 var obj = {
-                    loginId : $("#loginId").val(),
-                    email : $("#email").val(),
-                    roleParam: $("#roleParam").val(),
-                    project: $("#project").val()
+                    status: $("#status").val(),
+                    displayName: $("#displayName").val(),
+                    description: $("#description").val()
                 }
-                aegis.callDataTableAjax("/web/user/list", obj, data, callback);
+                aegis.callDataTableAjax("/web/systemManagement/issueStatus/list", obj, data, callback);
             },
             columns: [
-                {"data": "loginId", "defaultContent": "-"},
-                {"data": "name", "defaultContent": "-"},
-                {"data": "email", "defaultContent": "-"},
-                {"data": "role", "defaultContent": "-"},
-                {"data": "project", "defaultContent": "-"},
                 {"data": "status", "defaultContent": "-"},
-                {"data": "lastLoginSuccessDt", "defaultContent": "-"},
-                {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
-                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-user-edit'></i></a>";
-                    }}
+                {"data": "displayName", "defaultContent": "-"},
+                {"data": "description", "defaultContent": "-"},
+                {"data": "isSystem", "defaultContent": "-"},
+                {"data": "color", "defaultContent": "-"},
+                {"data": "createdAt", "defaultContent": "-"},
+                {
+                    "data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
+
+                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display(" + full.id + ")' title='查看'><i class='fa fa-clipboard'></i></a>" +
+                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify(" + full.id + ")' title='修改'><i class='fa fa-edit'></i></a>";
+                    }
+                }
             ],
             language: aegis.locale
         });
     });
 
-    function display(id) {
-        location.href = "/web/user/" + id;
-    }
-
-    function modify(id) {
-        location.href = "/web/user/" + id + "/modify";
-    }
+    toastr.options = aegis.toastrOptions;
 
     function refresh() {
-      tableView.draw();
+        tableView.draw();
     }
 
-  function reset() {
-      $("#loginId").val('');
-      $("#email").val('');
-      $("#roleParam").val('0');
-      $("#project").val('0');
-      refresh();
-  }
+
+
 </script>
 </body>
 </html>

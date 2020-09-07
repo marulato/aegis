@@ -247,7 +247,7 @@
                       </tr>
                       </thead>
                       <tbody>
-                      <tr th:if="${#lists.isEmpty(projects)}">
+                      <tr th:if="${#lists.isEmpty(public)}">
                         <td colspan="5" style="text-align: center">没有数据</td>
                       </tr>
                       <tr th:each="pub, stats:${public}">

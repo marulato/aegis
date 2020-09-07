@@ -68,7 +68,7 @@ public class UserAccountController {
     public ModelAndView redirectUserPage(HttpServletRequest request) {
         AppContext context = AppContext.getAppContext(request);
         ModelAndView modelAndView = new ModelAndView("admin/userList");
-        modelAndView.addObject("roles", accountService.getAllRolesForSearchSelector());
+        modelAndView.addObject("roles", accountService.getRoleSelectorForSearch(context));
         modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("projects", projectService.
                 getAllProjectsForSearchSelector(context.getUserId(), context.getRoleId()));
