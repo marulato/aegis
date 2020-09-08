@@ -3,6 +3,7 @@ package org.legion.aegis.admin.service;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.legion.aegis.admin.controller.UserAccountController;
 import org.legion.aegis.admin.dao.UserAccountDAO;
 import org.legion.aegis.admin.dto.UserDto;
 import org.legion.aegis.admin.entity.*;
@@ -11,6 +12,7 @@ import org.legion.aegis.admin.vo.UserAccountVO;
 import org.legion.aegis.admin.vo.UserProjectVO;
 import org.legion.aegis.admin.vo.UserSearchVO;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
@@ -328,8 +330,10 @@ public class UserAccountService {
 
     @Transactional
     public void removeProjectAssignment(Long userId, Long projectId) {
+        List<Long> idList = (List) SessionManager.getAttribute(UserAccountController.PROJECT_KEY);
+        AppContext context = AppContext.getFromWebThread();
         UserProjectAssign assign = userAccountDAO.getProjectAssignmentByUserIdAndProjectId(userId, projectId);
-        if (assign != null && assign.getUserAcctId().equals(userId)) {
+        if (assign != null && assign.getUserAcctId().equals(userId) && (idList.contains(projectId) || context.isAdminRole())) {
             userAccountDAO.deleteProjectAssign(assign.getUserAcctId(), assign.getProjectId());
         } else {
             throw new PermissionDeniedException();
@@ -338,10 +342,14 @@ public class UserAccountService {
 
     @Transactional
     public void removeGroup(Long userId, Long groupId) {
+        List<Long> idList = (List) SessionManager.getAttribute(UserAccountController.GROUP_KEY);
+        AppContext context = AppContext.getFromWebThread();
         UserRoleAssign roleAssign = userAccountDAO.getUserRoleAssignment(userId).get(0);
         List<UserProjectAssign> assigns = userAccountDAO.getUserProjectAssignmentsByUserIdAndGroup(userId, groupId);
-        for (UserProjectAssign assign : assigns) {
-            userAccountDAO.deleteGroupAssign(assign.getUserAcctId(), assign.getGroupId());
+        if (assigns != null && (idList.contains(groupId) || context.isAdminRole())) {
+            for (UserProjectAssign assign : assigns) {
+                userAccountDAO.deleteGroupAssign(assign.getUserAcctId(), assign.getGroupId());
+            }
         }
 
     }

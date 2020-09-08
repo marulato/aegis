@@ -123,12 +123,18 @@ public class PortalLoginController {
             for (UserRole role : context.getAllRoles()) {
                 if (roleId.equals(role.getId())) {
                     context.setCurrentRole(role);
+                    if (AppConsts.ROLE_SYSTEM_ADMIN.equals(role.getId())) {
+                        context.setAdminRole(true);
+                    }
                     break;
                 }
             }
         } else if (context.getAllRoles() != null && context.getAllRoles().size() == 1) {
             context.setLoggedIn(true);
             context.setCurrentRole(context.getAllRoles().get(0));
+            if (AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getCurrentRole().getId())) {
+                context.setAdminRole(true);
+            }
         }
         if (context.getCurrentRole() == null) {
             throw new PermissionDeniedException();

@@ -138,6 +138,7 @@
                   <th>描述</th>
                   <th>系统预设</th>
                   <th>颜色</th>
+                  <th>颜色数值</th>
                   <th>创建日期</th>
                   <th>操作</th>
                 </tr>
@@ -216,16 +217,16 @@
                 {"data": "displayName", "defaultContent": "-"},
                 {"data": "description", "defaultContent": "-"},
                 {"data": "isSystem", "defaultContent": "-"},
-                {"data": "color", "defaultContent": "-", "render": function (data, type, full, meta) {
-                    return "<span style='width:50%; height: 30px; display: inline-block; background-color: "+full.color+"'>&nbsp;</span>" +
-                        "<span style='display: inline-block; width:50%; height: 30px;'>&nbsp;"+ full.color +"</span>";
+                {"data": "color", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("background-color", sData);
+                    }, "render": function (data, type, full, meta) {
+                      return "";
                     }},
+                {"data": "color", "defaultContent": "-"},
                 {"data": "createdAt", "defaultContent": "-"},
                 {
                     "data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
-
-                        return "<a style='color: #666666' href='javascript:void(0)' onclick='display(" + full.id + ")' title='查看'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify(" + full.id + ")' title='修改'><i class='fa fa-edit'></i></a>";
+                        return "<a style='color: #666666' href='javascript:void(0)' onclick='modify(\"" + full.statusCode + "\")' title='修改'><i class='fa fa-edit'></i></a>";
                     }
                 }
             ],
@@ -237,6 +238,10 @@
 
     function refresh() {
         tableView.draw();
+    }
+
+    function modify(code) {
+        location.href = "/web/systemManagement/issueStatus/" + code;
     }
 
 

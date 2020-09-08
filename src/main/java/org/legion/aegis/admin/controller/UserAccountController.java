@@ -41,7 +41,9 @@ public class UserAccountController {
 
     private final ProjectService projectService;
     private final UserAccountService accountService;
-    private static final String SESSION_KEY = "SESSION_USER";
+    private static final String SESSION_KEY  = "SESSION_USER";
+    public static final String PROJECT_KEY  = "AUTH_PROJECT";
+    public static final String GROUP_KEY    = "AUTH_GROUP";
 
     @Autowired
     public UserAccountController(ProjectService projectService, UserAccountService accountService) {
@@ -134,12 +136,17 @@ public class UserAccountController {
         List<UserProjectVO> projectVOList = accountService.searchUserProjects(StringUtils.parseIfIsLong(id), userVO.getRoleId());
         List<UserProjectVO> publicList = new ArrayList<>();
         List<UserProjectVO> privateList = new ArrayList<>();
+        List<Long> validProjectId = new ArrayList<>();
+        List<Long> validGroupId = new ArrayList<>();
+        SessionManager.setAttribute(PROJECT_KEY, validProjectId);
+        SessionManager.setAttribute(GROUP_KEY, validGroupId);
         if (UserAccountService.isSupervisor(context.getRoleId())) {
             List<ProjectGroup> supervisorGroupList = projectService.getProjectGroupUnderUser(context.getUserId(), context.getRoleId());
             for (UserProjectVO vo : projectVOList) {
                 for (ProjectGroup group : supervisorGroupList) {
                     if (vo.getGroupId().equals(group.getId())) {
                         vo.setHasPermission(true);
+                        validProjectId.add(vo.getProjectId());
                     }
                 }
             }
@@ -161,6 +168,7 @@ public class UserAccountController {
                 for (ProjectGroup group : supervisorGroupList) {
                     if (vo.getGroupId().equals(group.getId())) {
                         vo.setHasPermission(true);
+                        validGroupId.add(vo.getGroupId());
                     }
                 }
             }

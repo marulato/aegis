@@ -1,6 +1,7 @@
 package org.legion.aegis.admin.service;
 
 import org.legion.aegis.admin.dao.SystemMgrDAO;
+import org.legion.aegis.admin.entity.IssueStatus;
 import org.legion.aegis.admin.vo.IssueStatusVO;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
@@ -21,5 +22,9 @@ public class SystemMgrService {
         SearchResult<IssueStatusVO> searchResult = new SearchResult<>(systemMgrDAO.searchIssueStatus(param), param);
         searchResult.setTotalCounts(systemMgrDAO.searchIssueStatusCounts(param));
         return searchResult;
+    }
+
+    public IssueStatus getIssueStatusByCode(String statusCode) {
+        return systemMgrDAO.getIssueStatusByCode(statusCode);
     }
 }

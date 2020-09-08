@@ -2,6 +2,8 @@ package org.legion.aegis.admin.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.legion.aegis.admin.entity.IssueStatus;
 import org.legion.aegis.admin.vo.IssueStatusVO;
 import org.legion.aegis.common.base.SearchParam;
 import java.util.List;
@@ -12,4 +14,7 @@ public interface SystemMgrDAO {
     List<IssueStatusVO> searchIssueStatus(@Param("sp") SearchParam param);
 
     Integer searchIssueStatusCounts(@Param("sp") SearchParam param);
+
+    @Select("SELECT * FROM CM_ISSUE_STATUS WHERE STATUS_CODE = #{statusCode}")
+    IssueStatus getIssueStatusByCode(String statusCode);
 }
