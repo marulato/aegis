@@ -105,30 +105,7 @@ public class SystemMgrService {
                     if (parent.getName().equals("issueStatus")) {
                         IssueStatusDto issueStatus = new IssueStatusDto();
                         List<Element> eachNodeList = parent.elements();
-                        for (Element node : eachNodeList) {
-                            switch (node.getName()) {
-                                case "statusCode":
-                                    issueStatus.setStatusCode(node.getText().trim());
-                                    break;
-                                case "displayName":
-                                    issueStatus.setDisplayName(node.getText().trim());
-                                    break;
-                                case "description":
-                                    issueStatus.setDescription(node.getText().trim());
-                                    break;
-                                case "color":
-                                    issueStatus.setColor(node.getText().trim());
-                                    break;
-                                case "isSystem":
-                                    issueStatus.setIsSystem(node.getText().trim());
-                                    break;
-                                case "isInuse":
-                                    issueStatus.setIsInuse(node.getText().trim());
-                                    break;
-                                default:
-                                    throw new InvalidXMLFormatException();
-                            }
-                        }
+                        XMLUtils.mapping(eachNodeList, issueStatus);
                         issueStatusList.add(issueStatus);
                     }
                 }

@@ -22,8 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Date;
@@ -97,13 +99,20 @@ public class SystemMgrController {
     @PostMapping("/web/systemManagement/issueStatus/import")
     @ResponseBody
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
-    public AjaxResponseBody importIssueStatus(@RequestParam("uploadedFile") MultipartFile file) {
+    public AjaxResponseBody importIssueStatus(HttpServletRequest request) {
+        StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
+        MultipartFile file = req.getFile("uploadedFile");
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         try {
-            List<ConstraintViolation> errors = systemMgrService.importIssueStatus(file.getInputStream());
-            if (!errors.isEmpty()) {
+            if (file != null) {
+                List<ConstraintViolation> errors = systemMgrService.importIssueStatus(file.getInputStream());
+                if (!errors.isEmpty()) {
+                    manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                    manager.addValidations(errors);
+                }
+            } else {
                 manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
-                manager.addValidations(errors);
+                manager.addError("inputFile", "请选择文件");
             }
         } catch (Exception e) {
             manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
