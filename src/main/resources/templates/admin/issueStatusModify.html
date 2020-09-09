@@ -78,7 +78,7 @@
                     <div class="form-group">
                       <label for="statusCode" data-required="true">状态代码</label>
                       <input class="form-control" type="text" name="statusCode" id="statusCode"
-                             th:value="${issueStatus.statusCode}">
+                             th:value="${issueStatus.statusCode}" readonly>
                     </div>
                   </div>
                 </div>
@@ -104,6 +104,18 @@
                           <span class="input-group-text"><i class="fas fa-square" th:style="'color:' + ${issueStatus.color}"></i></span>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="isInuseSwitch" data-required="true">启用状态</label>
+                      <br/>
+                      <input class="form-control" type="checkbox" name="isInuseSwitch" id="isInuseSwitch">
+                      <input class="form-control" type="hidden" name="isInuse" id="isInuse"
+                             th:value="${issueStatus.isInuse}">
                     </div>
                   </div>
                 </div>
@@ -214,8 +226,43 @@
             $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
         });
 
+        var onoff = $("#isInuse").val() === 'Y';
+        $("#isInuseSwitch").bootstrapSwitch({
+            onText: "启用",
+            offText: "停用",
+            onColor: "success",
+            offColor: "danger",
+            state: onoff,
+            onSwitchChange: function (event, state) {
+                if (state === true) {
+                    $("#isInuse").val('Y');
+                } else {
+                    $("#isInuse").val('N');
+                }
+            }
+
+        });
+
     });
 
+    function save() {
+        $.ajax({
+            url: "/web/systemManagement/issueStatus/" + $("#statusCode").val(),
+            type: "post",
+            data: $("#mainForm").serialize(),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    toastr.success("修改成功！");
+                }
+            },
+            error: function () {
+                location.href = "/web/error";
+            }
+        })
+    }
 
 
 

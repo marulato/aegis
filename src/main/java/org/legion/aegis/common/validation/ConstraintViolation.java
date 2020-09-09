@@ -5,11 +5,11 @@ public class ConstraintViolation {
     private String validatedFieldName;
     private Object validatedFieldValue;
     private String message;
-    private String profile;
+    private String[] profile;
     private Class<?> validationType;
 
     public ConstraintViolation(String validatedFieldName, Object validatedFieldValue,
-                               String message, String profile, Class<?> validationType) {
+                               String message, String[] profile, Class<?> validationType) {
         this.validatedFieldName = validatedFieldName;
         this.validatedFieldValue = validatedFieldValue;
         this.message = message;
@@ -41,11 +41,11 @@ public class ConstraintViolation {
         this.message = message;
     }
 
-    public String getProfile() {
+    public String[] getProfile() {
         return profile;
     }
 
-    public void setProfile(String profile) {
+    public void setProfile(String[] profile) {
         this.profile = profile;
     }
 

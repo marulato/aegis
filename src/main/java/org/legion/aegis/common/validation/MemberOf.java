@@ -11,5 +11,5 @@ public @interface MemberOf {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 }

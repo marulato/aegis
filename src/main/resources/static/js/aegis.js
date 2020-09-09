@@ -18,6 +18,15 @@ aegis.showErrors = function(errorData) {
     });
 }
 
+aegis.showErrorString = function(errorData) {
+    var str = "";
+    $.each(errorData, function (index, element) {
+        str += index + " : " + element;
+        str += ", ";
+    });
+    return str.substring(0, str.length - 2);
+}
+
 aegis.clearErrors = function () {
     $("div[name^=errorArea_]").each(function (idx, ele) {
         $(ele).remove();

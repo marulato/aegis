@@ -11,5 +11,5 @@ public @interface Email {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 }

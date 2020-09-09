@@ -1,0 +1,10 @@
+<systemManagement_issueStatus>
+    <issueStatus>
+        <statusCode>TEST</statusCode>
+        <displayName>THIS IS A PROTOTYPE TEMPLATE</displayName>
+        <description>THIS IS A PROTOTYPE TEMPLATE</description>
+        <color>#FFFFFF</color>
+        <isSystem>Y</isSystem>
+        <isInuse>Y</isInuse>
+    </issueStatus>
+</systemManagement_issueStatus>

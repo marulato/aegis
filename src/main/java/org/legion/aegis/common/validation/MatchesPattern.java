@@ -11,6 +11,6 @@ public @interface MatchesPattern {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 
 }

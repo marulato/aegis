@@ -39,12 +39,22 @@ public class CommonValidator {
         return violations;
     }
 
-    private static boolean isProfileMatch(String profile, String annoProfile) {
-        if (StringUtils.isEmpty(profile) && StringUtils.isEmpty(annoProfile))
+    private static boolean isProfileMatch(String profile, String[] annoProfile) {
+
+        if (StringUtils.isEmpty(profile) && (annoProfile == null || annoProfile.length == 0)) {
             return true;
-        if (StringUtils.isNotEmpty(profile) && StringUtils.isNotEmpty(annoProfile))
-            return profile.equals(annoProfile);
-        return !StringUtils.isEmpty(profile) || !StringUtils.isNotEmpty(annoProfile);
+        }
+        if (StringUtils.isEmpty(profile) && annoProfile != null && annoProfile.length > 0) {
+            return true;
+        }
+        if (StringUtils.isNotEmpty(profile) && (annoProfile == null || annoProfile.length == 0)) {
+            return false;
+        }
+        if (StringUtils.isNotEmpty(profile) && annoProfile != null && annoProfile.length > 0) {
+            List<String> list = Arrays.asList(annoProfile);
+            return list.contains(profile);
+        }
+        return false;
     }
 
     private static void checkAnnotation_ValidateWithMethod(ConstraintField constraintField,

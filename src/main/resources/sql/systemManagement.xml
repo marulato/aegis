@@ -13,7 +13,7 @@
         FROM CM_ISSUE_STATUS
         <where>
             <if test="sp.params.status != null and sp.params.status != ''">
-                AND STATUS_CODE LIKE CONCAT('%', UPPER(#{sp.params.status}), '%';)
+                AND STATUS_CODE LIKE CONCAT('%', UPPER(#{sp.params.status}), '%')
             </if>
             <if test="sp.params.displayName != null and sp.params.displayName != ''">
                 AND UPPER(DISPLAY_NAME) LIKE CONCAT('%', UPPER(#{sp.params.displayName}), '%')

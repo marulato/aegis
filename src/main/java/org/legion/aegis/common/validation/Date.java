@@ -11,5 +11,5 @@ public @interface Date {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 }

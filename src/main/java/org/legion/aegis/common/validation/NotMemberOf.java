@@ -11,5 +11,5 @@ public @interface NotMemberOf {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 }

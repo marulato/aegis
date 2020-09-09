@@ -9,6 +9,7 @@ public class IssueStatusVO extends BaseVO {
     private String description;
     private String color;
     private String isSystem;
+    private String isInuse;
 
     public String getStatusCode() {
         return statusCode;
@@ -48,5 +49,13 @@ public class IssueStatusVO extends BaseVO {
 
     public void setIsSystem(String isSystem) {
         this.isSystem = isSystem;
+    }
+
+    public String getIsInuse() {
+        return isInuse;
+    }
+
+    public void setIsInuse(String isInuse) {
+        this.isInuse = isInuse;
     }
 }

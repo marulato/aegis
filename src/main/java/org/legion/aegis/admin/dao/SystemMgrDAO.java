@@ -17,4 +17,7 @@ public interface SystemMgrDAO {
 
     @Select("SELECT * FROM CM_ISSUE_STATUS WHERE STATUS_CODE = #{statusCode}")
     IssueStatus getIssueStatusByCode(String statusCode);
+
+    @Select("SELECT * FROM CM_ISSUE_STATUS")
+    List<IssueStatus> getAllIssueStatus();
 }

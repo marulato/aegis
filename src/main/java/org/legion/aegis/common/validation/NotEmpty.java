@@ -9,5 +9,5 @@ public @interface NotEmpty {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 }

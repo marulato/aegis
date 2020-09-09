@@ -15,7 +15,7 @@ public @interface ValidateWithMethod {
 
     String message();
 
-    String profile() default "";
+    String[] profile() default {};
 
     @Target(ElementType.FIELD)
     @Documented
