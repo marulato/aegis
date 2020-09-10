@@ -25,7 +25,7 @@ public class IssueStatusDto extends BaseDto {
     private String description;
     @ValidateWithMethod(methodName = "validateColor", message = "请输入正确的16进制颜色代码（#000000 ~ #FFFFFF）", profile = {"add", "modify"})
     private String color;
-    @MemberOf(value = {AppConsts.YES, AppConsts.NO}, message = "", profile = {"add", "modify"})
+    //@MemberOf(value = {AppConsts.YES, AppConsts.NO}, message = "", profile = {"add", "modify"})
     private String isSystem;
     @MemberOf(value = {AppConsts.YES, AppConsts.NO}, message = "请选择正确的启用/停用状态", profile = {"add", "modify"})
     private String isInuse;

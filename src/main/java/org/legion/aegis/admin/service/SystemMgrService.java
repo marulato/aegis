@@ -7,7 +7,9 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.legion.aegis.admin.dao.SystemMgrDAO;
 import org.legion.aegis.admin.dto.IssueStatusDto;
+import org.legion.aegis.admin.entity.IssueResolution;
 import org.legion.aegis.admin.entity.IssueStatus;
+import org.legion.aegis.admin.vo.IssueResolutionVO;
 import org.legion.aegis.admin.vo.IssueStatusVO;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
@@ -47,8 +49,18 @@ public class SystemMgrService {
         return searchResult;
     }
 
+    public SearchResult<IssueResolutionVO> searchIssueResolutions(SearchParam param) {
+        SearchResult<IssueResolutionVO> searchResult = new SearchResult<>(systemMgrDAO.searchIssueResolutions(param), param);
+        searchResult.setTotalCounts(systemMgrDAO.searchIssueResolutionsCounts(param));
+        return searchResult;
+    }
+
     public IssueStatus getIssueStatusByCode(String statusCode) {
         return systemMgrDAO.getIssueStatusByCode(statusCode);
+    }
+
+    public IssueResolution getIssueResolutionByCode(String resolutionCode) {
+        return systemMgrDAO.getIssueResolutionByCode(resolutionCode);
     }
 
     public void updateIssueStatus(IssueStatus issueStatus) {
@@ -60,6 +72,19 @@ public class SystemMgrService {
                 old.setDisplayName(issueStatus.getDisplayName());
                 old.setDescription(issueStatus.getDescription());
                 old.setIsInuse(issueStatus.getIsInuse());
+                JPAExecutor.update(old);
+            }
+        }
+    }
+
+    public void updateIssueResolutin(IssueResolution resolution) {
+        if (resolution != null) {
+            IssueResolution old = getIssueResolutionByCode(resolution.getResolutionCode());
+            if (old != null) {
+                old.setResolutionCode(resolution.getResolutionCode().toUpperCase());
+                old.setDisplayName(resolution.getDisplayName());
+                old.setDescription(resolution.getDescription());
+                old.setIsInuse(resolution.getIsInuse());
                 JPAExecutor.update(old);
             }
         }

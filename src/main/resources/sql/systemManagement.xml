@@ -9,6 +9,7 @@
             DESCRIPTION,
             COLOR,
             CASE IS_SYSTEM WHEN 'Y' THEN '是' ELSE '否' END AS IS_SYSTEM,
+            CASE IS_INUSE WHEN 'Y' THEN '启用' ELSE '停用' END AS IS_INUSE,
             DATE_FORMAT(CREATED_AT, '%Y/%m/%d') AS CREATED_AT
         FROM CM_ISSUE_STATUS
         <where>
@@ -36,14 +37,14 @@
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
             <when test="sp.orderColumnNo == 3">
-                ORDER BY IS_SYSTEM
+                ORDER BY IS_INUSE
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
-            <when test="sp.orderColumnNo == 3">
+            <when test="sp.orderColumnNo == 4">
                 ORDER BY COLOR
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
-            <when test="sp.orderColumnNo == 3">
+            <when test="sp.orderColumnNo == 5">
                 ORDER BY CREATED_AT
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
@@ -62,6 +63,69 @@
             </if>
             <if test="sp.params.description != null and sp.params.description != ''">
                 AND DESCRIPTION = #{sp.params.description}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchIssueResolutions" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.admin.vo.IssueResolutionVO">
+        SELECT
+        RESOLUTION_CODE,
+        DISPLAY_NAME,
+        DESCRIPTION,
+        CASE IS_SYSTEM WHEN 'Y' THEN '是' ELSE '否' END AS IS_SYSTEM,
+        CASE IS_INUSE WHEN 'Y' THEN '启用' ELSE '停用' END AS IS_INUSE,
+        DATE_FORMAT(CREATED_AT, '%Y/%m/%d') AS CREATED_AT
+        FROM CM_ISSUE_RESOLUTION
+        <where>
+            <if test="sp.params.status != null and sp.params.status != ''">
+                AND RESOLUTION_CODE LIKE CONCAT('%', UPPER(#{sp.params.resolutionCode}), '%')
+            </if>
+            <if test="sp.params.displayName != null and sp.params.displayName != ''">
+                AND UPPER(DISPLAY_NAME) LIKE CONCAT('%', UPPER(#{sp.params.displayName}), '%')
+            </if>
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER(DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
+            </if>
+        </where>
+        <choose>
+            <when test="sp.orderColumnNo == 0">
+                ORDER BY RESOLUTION_CODE
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 1">
+                ORDER BY DISPLAY_NAME
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 2">
+                ORDER BY DESCRIPTION
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 3">
+                ORDER BY IS_INUSE
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+            <when test="sp.orderColumnNo == 4">
+                ORDER BY CREATED_AT
+                <if test="sp.order != null and sp.order != ''">${sp.order}</if>
+            </when>
+        </choose>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchIssueResolutionsCounts" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT
+            COUNT(RESOLUTION_CODE),
+        FROM CM_ISSUE_RESOLUTION
+        <where>
+            <if test="sp.params.status != null and sp.params.status != ''">
+                AND RESOLUTION_CODE LIKE CONCAT('%', UPPER(#{sp.params.resolutionCode}), '%')
+            </if>
+            <if test="sp.params.displayName != null and sp.params.displayName != ''">
+                AND UPPER(DISPLAY_NAME) LIKE CONCAT('%', UPPER(#{sp.params.displayName}), '%')
+            </if>
+            <if test="sp.params.description != null and sp.params.description != ''">
+                AND UPPER(DESCRIPTION) LIKE CONCAT('%', UPPER(#{sp.params.description}), '%')
             </if>
         </where>
     </select>
