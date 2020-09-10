@@ -11,4 +11,6 @@ import java.util.List;
 public interface IssueDAO {
 
     List<IssueVO> search(@Param("sp") SearchParam param);
+
+    Integer searchCounts(@Param("sp") SearchParam param);
 }

@@ -51,12 +51,6 @@ public class PortalLoginController {
         return "admin/login";
     }
 
-    @GetMapping("/web/index")
-    public String getDefaultIndexPage(HttpServletRequest request) {
-        log.info(LogUtils.around("Enter default Landing page"));
-        return "index";
-    }
-
     @GetMapping("/web/login/changePassword")
     public String getChangePasswordPage(HttpServletRequest request) {
         UserAccount userAccount = (UserAccount) SessionManager.getAttribute(SESSION_KEY);

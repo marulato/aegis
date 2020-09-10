@@ -11,28 +11,19 @@ public class IssueVO extends BaseVO {
     private Long groupId;
     private Long projectId;
     private String title;
-    private byte[] description;
     private String reproducibility;
     private String status;
     private String resolution;
-    private Integer priority;
-    private Integer severity;
-    private Long assignedTo;
     private String rootCause;
-    private Date fixedAt;
-    private Long fixedBy;
-    private Long reportedBy;
-    private Date reportedAt;
-    private String tag;
-
-    private String priorityDesc;
-    private String severityDesc;
-    private String assignedToDesc;
+    private String priority;
+    private String severity;
+    private String assignedTo;
     private String projectName;
     private String groupName;
     private String moduleName;
-    private String reportedByDesc;
-    private String reportedAtDesc;
+    private String reportedBy;
+    private String reportedAt;
+    private String sla;
 
     public Long getId() {
         return id;
@@ -82,14 +73,6 @@ public class IssueVO extends BaseVO {
         this.title = title;
     }
 
-    public byte[] getDescription() {
-        return description;
-    }
-
-    public void setDescription(byte[] description) {
-        this.description = description;
-    }
-
     public String getReproducibility() {
         return reproducibility;
     }
@@ -114,30 +97,6 @@ public class IssueVO extends BaseVO {
         this.resolution = resolution;
     }
 
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
-    }
-
-    public Integer getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(Integer severity) {
-        this.severity = severity;
-    }
-
-    public Long getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(Long assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
     public String getRootCause() {
         return rootCause;
     }
@@ -146,52 +105,28 @@ public class IssueVO extends BaseVO {
         this.rootCause = rootCause;
     }
 
-    public Date getFixedAt() {
-        return fixedAt;
+    public String getPriority() {
+        return priority;
     }
 
-    public void setFixedAt(Date fixedAt) {
-        this.fixedAt = fixedAt;
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 
-    public Long getFixedBy() {
-        return fixedBy;
+    public String getSeverity() {
+        return severity;
     }
 
-    public void setFixedBy(Long fixedBy) {
-        this.fixedBy = fixedBy;
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
-    public String getTag() {
-        return tag;
+    public String getAssignedTo() {
+        return assignedTo;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getPriorityDesc() {
-        return priorityDesc;
-    }
-
-    public void setPriorityDesc(String priorityDesc) {
-        this.priorityDesc = priorityDesc;
-    }
-
-    public String getSeverityDesc() {
-        return severityDesc;
-    }
-
-    public void setSeverityDesc(String severityDesc) {
-        this.severityDesc = severityDesc;
-    }
-
-    public String getAssignedToDesc() {
-        return assignedToDesc;
-    }
-
-    public void setAssignedToDesc(String assignedToDesc) {
-        this.assignedToDesc = assignedToDesc;
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
     public String getProjectName() {
@@ -218,35 +153,27 @@ public class IssueVO extends BaseVO {
         this.moduleName = moduleName;
     }
 
-    public Long getReportedBy() {
+    public String getReportedBy() {
         return reportedBy;
     }
 
-    public void setReportedBy(Long reportedBy) {
+    public void setReportedBy(String reportedBy) {
         this.reportedBy = reportedBy;
     }
 
-    public Date getReportedAt() {
+    public String getReportedAt() {
         return reportedAt;
     }
 
-    public void setReportedAt(Date reportedAt) {
+    public void setReportedAt(String reportedAt) {
         this.reportedAt = reportedAt;
     }
 
-    public String getReportedByDesc() {
-        return reportedByDesc;
+    public String getSla() {
+        return sla;
     }
 
-    public void setReportedByDesc(String reportedByDesc) {
-        this.reportedByDesc = reportedByDesc;
-    }
-
-    public String getReportedAtDesc() {
-        return reportedAtDesc;
-    }
-
-    public void setReportedAtDesc(String reportedAtDesc) {
-        this.reportedAtDesc = reportedAtDesc;
+    public void setSla(String sla) {
+        this.sla = sla;
     }
 }

@@ -32,7 +32,7 @@
   <div th:replace="/include/topbar::topmenu"></div>
   <!-- /.navbar -->
 
-  <div th:replace="/include/sidebar::leftmenu('1.1')"></div>
+  <div th:replace="/include/sidebar::leftmenu('1.1', ${role})"></div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -137,14 +137,14 @@
                 <div class="row">
                   <div class="col-sm-4">
                     <div class="form-group-sm">
-                      <label for="project">项目:</label>
-                      <select class="custom-select" name="project" id="project"></select>
+                      <label for="groupId">项目组:</label>
+                      <select class="custom-select" name="groupId" id="groupId"></select>
                     </div>
                   </div>
                   <div class="col-sm-4">
                     <div class="form-group-sm">
-                      <label for="subProject">子项目:</label>
-                      <select class="custom-select" name="subProject" id="subProject"></select>
+                      <label for="projectId">项目:</label>
+                      <select class="custom-select" name="projectId" id="projectId"></select>
                     </div>
                   </div>
                   <div class="col-sm-4">
@@ -158,22 +158,22 @@
                 <div class="row">
                   <div class="col-sm-2">
                     <div class="form-group-sm">
-                      <label for="reporter">提交人:</label>
-                      <select class="custom-select" name="reporter" id="reporter">
+                      <label for="reportedBy">提交人:</label>
+                      <select class="custom-select" name="reportedBy" id="reportedBy">
                       </select>
                     </div>
                   </div>
                   <div class="col-sm-2">
                     <div class="form-group-sm">
-                      <label for="developer">开发者:</label>
-                      <select class="custom-select" name="developer" id="developer">
+                      <label for="assignedTo">开发者:</label>
+                      <select class="custom-select" name="assignedTo" id="assignedTo">
                       </select>
                     </div>
                   </div>
                   <div class="col-sm-2">
                     <div class="form-group-sm">
-                      <label for="module">模块:</label>
-                      <select class="custom-select" name="module" id="module">
+                      <label for="moduleId">模块:</label>
+                      <select class="custom-select" name="moduleId" id="moduleId">
                       </select>
                     </div>
                   </div>
@@ -202,14 +202,14 @@
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group-sm">
-                      <label for="submitRange">提交日期</label>
+                      <label for="reportedRange">提交日期</label>
                       <div class="input-group">
                         <div class="input-group-prepend">
                         <span class="input-group-text">
                           <i class="far fa-calendar-alt"></i>
                         </span>
                         </div>
-                        <input id="submitRange" name="submitRange" class="form-control" type="text">
+                        <input id="reportedRange" name="reportedRange" class="form-control" type="text">
                       </div>
                     </div>
                   </div>
@@ -343,7 +343,33 @@
        });
 
         $('#issueTable').DataTable({
-
+            "processing": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "aLengthMenu":[10,25,50,100],
+            "bPaginate": true,
+            "serverSide": true,
+            ajax: function (data, callback, settings) {
+                var obj = {
+                    issueId: $("#issueId").val(),
+                    projectId: $("#projectId").val(),
+                    groupId: $("#groupId").val(),
+                    reportedBy: $("#reportedBy").val(),
+                    description: $("#description").val()
+                }
+                aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
+            },
+            columns: [
+                {"data": "issueId", "defaultContent": "-"},
+                {"data": "description", "defaultContent": "-"},
+                {"data": "createdAt", "defaultContent": "-"},
+                {"data": "-", "defaultContent": "-"}
+            ],
+            language: aegis.locale
         });
     });
 
