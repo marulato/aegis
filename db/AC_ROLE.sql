@@ -34,6 +34,6 @@ VALUES ('QA_S', '测试主管', 'ADM', 'N', '/web/index', NOW(), 'SYSTEM', NOW()
 
 INSERT INTO AC_ROLE (ID, ROLE_NAME, TYPE, IS_SYSTEM, LANDING_PAGE, CREATED_AT, CREATED_BY,
                      UPDATED_AT, UPDATED_BY)
-VALUES ('EXT_PTY', '第三方', 'USER', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('EXT_PTY', '第三方', 'USR', 'N', '/web/index', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 
