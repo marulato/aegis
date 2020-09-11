@@ -79,7 +79,8 @@
                     <div class="form-group">
                       <label for="groupId">项目组:</label>
                       <select class="custom-select" name="groupId" id="groupId" onchange="toggleProjectSelector()">
-                        <option th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
+                        <option th:each="group, stats:${groupSelector}" th:value="${group.id}"
+                                th:text="${group.name}"></option>
                       </select>
                     </div>
                   </div>
@@ -89,7 +90,8 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="projectId">项目:</label>
-                      <select class="custom-select" name="projectId" id="projectId" onchange="toggleModuleSelector()"></select>
+                      <select class="custom-select" name="projectId" id="projectId"
+                              onchange="toggleModuleSelector()"></select>
                     </div>
                   </div>
                 </div>
@@ -119,6 +121,7 @@
                     <div class="form-group">
                       <label for="reproducibility">重现情况:</label>
                       <select class="custom-select" name="reproducibility" id="reproducibility">
+                        <option value="">- 请选择 -</option>
                         <option th:each="r, stats:${rpd}" th:value="${r.code}" th:text="${r.value}"></option>
                       </select>
                     </div>
@@ -130,7 +133,7 @@
                     <div class="form-group">
                       <label for="severity">严重性:</label>
                       <select class="custom-select" name="severity" id="severity">
-                        <option value="">- 全部 -</option>
+                        <option value="">- 请选择 -</option>
                         <option th:each="sev, stats:${severity}" th:value="${sev.code}" th:text="${sev.value}"></option>
                       </select>
                     </div>
@@ -164,71 +167,13 @@
                   </div>
                 </div>
 
-
                 <div class="row">
                   <div class="col-md-6">
-                    <div id="actions" class="row">
-                      <div class="col-lg-6">
-                        <div class="btn-group w-100">
-                      <span class="btn btn-success col fileinput-button">
-                        <i class="fas fa-plus"></i>
-                        <span>Add files</span>
-                      </span>
-                          <button type="submit" class="btn btn-primary col start">
-                            <i class="fas fa-upload"></i>
-                            <span>Start upload</span>
-                          </button>
-                          <button type="reset" class="btn btn-warning col cancel">
-                            <i class="fas fa-times-circle"></i>
-                            <span>Cancel upload</span>
-                          </button>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 d-flex align-items-center">
-                        <div class="fileupload-process w-100">
-                          <div id="total-progress" class="progress progress-striped active" role="progressbar"
-                               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                            <div class="progress-bar progress-bar-success" style="width:0%;"
-                                 data-dz-uploadprogress></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="table table-striped files" id="previews">
-                      <div id="template" class="row mt-2">
-                        <div class="col-auto">
-                          <span class="preview"><img src="data:," alt="" data-dz-thumbnail/></span>
-                        </div>
-                        <div class="col d-flex align-items-center">
-                          <p class="mb-0">
-                            <span class="lead" data-dz-name></span>
-                            (<span data-dz-size></span>)
-                          </p>
-                          <strong class="error text-danger" data-dz-errormessage></strong>
-                        </div>
-                        <div class="col-4 d-flex align-items-center">
-                          <div class="progress progress-striped active w-100" role="progressbar" aria-valuemin="0"
-                               aria-valuemax="100" aria-valuenow="0">
-                            <div class="progress-bar progress-bar-success" style="width:0%;"
-                                 data-dz-uploadprogress></div>
-                          </div>
-                        </div>
-                        <div class="col-auto d-flex align-items-center">
-                          <div class="btn-group">
-                            <button class="btn btn-primary start">
-                              <i class="fas fa-upload"></i>
-                              <span>Start</span>
-                            </button>
-                            <button data-dz-remove class="btn btn-warning cancel">
-                              <i class="fas fa-times-circle"></i>
-                              <span>Cancel</span>
-                            </button>
-                            <button data-dz-remove class="btn btn-danger delete">
-                              <i class="fas fa-trash"></i>
-                              <span>Delete</span>
-                            </button>
-                          </div>
-                        </div>
+                    <div class="form-group">
+                      <label for="attachments">附件:</label>
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="attachments" name="attachments" multiple="multiple" onchange="showFileName()">
+                        <label class="custom-file-label" id="fileNameLabel" for="attachments">选择文件（可多选）</label>
                       </div>
                     </div>
                   </div>
@@ -244,14 +189,18 @@
       <div class="col-12">
         <div class="row">
           <div class="col-md-6">
-            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px" onclick="location.href='/web/projectGroup'">
+            <button type="button" class="btn btn-secondary float-right" style="font-size: 14px"
+                    onclick="location.href='/web/projectGroup'">
               <i class="fa fa-chevron-left"></i>
-              返回</button>
+              返回
+            </button>
           </div>
           <div class="col-md-6">
-            <button type="button" id="submitBtn" class="btn btn-primary float-left" style="font-size: 14px" onclick="save()">
+            <button type="button" id="submitBtn" class="btn btn-primary float-left" style="font-size: 14px"
+                    onclick="save()">
               <i class="fa fa-check"></i>
-              提交</button>
+              提交
+            </button>
           </div>
         </div>
       </div>
@@ -273,7 +222,6 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
-
 
 
 <!-- jQuery -->
@@ -315,8 +263,8 @@
         "hideMethod": "fadeOut" //消失时的动画方式
     }
 
-    toastr.options.onHidden = function() {
-      location.href = "/web/projectGroup";
+    toastr.options.onHidden = function () {
+        location.href = "/web/projectGroup";
     }
     document.addEventListener('DOMContentLoaded', function () {
         toggleProjectSelector();
@@ -335,8 +283,8 @@
             dataType: "json",
             success: function (res) {
                 $("#projectId").empty();
-                $.each(res.data, function (idx, opt){
-                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                $.each(res.data, function (idx, opt) {
+                    var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#projectId").append(option);
                 });
                 toggleModuleSelector();
@@ -351,8 +299,8 @@
             dataType: "json",
             success: function (res) {
                 $("#reportedBy").empty();
-                $.each(res.data, function (idx, opt){
-                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                $.each(res.data, function (idx, opt) {
+                    var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#reportedBy").append(option);
                 });
             }
@@ -366,8 +314,8 @@
             dataType: "json",
             success: function (res) {
                 $("#assignedTo").empty();
-                $.each(res.data, function (idx, opt){
-                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                $.each(res.data, function (idx, opt) {
+                    var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#assignedTo").append(option);
                 });
             }
@@ -381,16 +329,23 @@
             dataType: "json",
             success: function (res) {
                 $("#moduleId").empty();
-                $.each(res.data, function (idx, opt){
-                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                $.each(res.data, function (idx, opt) {
+                    var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#moduleId").append(option);
                 });
             }
         });
     }
 
-
-
+    function showFileName() {
+        var file = $("#attachments")[0].files;
+        var name = "";
+        $.each(file, function (idx, f){
+            name += f.name + "; ";
+        });
+        name = name.substring(0, name.length - 2);
+        $("#fileNameLabel").html(name);
+    }
 </script>
 </body>
 </html>

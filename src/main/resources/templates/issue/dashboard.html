@@ -183,7 +183,7 @@
                     <div class="form-group-sm">
                       <label for="severity">严重性:</label>
                       <select class="custom-select" name="severity" id="severity">
-                        <option value="">- 全部 -</option>
+                        <option value="">- 请选择 -</option>
                         <option th:each="sev, stats:${severity}" th:value="${sev.code}" th:text="${sev.value}"></option>
                       </select>
                     </div>
@@ -192,7 +192,7 @@
                     <div class="form-group-sm">
                       <label for="status">状态:</label>
                       <select class="custom-select" name="status" id="status">
-                        <option value="">- 全部 -</option>
+                        <option value="">- 请选择 -</option>
                         <option th:each="st, stats:${status}" th:value="${st.statusCode}" th:text="${st.displayName}"></option>
                       </select>
                     </div>
@@ -201,7 +201,7 @@
                     <div class="form-group-sm">
                       <label for="resolution">解决方案:</label>
                       <select class="custom-select" name="resolution" id="resolution">
-                        <option value="">- 全部 -</option>
+                        <option value="">- 请选择 -</option>
                         <option th:each="res, stats:${resolution}" th:value="${res.resolutionCode}" th:text="${res.displayName}"></option>
                       </select>
                     </div>

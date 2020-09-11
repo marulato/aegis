@@ -16,8 +16,8 @@
         DATE_FORMAT(USER.ACTIVATED_AT, '%Y/%m/%d') AS ACTIVATED_AT,
         DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT,
         ROLE.ROLE_NAME AS ROLE,
-        ROLE.ID AS ROLE_ID,
-        PJT.NAME AS PROJECT
+        ROLE.ID AS ROLE_ID
+        -- PJT.NAME AS PROJECT
         FROM AC_USER_ACCT USER
         LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
         LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
@@ -56,7 +56,7 @@
                 </if>
             </if>
         </where>
-        GROUP BY USER.ID
+        -- GROUP BY USER.ID
         <choose>
             <when test="sp.orderColumnNo == 0">
                 ORDER BY LOGIN_ID

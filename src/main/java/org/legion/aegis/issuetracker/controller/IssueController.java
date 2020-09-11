@@ -79,21 +79,21 @@ public class IssueController {
             List<UserAccount> reporters = userAccountService.getReportersUnderGroup(StringUtils.parseIfIsLong(parentId));
             UserAccount account = new UserAccount();
             account.setId(null);
-            account.setName("- 全部 -");
+            account.setName("- 请选择 -");
             reporters.add(0, account);
             manager.addDataObjects(reporters);
         } else if ("developer".equals(type)) {
             List<UserAccount> developers = userAccountService.getDevelopersUnderGroup(StringUtils.parseIfIsLong(parentId));
             UserAccount account = new UserAccount();
             account.setId(null);
-            account.setName("- 全部 -");
+            account.setName("- 请选择 -");
             developers.add(0, account);
             manager.addDataObjects(developers);
         } else if ("module".equals(type)) {
             List<Module> modules = projectService.getModulesByProjectId(StringUtils.parseIfIsLong(parentId));
             Module module = new Module();
             module.setId(null);
-            module.setName("- 全部 -");
+            module.setName("- 请选择 -");
             if (modules.isEmpty()) {
                 modules.add(module);
             } else {
