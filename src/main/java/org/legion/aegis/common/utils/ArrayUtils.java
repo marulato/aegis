@@ -97,4 +97,11 @@ public class ArrayUtils {
         }
         return null;
     }
+
+    public static boolean contains(Object[] array, Object obj) {
+        if (array != null && obj != null) {
+            return List.of(array).contains(obj);
+        }
+        return false;
+    }
 }

@@ -27,5 +27,14 @@ public class MasterCodeUtils {
         return new ArrayList<>();
     }
 
+    public static String[] getCodeArrayByType(String type) {
+        List<MasterCode> masterCodes = getMasterCodeByType(type);
+        String[] array = new String[masterCodes.size()];
+        for (int i = 0; i < masterCodes.size(); i++) {
+            array[i] = masterCodes.get(i).getCode();
+        }
+        return array;
+    }
+
 
 }
