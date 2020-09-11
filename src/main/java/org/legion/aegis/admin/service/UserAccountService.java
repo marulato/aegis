@@ -423,4 +423,18 @@ public class UserAccountService {
             }
         }
     }
+
+    public List<UserAccount> getReportersUnderGroup(Long groupId) {
+        List<UserAccount> reporters = userAccountDAO.getUsersUnderGroup(groupId, AppConsts.ROLE_QA);
+        List<UserAccount> supervisors = userAccountDAO.getUsersUnderGroup(groupId, AppConsts.ROLE_QA_SUPERVISOR);
+        reporters.addAll(supervisors);
+        return reporters;
+    }
+
+    public List<UserAccount> getDevelopersUnderGroup(Long groupId) {
+        List<UserAccount> devs = userAccountDAO.getUsersUnderGroup(groupId, AppConsts.ROLE_DEV);
+        List<UserAccount> supervisors = userAccountDAO.getUsersUnderGroup(groupId, AppConsts.ROLE_DEV_SUPERVISOR);
+        devs.addAll(supervisors);
+        return devs;
+    }
 }

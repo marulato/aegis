@@ -1,13 +1,10 @@
 package org.legion.aegis.common;
 
-
+import org.legion.aegis.admin.entity.UserProjectAssign;
 import org.legion.aegis.admin.entity.UserRole;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,6 +19,7 @@ public class AppContext implements Serializable {
     private boolean loggedIn;
     private UserRole currentRole;
     private List<UserRole> allRoles;
+    private List<UserProjectAssign> assignments;
 
     public static final String APP_CONTEXT_KEY = "Legion_Web_Session_Context";
     private static final ThreadLocal<AppContext> localContext = new ThreadLocal<>();
@@ -137,5 +135,13 @@ public class AppContext implements Serializable {
 
     public void setAllRoles(List<UserRole> allRoles) {
         this.allRoles = allRoles;
+    }
+
+    public List<UserProjectAssign> getAssignments() {
+        return assignments;
+    }
+
+    public void setAssignments(List<UserProjectAssign> assignments) {
+        this.assignments = assignments;
     }
 }

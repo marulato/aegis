@@ -164,4 +164,12 @@ public class SystemMgrService {
         }
         return new ArrayList<>();
     }
+
+    public List<IssueStatus> getAllInuseStatus() {
+        return systemMgrDAO.getAllInuseIssueStatus();
+    }
+
+    public List<IssueResolution> getAllInuseResolutions() {
+        return systemMgrDAO.getAllInuseIssueResolutions();
+    }
 }

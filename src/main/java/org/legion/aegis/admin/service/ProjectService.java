@@ -63,6 +63,12 @@ public class ProjectService {
         return projectDAO.getAllProjectsUnderUser(userId, null);
     }
 
+    public List<Project> getAccessibleProjectsForUser(AppContext context, Long groupId) {
+        List<Project> projects = projectDAO.getAllProjectsUnderUser(context.getUserId(), context.getRoleId());
+        projects.removeIf(var -> !var.getGroupId().equals(groupId));
+        return projects;
+    }
+
     public List<Project> getProjectsUnderSupervisor(Long userId, String roleId) {
         return projectDAO.getAllProjectsUnderUser(userId, roleId);
     }

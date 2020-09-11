@@ -138,13 +138,15 @@
                   <div class="col-sm-4">
                     <div class="form-group-sm">
                       <label for="groupId">项目组:</label>
-                      <select class="custom-select" name="groupId" id="groupId"></select>
+                      <select class="custom-select" name="groupId" id="groupId" onchange="toggleProjectSelector()">
+                        <option th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
+                      </select>
                     </div>
                   </div>
                   <div class="col-sm-4">
                     <div class="form-group-sm">
                       <label for="projectId">项目:</label>
-                      <select class="custom-select" name="projectId" id="projectId"></select>
+                      <select class="custom-select" name="projectId" id="projectId" onchange="toggleModuleSelector()"></select>
                     </div>
                   </div>
                   <div class="col-sm-4">
@@ -181,6 +183,8 @@
                     <div class="form-group-sm">
                       <label for="severity">严重性:</label>
                       <select class="custom-select" name="severity" id="severity">
+                        <option value="">- 全部 -</option>
+                        <option th:each="sev, stats:${severity}" th:value="${sev.code}" th:text="${sev.value}"></option>
                       </select>
                     </div>
                   </div>
@@ -188,6 +192,8 @@
                     <div class="form-group-sm">
                       <label for="status">状态:</label>
                       <select class="custom-select" name="status" id="status">
+                        <option value="">- 全部 -</option>
+                        <option th:each="st, stats:${status}" th:value="${st.statusCode}" th:text="${st.displayName}"></option>
                       </select>
                     </div>
                   </div>
@@ -195,6 +201,8 @@
                     <div class="form-group-sm">
                       <label for="resolution">解决方案:</label>
                       <select class="custom-select" name="resolution" id="resolution">
+                        <option value="">- 全部 -</option>
+                        <option th:each="res, stats:${resolution}" th:value="${res.resolutionCode}" th:text="${res.displayName}"></option>
                       </select>
                     </div>
                   </div>
@@ -216,14 +224,14 @@
 
                   <div class="col-sm-6">
                     <div class="form-group-sm">
-                      <label for="updateRange">更新日期</label>
+                      <label for="updatedRange">更新日期</label>
                       <div class="input-group">
                         <div class="input-group-prepend">
                         <span class="input-group-text">
                           <i class="far fa-calendar-alt"></i>
                         </span>
                         </div>
-                        <input id="updateRange" name="updateRange" class="form-control" type="text">
+                        <input id="updatedRange" name="updatedRange" class="form-control" type="text">
                       </div>
                     </div>
                   </div>
@@ -231,11 +239,11 @@
               </form>
             </div>
 
-            <div class="card-footer" id="filterFooter" style="display: none">
-              <button class="btn btn-primary btn-sm float-right">
+            <div class="card-footer" id="filterFooter">
+              <button type="button" class="btn btn-primary btn-sm">
                 <i class="fas fa-search"></i>
               </button>
-              <button class="btn btn-default btn-sm">
+              <button type="button" class="btn btn-default btn-sm" onclick="reset()">
                 <i class="fas fa-redo-alt"></i>
               </button>
             </div>
@@ -329,20 +337,25 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
+    var tableView = null;
     document.addEventListener('DOMContentLoaded', function () {
-       $("#submitRange").daterangepicker({
+        toggleProjectSelector();
+        toggleReporterSelector();
+        toggleDeveloperSelector();
+
+       $("#reportedRange").daterangepicker({
            locale: {
                format: 'YYYY/MM/DD'
            }
        });
 
-       $("#updateRange").daterangepicker({
+       $("#updatedRange").daterangepicker({
            locale: {
                format: 'YYYY/MM/DD'
            }
        });
 
-        $('#issueTable').DataTable({
+        tableView = $('#issueTable').DataTable({
             "processing": true,
             "lengthChange": true,
             "searching": false,
@@ -359,19 +372,106 @@
                     projectId: $("#projectId").val(),
                     groupId: $("#groupId").val(),
                     reportedBy: $("#reportedBy").val(),
-                    description: $("#description").val()
+                    description: $("#description").val(),
+                    status: $("#status").val(),
+                    severity: $("#severity").val(),
+                    resolution: $("#resolution").val(),
+                    reportedRange: $("#reportedRange").val(),
+                    updatedRange: $("#updatedRange").val()
+
                 }
                 aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
             },
             columns: [
                 {"data": "issueId", "defaultContent": "-"},
-                {"data": "description", "defaultContent": "-"},
-                {"data": "createdAt", "defaultContent": "-"},
-                {"data": "-", "defaultContent": "-"}
+                {"data": "reportedBy", "defaultContent": "-"},
+                {"data": "assignedTo", "defaultContent": "-"},
+                {"data": "moduleName", "defaultContent": "-"},
+                {"data": "severity", "defaultContent": "-"},
+                {"data": "sla", "defaultContent": "-"},
+                {"data": "resolution", "defaultContent": "-"},
+                {"data": "status", "defaultContent": "-"},
+                {"data": "title", "defaultContent": "-"},
+                {"data": "reportedAt", "defaultContent": "-"},
+                {"data": "updatedAt", "defaultContent": "-"},
             ],
             language: aegis.locale
         });
     });
+
+    function toggleProjectSelector() {
+        toggleReporterSelector();
+        toggleDeveloperSelector();
+        $.ajax({
+            url: "/web/issue/selector/project/" + $("#groupId").val(),
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#projectId").empty();
+                $.each(res.data, function (idx, opt){
+                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                    $("#projectId").append(option);
+                });
+                toggleModuleSelector();
+            }
+        });
+    }
+
+    function toggleReporterSelector() {
+        $.ajax({
+            url: "/web/issue/selector/reporter/" + $("#groupId").val(),
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#reportedBy").empty();
+                $.each(res.data, function (idx, opt){
+                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                    $("#reportedBy").append(option);
+                });
+            }
+        });
+    }
+
+    function toggleDeveloperSelector() {
+        $.ajax({
+            url: "/web/issue/selector/developer/" + $("#groupId").val(),
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#assignedTo").empty();
+                $.each(res.data, function (idx, opt){
+                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                    $("#assignedTo").append(option);
+                });
+            }
+        });
+    }
+
+    function toggleModuleSelector() {
+        $.ajax({
+            url: "/web/issue/selector/module/" + $("#projectId").val(),
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#moduleId").empty();
+                $.each(res.data, function (idx, opt){
+                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                    $("#moduleId").append(option);
+                });
+            }
+        });
+    }
+
+    function reset() {
+        $("#issueId").val('');
+        $("#description").val('');
+        $("#status").val('');
+        $("#severity").val('');
+        $("#resolution").val('');
+        $("#reportedRange").val('');
+        $("#updatedRange").val('');
+        tableView.draw();
+    }
 
 </script>
 </body>

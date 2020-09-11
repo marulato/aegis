@@ -20,6 +20,9 @@ public interface SystemMgrDAO {
     @Select("SELECT * FROM CM_ISSUE_STATUS WHERE STATUS_CODE = #{statusCode}")
     IssueStatus getIssueStatusByCode(String statusCode);
 
+    @Select("SELECT * FROM CM_ISSUE_STATUS WHERE IS_INUSE = 'Y'")
+    List<IssueStatus> getAllInuseIssueStatus();
+
     @Select("SELECT * FROM CM_ISSUE_STATUS")
     List<IssueStatus> getAllIssueStatus();
 
@@ -30,6 +33,6 @@ public interface SystemMgrDAO {
     @Select("SELECT * FROM CM_ISSUE_RESOLUTION WHERE RESOLUTION_CODE = #{resolutionCode}")
     IssueResolution getIssueResolutionByCode(String resolutionCode);
 
-    @Select("SELECT * FROM CM_ISSUE_RESOLUTION")
-    List<IssueResolution> getAllIssueResolutions();
+    @Select("SELECT * FROM CM_ISSUE_RESOLUTION WHERE IS_INUSE = 'Y'")
+    List<IssueResolution> getAllInuseIssueResolutions();
 }

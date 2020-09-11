@@ -53,6 +53,7 @@ public class PortalLoginService {
                         }
                         webUser.setIsFirstLogin(user.getIsFirstLogin());
                         appContext.setAllRoles(roles);
+                        appContext.setAssignments(userAcctService.getUserProjectAssignments(user.getId()));
                     } else {
                         status = LoginStatus.INVALID_PASS;
                     }

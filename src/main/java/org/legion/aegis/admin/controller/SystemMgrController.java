@@ -110,6 +110,7 @@ public class SystemMgrController {
                     manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
                     manager.addValidations(errors);
                 }
+                file.getInputStream().close();
             } else {
                 manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
                 manager.addError("inputFile", "请选择文件");
