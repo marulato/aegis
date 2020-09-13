@@ -17,7 +17,6 @@
         DATE_FORMAT(USER.DEACTIVATED_AT, '%Y/%m/%d') AS DEACTIVATED_AT,
         ROLE.ROLE_NAME AS ROLE,
         ROLE.ID AS ROLE_ID
-        -- PJT.NAME AS PROJECT
         FROM AC_USER_ACCT USER
         LEFT JOIN AC_USER_ROLE_ASSIGN ASN ON USER.ID = ASN.USER_ACCT_ID
         LEFT JOIN AC_ROLE ROLE ON ASN.ROLE_ID = ROLE.ID
@@ -38,7 +37,7 @@
             </if>
 
             <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
-                AND PJT.ID = #{sp.params.project}
+                AND (PJT.ID = #{sp.params.project} OR PSN.GROUP_ID = (SELECT GROUP_ID FROM PJT_PROJECT WHERE ID = #{sp.params.project}))
             </if>
             <!--SYSADMIN can search all users regardless of their roles-->
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
@@ -56,7 +55,6 @@
                 </if>
             </if>
         </where>
-        -- GROUP BY USER.ID
         <choose>
             <when test="sp.orderColumnNo == 0">
                 ORDER BY LOGIN_ID
@@ -112,7 +110,7 @@
             </if>
 
             <if test="sp.params.project != null and sp.params.project != '' and sp.params.project != '0'.toString()">
-                AND PJT.ID = #{sp.params.project}
+                AND (PJT.ID = #{sp.params.project} OR PSN.GROUP_ID = (SELECT GROUP_ID FROM PJT_PROJECT WHERE ID = #{sp.params.project}))
             </if>
             <!--SYSADMIN can search all users regardless of their roles-->
             <if test="sp.params.role != null and sp.params.role != 'SYSADMIN'">
@@ -130,7 +128,7 @@
                 </if>
             </if>
         </where>
-        GROUP BY USER.ID) AS T
+        ) AS T
     </select>
 
 
@@ -196,14 +194,17 @@
               (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{supervisorId})
     </select>
 
-    <select id="getUsersUnderGroup" resultType="org.legion.aegis.admin.entity.UserAccount">
+    <select id="getUsersUnderProject" resultType="org.legion.aegis.admin.entity.UserAccount">
         SELECT DISTINCT USER.*
         FROM AC_USER_ACCT USER
                  LEFT JOIN AC_USER_ROLE_ASSIGN ROLE ON USER.ID = ROLE.USER_ACCT_ID
                  LEFT JOIN PJT_USER_PROJECT_ASN PSN ON USER.ID = PSN.USER_ACCT_ID
         <where>
-            <if test="param2 != 'SYSADMIN'">
-                AND ROLE.ROLE_ID = #{param2} AND PSN.GROUP_ID = #{param1}
+            <if test="param2 == 'DEV' or param2 == 'QA'">
+                AND ROLE.ROLE_ID = #{param2} AND PSN.PROJECT_ID = #{param1}
+            </if>
+            <if test="param2 == 'DEV_S' or param2 == 'QA_S'">
+                AND ROLE.ROLE_ID = #{param2} AND PSN.GROUP_ID = (SELECT GROUP_ID FROM PJT_PROJECT WHERE ID = #{param1})
             </if>
         </where>
     </select>

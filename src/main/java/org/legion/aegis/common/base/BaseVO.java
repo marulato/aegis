@@ -2,10 +2,12 @@ package org.legion.aegis.common.base;
 
 import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.Reflections;
+
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-public class BaseVO {
+public class BaseVO implements Serializable {
 
     private String createdAt;
     private String createdBy;

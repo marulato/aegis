@@ -135,7 +135,7 @@
             <div class="card-body" id="filterBody">
               <form id="mainForm">
                 <div class="row">
-                  <div class="col-sm-4">
+                  <div class="col-sm-6">
                     <div class="form-group-sm">
                       <label for="groupId">项目组:</label>
                       <select class="custom-select" name="groupId" id="groupId" onchange="toggleProjectSelector()">
@@ -143,19 +143,12 @@
                       </select>
                     </div>
                   </div>
-                  <div class="col-sm-4">
+                  <div class="col-sm-6">
                     <div class="form-group-sm">
                       <label for="projectId">项目:</label>
                       <select class="custom-select" name="projectId" id="projectId" onchange="toggleModuleSelector()"></select>
                     </div>
                   </div>
-                  <div class="col-sm-4">
-                    <div class="form-group-sm">
-                      <label for="issueId">ID:</label>
-                      <input type="text" name="issueId" id="issueId" class="form-control">
-                    </div>
-                  </div>
-
                 </div>
                 <div class="row">
                   <div class="col-sm-2">
@@ -240,7 +233,7 @@
             </div>
 
             <div class="card-footer" id="filterFooter">
-              <button type="button" class="btn btn-primary btn-sm">
+              <button type="button" class="btn btn-primary btn-sm" onclick="search()">
                 <i class="fas fa-search"></i>
               </button>
               <button type="button" class="btn btn-default btn-sm" onclick="reset()">
@@ -256,10 +249,18 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">问题 / 缺陷列表</h3>
-              <button type="button" class="btn btn-default btn-sm float-right">
-                <i class="fas fa-sync-alt"></i>
-                刷新
-              </button>
+              <div style="float: right">
+                <div class="col-sm-9" style="float: right">
+                  <div class="input-group mb-4">
+                    <input name="issueId" id="issueId" type="text" class="form-control" placeholder="ID">
+                    <div class="input-group-append">
+                      <span class="input-group-text" onmouseover="this.style.cursor='pointer'" onclick="searchById()">
+                        <i class="fa fa-search"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -267,16 +268,16 @@
                 <thead>
                 <tr>
                   <th style="width: 5%">ID</th>
-                  <th style="width: 5%">提交人</th>
-                  <th style="width: 5%;">接收人</th>
-                  <th style="width: 5%;">模块</th>
+                  <th style="width: 7.5%">提交人</th>
+                  <th style="width: 7.5%;">接收人</th>
+                  <th style="width: 10%;">模块</th>
                   <th style="width: 5%;">严重性</th>
-                  <th style="width: 5%">SLA</th>
-                  <th style="width: 5%">解决状态</th>
-                  <th style="width: 5%">问题状态</th>
-                  <th style="width: 40%">概述</th>
-                  <th style="width: 10%">提交时间</th>
-                  <th style="width: 10%">更新时间</th>
+                  <th style="width: 1%">SLA</th>
+                  <th style="width: 7%">解决状态</th>
+                  <th style="width: 9%">问题状态</th>
+                  <th style="width: 35%">概述</th>
+                  <th style="width: 6.5%">提交时间</th>
+                  <th style="width: 6.5%">更新时间</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -294,13 +295,7 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2020 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.1.0-pre
-    </div>
-  </footer>
+  <div th:replace="/include/footer::footer"></div>
 
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
@@ -345,14 +340,18 @@
 
        $("#reportedRange").daterangepicker({
            locale: {
-               format: 'YYYY/MM/DD'
-           }
+               format: 'YYYY/MM/DD',
+           },
+           startDate: moment().subtract(30, 'days'),
+           endDate: moment()
        });
 
        $("#updatedRange").daterangepicker({
            locale: {
                format: 'YYYY/MM/DD'
-           }
+           },
+           startDate: moment().subtract(30, 'days'),
+           endDate: moment()
        });
 
         tableView = $('#issueTable').DataTable({
@@ -383,7 +382,14 @@
                 aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
             },
             columns: [
-                {"data": "issueId", "defaultContent": "-"},
+                {
+                    "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    },
+                    render: function (data, type, full, meta) {
+                      return "<a href='/web/issue/view/"+ full.id +"'> "+ full.issueId +"</a>";
+                    }
+                },
                 {"data": "reportedBy", "defaultContent": "-"},
                 {"data": "assignedTo", "defaultContent": "-"},
                 {"data": "moduleName", "defaultContent": "-"},
@@ -392,16 +398,25 @@
                 {"data": "resolution", "defaultContent": "-"},
                 {"data": "status", "defaultContent": "-"},
                 {"data": "title", "defaultContent": "-"},
-                {"data": "reportedAt", "defaultContent": "-"},
-                {"data": "updatedAt", "defaultContent": "-"},
+                {
+                    "data": "reportedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    }
+                },
+                {
+                    "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    }
+                },
             ],
+            fnCreatedRow: function (row, data, dataIndex, cells) {
+              $(row).css("background-color", data.color);
+            },
             language: aegis.locale
         });
     });
 
     function toggleProjectSelector() {
-        toggleReporterSelector();
-        toggleDeveloperSelector();
         $.ajax({
             url: "/web/issue/selector/project/" + $("#groupId").val(),
             type: "get",
@@ -419,7 +434,7 @@
 
     function toggleReporterSelector() {
         $.ajax({
-            url: "/web/issue/selector/reporter/" + $("#groupId").val(),
+            url: "/web/issue/selector/reporter/" + $("#projectId").val(),
             type: "get",
             dataType: "json",
             success: function (res) {
@@ -434,7 +449,7 @@
 
     function toggleDeveloperSelector() {
         $.ajax({
-            url: "/web/issue/selector/developer/" + $("#groupId").val(),
+            url: "/web/issue/selector/developer/" + $("#projectId").val(),
             type: "get",
             dataType: "json",
             success: function (res) {
@@ -448,6 +463,8 @@
     }
 
     function toggleModuleSelector() {
+        toggleReporterSelector();
+        toggleDeveloperSelector();
         $.ajax({
             url: "/web/issue/selector/module/" + $("#projectId").val(),
             type: "get",
@@ -470,6 +487,15 @@
         $("#resolution").val('');
         $("#reportedRange").val('');
         $("#updatedRange").val('');
+        tableView.draw();
+    }
+
+    function search() {
+        $("#issueId").val('');
+        tableView.draw();
+    }
+
+    function searchById() {
         tableView.draw();
     }
 

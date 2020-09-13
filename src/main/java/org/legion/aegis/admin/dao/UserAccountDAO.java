@@ -62,5 +62,5 @@ public interface UserAccountDAO {
     @Delete("DELETE FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{param1} AND GROUP_ID = #{param2}")
     void deleteGroupAssign(Long userId, Long groupId);
 
-    List<UserAccount> getUsersUnderGroup(Long groupId, String roleId);
+    List<UserAccount> getUsersUnderProject(Long projectId, String roleId);
 }

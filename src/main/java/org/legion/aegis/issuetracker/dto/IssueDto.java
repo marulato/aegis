@@ -1,56 +1,78 @@
 package org.legion.aegis.issuetracker.dto;
 
+import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
-import org.legion.aegis.admin.entity.Project;
-import org.legion.aegis.admin.entity.ProjectGroup;
-import org.legion.aegis.admin.entity.UserProjectAssign;
 import org.legion.aegis.admin.service.ProjectService;
+import org.legion.aegis.admin.service.SystemMgrService;
+import org.legion.aegis.admin.service.UserAccountService;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.base.BaseDto;
 import org.legion.aegis.common.consts.AppConsts;
-import org.legion.aegis.common.utils.ArrayUtils;
-import org.legion.aegis.common.utils.MasterCodeUtils;
-import org.legion.aegis.common.utils.SpringUtils;
+import org.legion.aegis.common.utils.*;
+import org.legion.aegis.common.validation.Length;
 import org.legion.aegis.common.validation.MemberOf;
 import org.legion.aegis.common.validation.NotBlank;
 import org.legion.aegis.common.validation.ValidateWithMethod;
+import org.legion.aegis.issuetracker.consts.IssueConsts;
+import org.legion.aegis.issuetracker.controller.IssueController;
+import org.legion.aegis.issuetracker.entity.Issue;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
 
 public class IssueDto extends BaseDto {
 
-    @ValidateWithMethod(methodName = "validateGroupId", message = "请选择项目组")
-    private Long groupId;
-    @ValidateWithMethod(methodName = "validateProjectId", message = "请选择项目")
-    private Long projectId;
-    @ValidateWithMethod(methodName = "validateModule", message = "请选择模块")
-    private Long moduleId;
+    @ValidateWithMethod(methodName = "validateGroupId", message = "请选择项目组", profile = {"report"})
+    private String groupId;
+    @ValidateWithMethod(methodName = "validateProjectId", message = "请选择项目", profile = {"report"})
+    private String projectId;
+    @ValidateWithMethod(methodName = "validateModule", message = "请选择模块", profile = {"report"})
+    private String moduleId;
     @NotBlank(message = "请输入对次此问题的概述")
+    @Length(min = 5, max = 100, message = "概述不得少于5个字符，不得超过100字符", profile = {"report"})
     private String title;
-    @ValidateWithMethod(methodName = "validateRpd", message = "请选择重现情况")
+    @ValidateWithMethod(methodName = "validateRpd", message = "请选择重现情况", profile = {"report"})
     private String reproducibility;
+    @ValidateWithMethod(methodName = "validateStatus", message = "请选择问题状态", profile = {"update"})
     private String status;
+    @ValidateWithMethod(methodName = "validateResolution", message = "请选择解决状态", profile = {"update"})
     private String resolution;
     private String rootCause;
+    @ValidateWithMethod(methodName = "validatePriority", message = "请选择优先级", profile = {"report", "update"})
     private String priority;
+    @ValidateWithMethod(methodName = "validateSeverity", message = "请选择严重程度", profile = {"report", "update"})
     private String severity;
-    private Long assignedTo;
-    @NotBlank(message = "请输入对此问题的详细描述")
+    private String assignedTo;
+    @NotBlank(message = "请输入对此问题的详细描述", profile = {"report"})
     private String description;
-    private Long reportedBy;
+    private String reportedBy;
     private Date reportedAt;
 
-    private boolean validateGroupId(Long groupId) {
+    @Length(max = 4000, message = "长度不能超过4000字符", profile = {"update"})
+    private String updatedNote;
+
+    @ValidateWithMethod(methodName = "validateFixedAt", message = "请输入正确的日期格式", profile = {"update"})
+    private String fixedAt;
+
+    @ValidateWithMethod(methodName = "", message = "请选择需要等待确认的人员")
+    private String confirmedBy;
+
+
+    private List<MultipartFile> attachments;
+
+    private boolean validateGroupId(String groupId) {
         AppContext context = AppContext.getFromWebThread();
+        Long id = StringUtils.parseIfIsLong(groupId);
         if (AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getRoleId())) {
             ProjectService projectService = SpringUtils.getBean(ProjectService.class);
-            return projectService.getProjectGroupById(groupId) != null;
+            return projectService.getProjectGroupById(id) != null;
         }
         List<UserProjectAssign> projectAssigns = context.getAssignments();
         if (projectAssigns != null) {
             for (UserProjectAssign assign : projectAssigns) {
-                if (assign.getGroupId().equals(groupId)) {
+                if (assign.getGroupId().equals(id)) {
                     return true;
                 }
             }
@@ -58,20 +80,26 @@ public class IssueDto extends BaseDto {
         return false;
     }
 
-    private boolean validateProjectId(Long projectId) {
+    private boolean validateProjectId(String projectId) {
         AppContext context = AppContext.getFromWebThread();
         ProjectService projectService = SpringUtils.getBean(ProjectService.class);
-        ProjectGroup group = projectService.getProjectGroupById(groupId);
+        ProjectGroup group = projectService.getProjectGroupById(StringUtils.parseIfIsLong(groupId));
         if (group != null) {
-            Project project = projectService.getProjectById(projectId, false);
+            Project project = projectService.getProjectById(StringUtils.parseIfIsLong(projectId), false);
             if (project != null && AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getRoleId())) {
                 return project.getGroupId().equals(group.getId());
             }
             List<UserProjectAssign> projectAssigns = context.getAssignments();
             if (projectAssigns != null && project != null) {
                 for (UserProjectAssign assign : projectAssigns) {
-                    if (assign.getProjectId().equals(project.getId())) {
-                        return true;
+                    if (UserAccountService.isSupervisor(context.getRoleId())) {
+                        if (assign.getGroupId().equals(project.getGroupId())) {
+                            return true;
+                        }
+                    } else {
+                        if (assign.getProjectId().equals(project.getId())) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -79,12 +107,12 @@ public class IssueDto extends BaseDto {
         return false;
     }
 
-    private boolean validateModule(Long moduleId) {
+    private boolean validateModule(String moduleId) {
         ProjectService projectService = SpringUtils.getBean(ProjectService.class);
-        Project project = projectService.getProjectById(projectId, true);
+        Project project = projectService.getProjectById(StringUtils.parseIfIsLong(projectId), true);
         if (project != null && project.getModules() != null) {
             for (Module module : project.getModules()) {
-                if (module.getId().equals(moduleId)) {
+                if (module.getId().equals(StringUtils.parseIfIsLong(moduleId))) {
                     return true;
                 }
             }
@@ -97,27 +125,74 @@ public class IssueDto extends BaseDto {
         return ArrayUtils.contains(codes, reproducibility);
     }
 
-    public Long getGroupId() {
+    private boolean validateSeverity(String severity) {
+        String[] codes = MasterCodeUtils.getCodeArrayByType("issue.severity");
+        return ArrayUtils.contains(codes, severity);
+    }
+
+    private boolean validatePriority(String priority) {
+        String[] codes = MasterCodeUtils.getCodeArrayByType("issue.priority");
+        return ArrayUtils.contains(codes, priority);
+    }
+
+    private boolean validateStatus(String status) {
+        SystemMgrService systemMgrService = SpringUtils.getBean(SystemMgrService.class);
+        return systemMgrService.getIssueStatusByCode(status) != null;
+    }
+
+    private boolean validateResolution(String resolution) {
+        SystemMgrService systemMgrService = SpringUtils.getBean(SystemMgrService.class);
+        return systemMgrService.getIssueResolutionByCode(resolution) != null;
+    }
+
+    private boolean validateFixedAt(String fixedAt) {
+        if (StringUtils.isNotBlank(fixedAt)) {
+            return DateUtils.parseDatetime(fixedAt, "yyyy/MM/dd HH:mm") != null;
+        }
+        return true;
+    }
+
+    private boolean validateConfirmation(String confirmedBy) {
+        if (IssueConsts.ISSUE_STATUS_PENDING_CONFIRMATION.equals(status)) {
+            Issue issue = (Issue) SessionManager.getAttribute(IssueController.SESSION_KEY);
+            if (issue != null) {
+                UserAccountService service = SpringUtils.getBean(UserAccountService.class);
+                List<UserAccount> developers = service.getDevelopersUnderProject(issue.getProjectId());
+                List<UserAccount> reporters = service.getReportersUnderProject(issue.getProjectId());
+                developers.addAll(reporters);
+                developers.removeIf(var -> var.getId().equals(issue.getAssignedTo()));
+                for (UserAccount user : developers) {
+                    if (user.getId().equals(StringUtils.parseIfIsLong(confirmedBy))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public String getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(Long groupId) {
+    public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
-    public Long getProjectId() {
+    public String getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
 
-    public Long getModuleId() {
+    public String getModuleId() {
         return moduleId;
     }
 
-    public void setModuleId(Long moduleId) {
+    public void setModuleId(String moduleId) {
         this.moduleId = moduleId;
     }
 
@@ -177,11 +252,11 @@ public class IssueDto extends BaseDto {
         this.severity = severity;
     }
 
-    public Long getAssignedTo() {
+    public String getAssignedTo() {
         return assignedTo;
     }
 
-    public void setAssignedTo(Long assignedTo) {
+    public void setAssignedTo(String assignedTo) {
         this.assignedTo = assignedTo;
     }
 
@@ -193,11 +268,11 @@ public class IssueDto extends BaseDto {
         this.description = description;
     }
 
-    public Long getReportedBy() {
+    public String getReportedBy() {
         return reportedBy;
     }
 
-    public void setReportedBy(Long reportedBy) {
+    public void setReportedBy(String reportedBy) {
         this.reportedBy = reportedBy;
     }
 
@@ -207,5 +282,37 @@ public class IssueDto extends BaseDto {
 
     public void setReportedAt(Date reportedAt) {
         this.reportedAt = reportedAt;
+    }
+
+    public List<MultipartFile> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<MultipartFile> attachments) {
+        this.attachments = attachments;
+    }
+
+    public String getUpdatedNote() {
+        return updatedNote;
+    }
+
+    public void setUpdatedNote(String updatedNote) {
+        this.updatedNote = updatedNote;
+    }
+
+    public String getFixedAt() {
+        return fixedAt;
+    }
+
+    public void setFixedAt(String fixedAt) {
+        this.fixedAt = fixedAt;
+    }
+
+    public String getConfirmedBy() {
+        return confirmedBy;
+    }
+
+    public void setConfirmedBy(String confirmedBy) {
+        this.confirmedBy = confirmedBy;
     }
 }

@@ -89,10 +89,10 @@ public class ExternalEmailService {
                         attachFileName : "attachment", new ByteArrayResource(attachment));
             }
             mailSender.send(mimeMessage);
-            emailArchive.setStatus(AppConsts.EMIAL_STATUS_SENT);
+            emailArchive.setStatus(AppConsts.EMAIL_STATUS_SENT);
         } catch (Exception e) {
             log.error("Email sent FAILED", e);
-            emailArchive.setStatus(AppConsts.EMIAL_STATUS_SENT_FAILED);
+            emailArchive.setStatus(AppConsts.EMAIL_STATUS_SENT_FAILED);
             //throw e; DO NOT throw it, Email Failure should not trigger rollback
         } finally {
             emailArchive.setSubject(subject);

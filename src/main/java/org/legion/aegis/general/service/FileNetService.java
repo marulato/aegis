@@ -7,6 +7,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.consts.ContentConsts;
 import org.legion.aegis.common.consts.SystemConsts;
 import org.legion.aegis.common.utils.FTPClients;
+import org.legion.aegis.common.utils.FileNameGenerator;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.general.dao.FileNetDAO;
 import org.legion.aegis.general.entity.FileNet;
@@ -14,6 +15,8 @@ import org.legion.aegis.general.ex.FTPUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Map;
@@ -65,26 +68,54 @@ public class FileNetService {
         return 0L;
     }
 
-    public Long saveFileNetDB(String fileName, byte[] data) {
+    private FileNet saveFileNet(String fileName, byte[] data, boolean saveDB) {
         if (StringUtils.isNotBlank(fileName) && data != null) {
             FileNet fileNet = new FileNet();
             fileNet.setSha512(DigestUtils.sha512Hex(data).toUpperCase());
             fileNet.setSize(data.length);
             fileNet.setFileUuid(getFileUUID(data));
             fileNet.setFileName(fileName);
-            fileNet.setStorageType(AppConsts.FILE_NET_STORAGE_TYPE_DATABASE);
             fileNet.setStatus(AppConsts.FILE_NET_STATUS_STORED);
-            fileNet.setData(data);
+            if (saveDB) {
+                fileNet.setStorageType(AppConsts.FILE_NET_STORAGE_TYPE_DATABASE);
+                fileNet.setData(data);
+            } else {
+                fileNet.setStorageType(AppConsts.FILE_NET_STORAGE_TYPE_LOCAL);
+            }
             String extension = FilenameUtils.getExtension(fileNet.getFileName()).toUpperCase();
             fileNet.setFileType(StringUtils.isNotBlank(extension) ? extension : AppConsts.FILE_NET_FILE_TYPE_UNKNOWN);
             fileNet.setMimeType(getMimeType(extension));
             fileNet.createAuditValues(AppContext.getFromWebThread());
             fileNetDAO.create(fileNet);
-            return fileNet.getId();
+            return fileNet;
 
         }
-        return 0L;
+        return null;
     }
+
+    public FileNet saveFileNetDB(String fileName, byte[] data) {
+        return saveFileNet(fileName, data, true);
+    }
+
+    public FileNet saveFileNetLocal(String fileName, byte[] data, String localPath) throws Exception {
+        if (StringUtils.isNotBlank(localPath)) {
+            File file = new File(localPath);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            FileNet fileNet = saveFileNet(fileName, data, false);
+            if (fileNet != null) {
+                String savedName = fileNet.getFileUuid();
+                String fullPath = FileNameGenerator.format(localPath) + savedName;
+                try (FileOutputStream outputStream = new FileOutputStream(new File(fullPath))) {
+                    outputStream.write(data);
+                }
+            }
+            return fileNet;
+        }
+        return null;
+    }
+
 
     public String getMimeType(String extension) {
         if (StringUtils.isNotBlank(extension)) {
@@ -92,6 +123,10 @@ public class FileNetService {
             return map.get(extension.toUpperCase());
         }
         return null;
+    }
+
+    public FileNet getFileNetById(Long id) {
+        return fileNetDAO.getFileNetById(id);
     }
 
     private String getFileUUID(byte[] fileData) {

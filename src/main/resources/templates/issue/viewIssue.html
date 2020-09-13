@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Dashboard</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
+  <!-- iCheck -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+
+  <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/datetimepicker/bootstrap-datetimepicker.min.css}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <div th:replace="/include/topbar::topmenu"></div>
+  <!-- /.navbar -->
+
+  <div th:replace="/include/sidebar::leftmenu('1.2', ${role})"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark"><a href="/web/project"><i class="fa fa-chevron-left"></i></a>&nbsp;问题详情</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">主页</a></li>
+              <li class="breadcrumb-item active">问题详情</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- table-->
+        <div class="col-12">
+          <div class="alert alert-success alert-dismissible" style="display: none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <h5><i class="icon fas fa-check"></i> Alert!</h5>
+            Success alert preview. This alert is dismissable.
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">基本信息</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">ID</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.issueId}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box" th:style="'background-color:' + ${issue.color}">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">问题状态</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.status}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">解决状态</span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${issue.resolution}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">严重性</span>
+                      <span class="info-box-number text-center mb-0"
+                            th:text="${issue.severity}" th:style="'color:' + ${issue.severityColor}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">优先级</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.priority}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">提交人</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.reportedBy}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">负责人</span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${issue.assignedTo}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">提交时间</span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${issue.reportedAt}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">项目组</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.groupName}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">项目</span>
+                      <span class="info-box-number text-center text-muted mb-0" th:text="${issue.projectName}"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">模块</span>
+                      <span class="info-box-number text-center text-muted mb-0"
+                            th:text="${issue.moduleName}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">转发给其他开发者:</label>
+                    <div class="input-group">
+                      <select class="custom-select" name="assignedTo" id="assignedTo">
+                        <option th:each="asn, stats:${assignedTo}" th:value="${asn.id}" th:text="${asn.name}"></option>
+                      </select>
+                      &emsp;
+                      <button type="button" class="btn btn-default" style="font-size: 14px" onclick="assign()"><i class="fa fa-reply"></i>&nbsp;转发</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">概述:</label>
+                    <div th:text="${issue.title}"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">详细描述:</label>
+                    <div th:utext="${issue.description}"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">附件:</label>
+                    <div th:each="file, stats:${issue.attachments}">
+                      <a th:href="@{'/web/issue/download/' + ${file.fileUuid}}"  th:text="${file.fileName}"> </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">问题原因:</label>
+                    <div>
+                      <span th:text="${issue.rootCause}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">备注</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+              <div style="float: right">
+                <button type="button" class="btn btn-default btn-sm"
+                        onclick="showAddNote()">
+                  <i class="fas fa-sticky-note"></i>
+                  &nbsp;添加备注
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row" th:each="note, stats:${issue.notes}">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label th:text="${note.createdBy} + '于 ' + ${note.createdAt} + ' 添加'"></label>
+                    <textarea class="form-control" th:value="${note.content}" th:text="${note.content}" readonly></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--Time Line-->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">时间线</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="timeline">
+                    <th:block th:each="var, stats:${timeline}">
+
+                      <div class="time-label">
+                        <span class="bg-blue" th:text="${stats.current.key}">10 Feb. 2014</span>
+                      </div>
+                      <div th:each="item, timeline:${stats.current.value}">
+                        <i class="fas fa-user bg-blue"></i>
+                        <div class="timeline-item">
+                          <span class="time" th:utext="'<i class=\'fas fa-clock\'></i>' + ${item.at}"><i class="fas fa-clock"></i> 12:05</span>
+                          <h3 class="timeline-header" th:text="${item.by} + '：' +${item.desc} + '了' + ${item.type}">sent
+                            you an email</h3>
+
+                          <div class="timeline-body" th:text="${item.oldValue} + ' -> ' + ${item.newValue}">
+
+                          </div>
+                        </div>
+                      </div>
+
+                    </th:block>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="row">
+          <div class="col-md-12">
+            <button type="button" class="btn btn-default" style="font-size: 14px"
+                    onclick="location.href='/web/issue/view'">
+              <i class="fa fa-chevron-left"></i>
+              返回
+            </button>
+            &emsp;
+            <button type="button" class="btn btn-success" style="font-size: 14px"
+                    onclick="showUpdate()">
+              <i class="fa fa-edit"></i>
+              更新
+            </button>
+            &emsp;
+            <button type="button" class="btn btn-primary" style="font-size: 14px"
+                    onclick="follow()">
+              <i class="fa fa-user-plus"></i>
+              关注此问题
+            </button>
+          </div>
+        </div>
+      </div>
+      <br/>
+    </section>
+  </div>
+  <!-- /.row -->
+
+  <!-- /.row (main row) -->
+  <!-- /.container-fluid -->
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+<div th:replace="/include/footer::footer"></div>
+
+<!-- Control Sidebar -->
+<aside class="control-sidebar control-sidebar-dark">
+  <!-- Control sidebar content goes here -->
+</aside>
+<!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+
+<div class="modal fade" id="modal_note">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >添加备注</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="note">内容</label>
+              <textarea class="form-control" name="note" id="note"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="addNote()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="modal_update">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >更新问题状态</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="mainForm">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="status">问题状态:</label>
+                <select class="custom-select" name="status" id="status" onchange="toggleConfirmation()">
+                  <option th:each="st, stats:${status}" th:value="${st.statusCode}" th:text="${st.displayName}" th:selected="${issue.statusCode == st.statusCode}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" id="confirmDiv" style="display:none;">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="confirmedBy">确认人:</label>
+                <select class="custom-select" name="confirmedBy" id="confirmedBy">
+                  <option th:each="asn, stats:${assignedTo}" th:value="${asn.id}" th:text="${asn.name}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="resolution">解决状态:</label>
+                <select class="custom-select" name="resolution" id="resolution">
+                  <option th:each="res, stats:${resolution}" th:value="${res.resolutionCode}" th:text="${res.displayName}" th:selected="${issue.resolutionCode == res.resolutionCode}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="rootCause">问题原因:</label>
+                <input class="form-control" name="rootCause" id="rootCause">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="fixedAt">解决时间（yyyy/MM/dd HH:mm:ss）:</label>
+                <input type="text" class="form-control" name="fixedAt" id="fixedAt">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="severity">严重性:</label>
+                <select class="custom-select" name="severity" id="severity">
+                  <option th:each="se, stats:${severity}" th:value="${se.code}" th:text="${se.value}" th:selected="${issue.severityCode == se.code}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="priority">优先级:</label>
+                <select class="custom-select" name="priority" id="priority">
+                  <option th:each="p, stats:${priority}" th:value="${p.code}" th:text="${p.value}" th:selected="${issue.priorityCode == p.code}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="updatedNote">备注：</label>
+                <textarea class="form-control" name="updatedNote" id="updatedNote"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="attachments">添加附件:</label>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="attachments" name="attachments" multiple="multiple" onchange="showFileName()">
+                  <label class="custom-file-label" id="fileNameLabel" for="attachments">选择文件（可多选）</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="update()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+
+
+
+
+
+<!-- jQuery -->
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!-- daterangepicker -->
+<script th:src="@{/plugins/moment/moment.min.js}"></script>
+<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+<script th:src="@{/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.js}"></script>
+<!-- AdminLTE for demo purposes -->
+<script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+    });
+
+    $("#fixedAt").datetimepicker({
+        format: "yyyy/mm/dd hh:i",
+        language:'zh-CN'
+    });
+
+    toastr.options = { // toastr配置
+        "closeButton": false, //是否显示关闭按钮
+        "debug": false, //是否使用debug模式
+        "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+        "positionClass": "toast-top-right",//显示的动画时间
+        "showDuration": "200", //显示的动画时间
+        "hideDuration": "300", //消失的动画时间
+        "timeOut": "1000", //展现时间
+        "extendedTimeOut": "500", //加长展示时间
+        "showEasing": "swing", //显示时的动画缓冲方式
+        "hideEasing": "linear", //消失时的动画缓冲方式
+        "showMethod": "fadeIn", //显示时的动画方式
+        "hideMethod": "fadeOut" //消失时的动画方式
+    }
+
+    toastr.options.onHidden = function() {
+        location.reload();
+    }
+
+    function showAddNote() {
+        aegis.clearErrors();
+        $("#modal_note").modal("show");
+    }
+
+    function addNote() {
+        $.ajax({
+            url: "/web/issue/addNote",
+            data: {"content": $("#note").val()},
+            type: "post",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_note").modal("hide");
+                    toastr.success("备注添加成功");
+                }
+            }
+        });
+    }
+
+    function showFileName() {
+        var file = $("#attachments")[0].files;
+        var name = "";
+        $.each(file, function (idx, f){
+            name += f.name + "; ";
+        });
+        name = name.substring(0, name.length - 2);
+        $("#fileNameLabel").html(name);
+    }
+
+    function showUpdate() {
+        $("#modal_update").modal("show");
+    }
+
+    function follow() {
+
+    }
+
+    function update() {
+        aegis.clearErrors();
+        var formData = new FormData($("#mainForm")[0]);
+        $.ajax({
+            url: "/web/issue/update",
+            type: "post",
+            data: formData,
+            contentType: false,
+            processData: false,
+            cache: false,
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_update").modal("hide");
+                    toastr.success("更新成功！");
+                }
+            }
+        });
+    }
+
+    function assign() {
+        $.ajax({
+          url: "/web/issue/assign",
+            type: "post",
+            data:{"assignedTo": $("#assignedTo").val()},
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    toastr.success("转发成功！");
+                }
+            }
+        });
+    }
+
+    function toggleConfirmation() {
+        if ($("#status").val() === "P_CONFIRM") {
+            $("#confirmDiv").show();
+        } else {
+            $("#confirmDiv").hide();
+        }
+    }
+
+</script>
+</body>
+</html>

@@ -21,6 +21,7 @@ public class ContentConsts {
     public static final String MT_MP3                               = "audio/mpeg3";
     public static final String MT_TRM                               = "application/x-msterminal";
     public static final String MT_JPG                               = "image/jpg";
+    public static final String MT_TXT                               = "text/plain";
 
     //Tika content type
     public static final String TK_PDF                               = "application/pdf";
@@ -58,7 +59,7 @@ public class ContentConsts {
         map.put("WAV", MT_WAV);
         map.put("MP3", MT_MP3);
         map.put("TRM", MT_TRM);
-        map.put("MP3", MT_MP3);
+        map.put("TXT", MT_TXT);
         map.put(AppConsts.FILE_NET_FILE_TYPE_UNKNOWN, "application/text");
         return map;
     }

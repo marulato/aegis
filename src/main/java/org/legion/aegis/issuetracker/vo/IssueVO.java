@@ -1,7 +1,11 @@
 package org.legion.aegis.issuetracker.vo;
 
 import org.legion.aegis.common.base.BaseVO;
+import org.legion.aegis.general.entity.FileNet;
+import org.legion.aegis.issuetracker.entity.IssueNote;
+
 import java.util.Date;
+import java.util.List;
 
 public class IssueVO extends BaseVO {
 
@@ -24,6 +28,21 @@ public class IssueVO extends BaseVO {
     private String reportedBy;
     private String reportedAt;
     private String sla;
+
+    private String color;
+    private String issueId;
+    private String description;
+    private String severityColor;
+
+    private String statusCode;
+    private String severityCode;
+    private String priorityCode;
+    private String resolutionCode;
+
+    private List<FileNet> attachments;
+    private List<IssueNoteVO> notes;
+
+    private String fixedAt;
 
     public Long getId() {
         return id;
@@ -175,5 +194,93 @@ public class IssueVO extends BaseVO {
 
     public void setSla(String sla) {
         this.sla = sla;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(String issueId) {
+        this.issueId = issueId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<FileNet> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<FileNet> attachments) {
+        this.attachments = attachments;
+    }
+
+    public List<IssueNoteVO> getNotes() {
+        return notes;
+    }
+
+    public void setNotes(List<IssueNoteVO> notes) {
+        this.notes = notes;
+    }
+
+    public String getSeverityColor() {
+        return severityColor;
+    }
+
+    public void setSeverityColor(String severityColor) {
+        this.severityColor = severityColor;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getSeverityCode() {
+        return severityCode;
+    }
+
+    public void setSeverityCode(String severityCode) {
+        this.severityCode = severityCode;
+    }
+
+    public String getPriorityCode() {
+        return priorityCode;
+    }
+
+    public void setPriorityCode(String priorityCode) {
+        this.priorityCode = priorityCode;
+    }
+
+    public String getResolutionCode() {
+        return resolutionCode;
+    }
+
+    public void setResolutionCode(String resolutionCode) {
+        this.resolutionCode = resolutionCode;
+    }
+
+    public String getFixedAt() {
+        return fixedAt;
+    }
+
+    public void setFixedAt(String fixedAt) {
+        this.fixedAt = fixedAt;
     }
 }

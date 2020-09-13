@@ -11,7 +11,6 @@ public class Issue extends BasePO {
 
     @PrimaryKey(autoIncrement = true)
     private Long id;
-    private Long groupIssueId;
     private Long moduleId;
     private Long groupId;
     private Long projectId;
@@ -20,12 +19,11 @@ public class Issue extends BasePO {
     private String reproducibility;
     private String status;
     private String resolution;
-    private Integer priority;
-    private Integer severity;
+    private String priority;
+    private String severity;
     private Long assignedTo;
     private String rootCause;
     private Date fixedAt;
-    private Long fixedBy;
     private Long reportedBy;
     private Date reportedAt;
     private String tag;
@@ -36,14 +34,6 @@ public class Issue extends BasePO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getGroupIssueId() {
-        return groupIssueId;
-    }
-
-    public void setGroupIssueId(Long groupIssueId) {
-        this.groupIssueId = groupIssueId;
     }
 
     public Long getModuleId() {
@@ -110,19 +100,19 @@ public class Issue extends BasePO {
         this.resolution = resolution;
     }
 
-    public Integer getPriority() {
+    public String getPriority() {
         return priority;
     }
 
-    public void setPriority(Integer priority) {
+    public void setPriority(String priority) {
         this.priority = priority;
     }
 
-    public Integer getSeverity() {
+    public String getSeverity() {
         return severity;
     }
 
-    public void setSeverity(Integer severity) {
+    public void setSeverity(String severity) {
         this.severity = severity;
     }
 
@@ -142,18 +132,6 @@ public class Issue extends BasePO {
         this.rootCause = rootCause;
     }
 
-    public Date getFixedAt() {
-        return fixedAt;
-    }
-
-    public void setFixedAt(Date fixedAt) {
-        this.fixedAt = fixedAt;
-    }
-
-    public Long getFixedBy() {
-        return fixedBy;
-    }
-
     public Long getReportedBy() {
         return reportedBy;
     }
@@ -170,15 +148,19 @@ public class Issue extends BasePO {
         this.reportedAt = reportedAt;
     }
 
-    public void setFixedBy(Long fixedBy) {
-        this.fixedBy = fixedBy;
-    }
-
     public String getTag() {
         return tag;
     }
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Date getFixedAt() {
+        return fixedAt;
+    }
+
+    public void setFixedAt(Date fixedAt) {
+        this.fixedAt = fixedAt;
     }
 }

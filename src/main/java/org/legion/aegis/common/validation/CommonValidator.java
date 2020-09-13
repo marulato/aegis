@@ -203,6 +203,9 @@ public class CommonValidator {
             Length length = field.getAnnotation(Length.class);
             if (isProfileMatch(constraintField.getInputProfile(), length.profile())) {
                 Object value = Reflections.getValue(field, constraintField.getInstanceType(), constraintField.getInstanceBelongsTo());
+                if (value == null && length.min() == 0) {
+                    return;
+                }
                 if (!(value instanceof String) || ((String) value).length() < length.min()
                         || ((String) value).length() > length.max()) {
                     violations.add(new ConstraintViolation(field.getName(), value,

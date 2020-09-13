@@ -24,12 +24,13 @@ public class NetworkFileTransfer {
             BufferedInputStream bufferedIn = null;
             OutputStream output = null;
             try{
-                File file = new File(from, fileName);
+                File file = new File(from);
                 if (file.exists()) {
                     response.addHeader("content-type", "application/octet-stream");
                     response.addHeader("content-length", String.valueOf(file.length()));
                     response.setContentType("application/octet-stream");
-                    response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+                    response.addHeader("Content-Disposition", "attachment;filename=" +
+                            URLEncoder.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", "%20"));
                     bufferedIn = new BufferedInputStream(new FileInputStream(file));
                     output = response.getOutputStream();
                     byte[] buffer = new byte[1024];

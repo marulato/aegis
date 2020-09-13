@@ -76,8 +76,10 @@ public class AppConsts {
     public static final String FILE_NET_SRC_TYPE_EMAIL_ATTACHMENT  = "EMAIL";
 
 
-    public static final String EMIAL_STATUS_SENT           = "SENT";
-    public static final String EMIAL_STATUS_SENT_FAILED    = "FAILED";
+    public static final String EMAIL_STATUS_SENT           = "SENT";
+    public static final String EMAIL_STATUS_SENT_FAILED    = "FAILED";
+
+
 
 
     public static final List<String> ALL_DOC_CATEGORIES = List.of();

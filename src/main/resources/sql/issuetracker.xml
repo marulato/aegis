@@ -4,7 +4,6 @@
     <select id="search" parameterType="org.legion.aegis.common.base.SearchParam"
             resultType="org.legion.aegis.issuetracker.vo.IssueVO">
         SELECT DISTINCT ISS.ID                                      AS ID,
-                        ISS.GROUP_ISSUE_ID,
                         PJT.NAME                                    AS PROJECT_NAME,
                         GRP.NAME                                    AS GROUP_NAME,
                         ISS.TITLE,
@@ -18,7 +17,8 @@
                         USER1.NAME                                  AS REPORTED_BY,
                         USER2.NAME                                  AS ASSIGNED_TO,
                         DATE_FORMAT(ISS.REPORTED_AT, '%Y/%m/%d %T') AS REPORTED_AT,
-                        DATE_FORMAT(ISS.UPDATED_BY, '%Y/%m/%d %T')  AS UPDATED_BY
+                        DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d %T')  AS UPDATED_AT,
+                        DATE_FORMAT(ISS.FIXED_AT, '%Y/%m/%d %T')    AS FIXED_AT
         FROM ISU_ISSUE ISS
                  LEFT JOIN PJT_PROJECT PJT
                            ON PJT.ID = ISS.PROJECT_ID
@@ -47,47 +47,46 @@
             <if test="sp.params.issueId != null and sp.params.issueId != ''">
                 AND ISS.ID = #{sp.params.issueId}
             </if>
-            <if test="sp.params.groupIssueId != null and sp.params.groupIssueId != ''">
-                AND ISS.GROUP_ISSUE_ID = #{sp.params.groupIssueId}
-            </if>
-            <if test="sp.params.projectId != null and sp.params.projectId != ''">
-                AND ISS.PROJECT_ID = #{sp.params.projectId}
-            </if>
-            <if test="sp.params.groupId != null and sp.params.groupId != ''">
-                AND ISS.GROUP_ID = #{sp.params.groupId}
-            </if>
-            <if test="sp.params.status != null and sp.params.status != ''">
-                AND ISS.STATUS = #{sp.params.status}
-            </if>
-            <if test="sp.params.resolution != null and sp.params.resolution != ''">
-                AND ISS.RESOLUTION = #{sp.params.resolution}
-            </if>
-            <if test="sp.params.reportedBy != null and sp.params.reportedBy != ''">
-                AND ISS.REPORTED_BY = #{sp.params.reportedBy}
-            </if>
-            <if test="sp.params.reportedFrom != null and sp.params.reportedTo != null">
-                AND DATE_FORMAT(ISS.REPORTED_AT, '%Y/%m/%d') BETWEEN #{sp.params.reportedFrom} AND #{sp.params.reportedTo}
-            </if>
-            <if test="sp.params.updatedFrom != null and sp.params.updatedTo != null">
-                AND DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d') BETWEEN #{sp.params.updatedFrom} AND #{sp.params.updatedTo}
-            </if>
-            <if test="sp.params.assignedTo != null and sp.params.assignedTo != ''">
-                AND ISS.ASSIGNED_TO = #{sp.params.assignedTo}
-            </if>
-            <if test="sp.params.moduleId != null and sp.params.moduleId != ''">
-                AND ISS.MODULE_ID = #{sp.params.moduleId}
-            </if>
-            <if test="sp.params.severity != null and sp.params.severity != ''">
-                AND ISS.SEVERITY = #{sp.params.severity}
-            </if>
-            <if test="sp.params.updatedAt != null and sp.params.updatedAt != ''">
-                AND ISS.UPDATED_AT = #{sp.params.updatedAt}
+            <if test="sp.params.issueId == null or sp.params.issueId == '' or sp.params.issueId &lt;1">
+                <if test="sp.params.projectId != null and sp.params.projectId != ''">
+                    AND ISS.PROJECT_ID = #{sp.params.projectId}
+                </if>
+                <if test="sp.params.groupId != null and sp.params.groupId != ''">
+                    AND ISS.GROUP_ID = #{sp.params.groupId}
+                </if>
+                <if test="sp.params.status != null and sp.params.status != ''">
+                    AND ISS.STATUS = #{sp.params.status}
+                </if>
+                <if test="sp.params.resolution != null and sp.params.resolution != ''">
+                    AND ISS.RESOLUTION = #{sp.params.resolution}
+                </if>
+                <if test="sp.params.reportedBy != null and sp.params.reportedBy &gt;0">
+                    AND ISS.REPORTED_BY = #{sp.params.reportedBy}
+                </if>
+                <if test="sp.params.reportedFrom != null and sp.params.reportedTo != null">
+                    AND ISS.REPORTED_AT BETWEEN #{sp.params.reportedFrom} AND #{sp.params.reportedTo}
+                </if>
+                <if test="sp.params.updatedFrom != null and sp.params.updatedTo != null">
+                    AND ISS.UPDATED_AT BETWEEN #{sp.params.updatedFrom} AND #{sp.params.updatedTo}
+                </if>
+                <if test="sp.params.assignedTo != null and sp.params.assignedTo &gt;0">
+                    AND ISS.ASSIGNED_TO = #{sp.params.assignedTo}
+                </if>
+                <if test="sp.params.moduleId != null and sp.params.moduleId &gt;0">
+                    AND ISS.MODULE_ID = #{sp.params.moduleId}
+                </if>
+                <if test="sp.params.severity != null and sp.params.severity != ''">
+                    AND ISS.SEVERITY = #{sp.params.severity}
+                </if>
+                <if test="sp.params.updatedAt != null and sp.params.updatedAt != ''">
+                    AND ISS.UPDATED_AT = #{sp.params.updatedAt}
+                </if>
             </if>
             <if test="sp.params.roleId == 'DEV' or sp.params.roleId == 'QA'">
                 AND ISS.PROJECT_ID IN (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
             </if>
             <if test="sp.params.roleId == 'DEV_S' or sp.params.roleId == 'QA_S'">
-                AND ISS.GROUP_ISSUE_ID IN (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+                AND ISS.GROUP_ID IN (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
             </if>
         </where>
         <choose>
@@ -171,47 +170,46 @@
             <if test="sp.params.issueId != null and sp.params.issueId != ''">
                 AND ISS.ID = #{sp.params.issueId}
             </if>
-            <if test="sp.params.groupIssueId != null and sp.params.groupIssueId != ''">
-                AND ISS.GROUP_ISSUE_ID = #{sp.params.groupIssueId}
-            </if>
-            <if test="sp.params.projectId != null and sp.params.projectId != ''">
-                AND ISS.PROJECT_ID = #{sp.params.projectId}
-            </if>
-            <if test="sp.params.groupId != null and sp.params.groupId != ''">
-                AND ISS.GROUP_ID = #{sp.params.groupId}
-            </if>
-            <if test="sp.params.status != null and sp.params.status != ''">
-                AND ISS.STATUS = #{sp.params.status}
-            </if>
-            <if test="sp.params.resolution != null and sp.params.resolution != ''">
-                AND ISS.RESOLUTION = #{sp.params.resolution}
-            </if>
-            <if test="sp.params.reportedBy != null and sp.params.reportedBy != ''">
-                AND ISS.REPORTED_BY = #{sp.params.reportedBy}
-            </if>
-            <if test="sp.params.reportedFrom != null and sp.params.reportedTo != null">
-                AND DATE_FORMAT(ISS.REPORTED_AT, '%Y/%m/%d') BETWEEN #{sp.params.reportedFrom} AND #{sp.params.reportedTo}
-            </if>
-            <if test="sp.params.updatedFrom != null and sp.params.updatedTo != null">
-                AND DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d') BETWEEN #{sp.params.updatedFrom} AND #{sp.params.updatedTo}
-            </if>
-            <if test="sp.params.assignedTo != null and sp.params.assignedTo != ''">
-                AND ISS.ASSIGNED_TO = #{sp.params.assignedTo}
-            </if>
-            <if test="sp.params.moduleId != null and sp.params.moduleId != ''">
-                AND ISS.MODULE_ID = #{sp.params.moduleId}
-            </if>
-            <if test="sp.params.severity != null and sp.params.severity != ''">
-                AND ISS.SEVERITY = #{sp.params.severity}
-            </if>
-            <if test="sp.params.updatedAt != null and sp.params.updatedAt != ''">
-                AND ISS.UPDATED_AT = #{sp.params.updatedAt}
+            <if test="sp.params.issueId == null or sp.params.issueId == '' or sp.params.issueId &lt;1">
+                <if test="sp.params.projectId != null and sp.params.projectId != ''">
+                    AND ISS.PROJECT_ID = #{sp.params.projectId}
+                </if>
+                <if test="sp.params.groupId != null and sp.params.groupId != ''">
+                    AND ISS.GROUP_ID = #{sp.params.groupId}
+                </if>
+                <if test="sp.params.status != null and sp.params.status != ''">
+                    AND ISS.STATUS = #{sp.params.status}
+                </if>
+                <if test="sp.params.resolution != null and sp.params.resolution != ''">
+                    AND ISS.RESOLUTION = #{sp.params.resolution}
+                </if>
+                <if test="sp.params.reportedBy != null and sp.params.reportedBy &gt;0">
+                    AND ISS.REPORTED_BY = #{sp.params.reportedBy}
+                </if>
+                <if test="sp.params.reportedFrom != null and sp.params.reportedTo != null">
+                    AND ISS.REPORTED_AT BETWEEN #{sp.params.reportedFrom} AND #{sp.params.reportedTo}
+                </if>
+                <if test="sp.params.updatedFrom != null and sp.params.updatedTo != null">
+                    AND ISS.UPDATED_AT BETWEEN #{sp.params.updatedFrom} AND #{sp.params.updatedTo}
+                </if>
+                <if test="sp.params.assignedTo != null and sp.params.assignedTo &gt;0">
+                    AND ISS.ASSIGNED_TO = #{sp.params.assignedTo}
+                </if>
+                <if test="sp.params.moduleId != null and sp.params.moduleId &gt;0">
+                    AND ISS.MODULE_ID = #{sp.params.moduleId}
+                </if>
+                <if test="sp.params.severity != null and sp.params.severity != ''">
+                    AND ISS.SEVERITY = #{sp.params.severity}
+                </if>
+                <if test="sp.params.updatedAt != null and sp.params.updatedAt != ''">
+                    AND ISS.UPDATED_AT = #{sp.params.updatedAt}
+                </if>
             </if>
             <if test="sp.params.roleId == 'DEV' or sp.params.roleId == 'QA'">
                 AND ISS.PROJECT_ID IN (SELECT PROJECT_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
             </if>
             <if test="sp.params.roleId == 'DEV_S' or sp.params.roleId == 'QA_S'">
-                AND ISS.GROUP_ISSUE_ID IN (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
+                AND ISS.GROUP_ID IN (SELECT GROUP_ID FROM PJT_USER_PROJECT_ASN WHERE USER_ACCT_ID = #{sp.params.userId})
             </if>
         </where>
     </select>
