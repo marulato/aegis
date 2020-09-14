@@ -37,7 +37,10 @@ public class IssueDto extends BaseDto {
     private String reproducibility;
     @ValidateWithMethod(methodName = "validateStatus", message = "请选择问题状态", profile = {"update"})
     private String status;
-    @ValidateWithMethod(methodName = "validateResolution", message = "请选择解决状态", profile = {"update"})
+    @ValidateWithMethod.List({
+            @ValidateWithMethod(methodName = "validateResolution", message = "请选择解决状态", profile = {"update"}),
+            @ValidateWithMethod(methodName = "validateMatchStatus", message = "所选解决状态与问题状态不符", profile = {"update"})
+    })
     private String resolution;
     private String rootCause;
     @ValidateWithMethod(methodName = "validatePriority", message = "请选择优先级", profile = {"report", "update"})
@@ -170,6 +173,19 @@ public class IssueDto extends BaseDto {
             return false;
         }
         return true;
+    }
+
+    private boolean validateMatchStatus(String res) {
+        if (StringUtils.isNotBlank(res)) {
+            if (IssueConsts.ISSUE_STATUS_CLOSED.equals(status)) {
+                return res.equals(IssueConsts.ISSUE_RESOLUTION_NO_NEED)
+                        || res.equals(IssueConsts.ISSUE_RESOLUTION_RESOLVED)
+                        || res.equals(IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE);
+            } else if (IssueConsts.ISSUE_STATUS_REOPEN.equals(status)) {
+                return !res.equals(IssueConsts.ISSUE_RESOLUTION_RESOLVED);
+            }
+        }
+        return false;
     }
 
     public String getGroupId() {

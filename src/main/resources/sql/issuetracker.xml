@@ -213,4 +213,33 @@
             </if>
         </where>
     </select>
+
+    <select id="getTodayNewIssueCount" resultType="integer">
+        SELECT COUNT(ID) FROM ISU_ISSUE
+        WHERE REPORTED_AT
+            BETWEEN DATE_FORMAT(NOW(), '%Y/%m%d') AND NOW()
+        AND PROJECT_ID = #{projectId}
+    </select>
+
+    <select id="getTodayFixedIssueCount" resultType="integer">
+        SELECT COUNT(T.ID)
+        FROM (
+                 SELECT *
+                 FROM ISU_ISSUE_HISTORY
+                 WHERE CREATED_AT
+                     BETWEEN DATE_FORMAT(CREATED_AT, '%Y/%m%d') AND NOW()
+                   AND FIELD_NAME = 'RESOLUTION'
+                   AND EXISTS(SELECT 1 FROM ISU_ISSUE WHERE ID = ISSUE_ID AND PROJECT_ID = #{projectId} )
+                 ORDER BY CREATED_AT DESC
+                 LIMIT 1) T
+        WHERE T.NEW_VALUE IN ('RESOLVED', 'UNSOLVABLE', 'NO_NEED')
+    </select>
+
+    <select id="getNotAssignedIssueCount" resultType="integer">
+        SELECT COUNT(ID) FROM ISU_ISSUE WHERE STATUS = 'OPENED' AND PROJECT_ID = #{projectId} AND (ASSIGNED_TO IS NULL OR ASSIGNED_TO = 0)
+    </select>
+
+    <select id="getReopenedIssueCount" resultType="integer">
+        SELECT COUNT(ID) FROM ISU_ISSUE WHERE STATUS = 'REOPENED' AND PROJECT_ID = #{projectId}
+    </select>
 </mapper>

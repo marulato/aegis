@@ -3,10 +3,7 @@ package org.legion.aegis.issuetracker.dao;
 import org.apache.ibatis.annotations.*;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.jpa.SimpleSQLGenerator;
-import org.legion.aegis.issuetracker.entity.Issue;
-import org.legion.aegis.issuetracker.entity.IssueAttachment;
-import org.legion.aegis.issuetracker.entity.IssueHistory;
-import org.legion.aegis.issuetracker.entity.IssueNote;
+import org.legion.aegis.issuetracker.entity.*;
 import org.legion.aegis.issuetracker.vo.IssueVO;
 
 import java.util.List;
@@ -33,4 +30,15 @@ public interface IssueDAO {
 
     @Select("SELECT * FROM ISU_ISSUE_HISTORY WHERE ISSUE_ID = #{issueId} ORDER BY CREATED_AT")
     List<IssueHistory> getHistoryByIssueId(Long issueId);
+
+    @Select("SELECT * FROM ISU_P_CONFIRMATION WHERE ISSUE_ID = #{issueId}")
+    IssueConfirmation getIssueConfirmationByIssueId(Long issueId);
+
+    Integer getTodayNewIssueCount(Long projectId);
+
+    Integer getTodayFixedIssueCount(Long projectId);
+
+    Integer getNotAssignedIssueCount(Long projectId);
+
+    Integer getReopenedIssueCount(Long projectId);
 }

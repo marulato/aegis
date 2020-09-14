@@ -12,6 +12,12 @@ public class IssueConsts {
     public static final String ISSUE_STATUS_PENDING_CONFIRMATION    = "P_CONFIRM";
     public static final String ISSUE_STATUS_DEPLOYED                = "DEPLOYED";
 
-    public static final String ISSUE_RESOLUTION_OPEN    = "OPEN";
+    public static final String ISSUE_RESOLUTION_OPEN          = "OPEN";
+    public static final String ISSUE_RESOLUTION_RESOLVED      = "RESOLVED";
+    public static final String ISSUE_RESOLUTION_POSTPONE      = "POSTPONE";
+    public static final String ISSUE_RESOLUTION_RESOLVING     = "RESOLVING";
+    public static final String ISSUE_RESOLUTION_UNSOLVABLE    = "UNSOLVABLE";
+    public static final String ISSUE_RESOLUTION_NO_NEED       = "NO_NEED";
+    public static final String ISSUE_RESOLUTION_NOT_PROCEED   = "NOT_PROCEED";
 
 }

@@ -3,7 +3,7 @@ package org.legion.aegis.issuetracker.entity;
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
 
-@Entity(tableName = "ISU_P_CONFIRMATION")
+@Entity(tableName = "ISU_P_CONFIRMATION", whereClause = "ISSUE_ID = #{issueId}")
 public class IssueConfirmation extends BasePO {
 
     private Long issueId;

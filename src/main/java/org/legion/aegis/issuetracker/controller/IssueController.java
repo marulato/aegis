@@ -1,9 +1,7 @@
 package org.legion.aegis.issuetracker.controller;
 
+import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
-import org.legion.aegis.admin.entity.Project;
-import org.legion.aegis.admin.entity.ProjectGroup;
-import org.legion.aegis.admin.entity.UserAccount;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.admin.service.SystemMgrService;
 import org.legion.aegis.admin.service.UserAccountService;
@@ -20,6 +18,7 @@ import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.general.ex.PermissionDeniedException;
+import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dto.IssueDto;
 import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueNote;
@@ -224,6 +223,19 @@ public class IssueController {
                 }
             }
         }
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/count")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody getCounts(HttpServletRequest request) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Long projectId = StringUtils.parseIfIsLong(request.getParameter("projectId"));
+        manager.addDataObject(issueService.getTodayNewIssueCount(projectId));
+        manager.addDataObject(issueService.getTodayFixedIssueCount(projectId));
+        manager.addDataObject(issueService.getNotAssignedIssueCount(projectId));
+        manager.addDataObject(issueService.getReopenedIssueCount(projectId));
         return manager.respond();
     }
 

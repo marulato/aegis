@@ -235,6 +235,18 @@
                 </div>
               </div>
 
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">等待确认信息:</label>
+                    <div>
+                      <span th:text="'由 ' + ${issue.confirmation.requestFrom} + ' 向 ' + ${issue.confirmation.requestTo} + ' 发起确认请求，当前：'"></span>
+                      <span th:text="${issue.confirmation.isConfirmed == 'Y' ? '已确认' : '未确认'}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -293,7 +305,13 @@
                           <h3 class="timeline-header" th:text="${item.by} + '：' +${item.desc} + '了' + ${item.type}">sent
                             you an email</h3>
 
-                          <div class="timeline-body" th:text="${item.oldValue} + ' -> ' + ${item.newValue}">
+                          <div class="timeline-body" th:if="${item.updated}" th:text="${item.oldValue} + ' -> ' + ${item.newValue}">
+
+                          </div>
+                          <div class="timeline-body" th:if="${item.added}" th:text="${item.newValue}">
+
+                          </div>
+                          <div class="timeline-body" th:if="${item.deleted}" th:text="${item.oldValue}">
 
                           </div>
                         </div>
@@ -404,7 +422,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="status">问题状态:</label>
-                <select class="custom-select" name="status" id="status" onchange="toggleConfirmation()">
+                <select class="custom-select" name="status" id="status" onchange="toggleConfirmation(); toggleResolution();">
                   <option th:each="st, stats:${status}" th:value="${st.statusCode}" th:text="${st.displayName}" th:selected="${issue.statusCode == st.statusCode}"></option>
                 </select>
               </div>
@@ -416,7 +434,7 @@
               <div class="form-group">
                 <label for="confirmedBy">确认人:</label>
                 <select class="custom-select" name="confirmedBy" id="confirmedBy">
-                  <option th:each="asn, stats:${assignedTo}" th:value="${asn.id}" th:text="${asn.name}"></option>
+                  <option th:each="asn, stats:${assignedTo}" th:value="${asn.id}" th:text="${asn.name}" th:selected="${issue.confirmation != null && asn.id == issue.confirmation.requestTo}"></option>
                 </select>
               </div>
             </div>
@@ -643,9 +661,17 @@
 
     function toggleConfirmation() {
         if ($("#status").val() === "P_CONFIRM") {
+            $("#confirmedBy").removeAttr("disabled");
             $("#confirmDiv").show();
         } else {
             $("#confirmDiv").hide();
+            $("#confirmedBy").attr("disabled", true);
+        }
+    }
+
+    function toggleResolution() {
+        if ($("#status").val() === "REOPENED") {
+            $("#resolution").find("option[value='OPEN']").attr("selected", true);
         }
     }
 

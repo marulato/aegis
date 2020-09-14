@@ -2,6 +2,7 @@ package org.legion.aegis.issuetracker.vo;
 
 import org.legion.aegis.common.base.BaseVO;
 import org.legion.aegis.general.entity.FileNet;
+import org.legion.aegis.issuetracker.entity.IssueConfirmation;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 
 import java.util.Date;
@@ -43,6 +44,8 @@ public class IssueVO extends BaseVO {
     private List<IssueNoteVO> notes;
 
     private String fixedAt;
+
+    private IssueConfirmationVO confirmation;
 
     public Long getId() {
         return id;
@@ -282,5 +285,13 @@ public class IssueVO extends BaseVO {
 
     public void setFixedAt(String fixedAt) {
         this.fixedAt = fixedAt;
+    }
+
+    public IssueConfirmationVO getConfirmation() {
+        return confirmation;
+    }
+
+    public void setConfirmation(IssueConfirmationVO confirmation) {
+        this.confirmation = confirmation;
     }
 }

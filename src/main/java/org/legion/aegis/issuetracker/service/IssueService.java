@@ -8,6 +8,7 @@ import org.legion.aegis.admin.service.UserAccountService;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
+import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.consts.SystemConsts;
 import org.legion.aegis.common.jpa.NameConvertor;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
@@ -17,10 +18,8 @@ import org.legion.aegis.general.service.FileNetService;
 import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dao.IssueDAO;
 import org.legion.aegis.issuetracker.dto.IssueDto;
-import org.legion.aegis.issuetracker.entity.Issue;
-import org.legion.aegis.issuetracker.entity.IssueAttachment;
-import org.legion.aegis.issuetracker.entity.IssueHistory;
-import org.legion.aegis.issuetracker.entity.IssueNote;
+import org.legion.aegis.issuetracker.entity.*;
+import org.legion.aegis.issuetracker.vo.IssueConfirmationVO;
 import org.legion.aegis.issuetracker.vo.IssueNoteVO;
 import org.legion.aegis.issuetracker.vo.IssueTimelineVO;
 import org.legion.aegis.issuetracker.vo.IssueVO;
@@ -167,6 +166,13 @@ public class IssueService {
             vo.setProjectName(project.getName());
             Module module = projectService.getModuleById(issue.getModuleId());
             vo.setModuleName(module.getName());
+            IssueConfirmation confirmation = issueDAO.getIssueConfirmationByIssueId(issue.getId());
+            IssueConfirmationVO confirmationVO = new IssueConfirmationVO();
+            confirmationVO.setRequestFrom(userAccountService.getUserById(confirmation.getRequestFrom()).getName());
+            confirmationVO.setRequestTo(userAccountService.getUserById(confirmation.getRequestTo()).getName());
+            confirmationVO.setIsConfirmed(confirmation.getIsConfirmed());
+            vo.setConfirmation(confirmationVO);
+
             return vo;
         }
         return null;
@@ -206,6 +212,31 @@ public class IssueService {
                 JPAExecutor.save(issueNote);
             }
 
+            if (StringUtils.isNotBlank(dto.getConfirmedBy())) {
+                IssueConfirmation existConfirmation = issueDAO.getIssueConfirmationByIssueId(issueId);
+                AppContext context = AppContext.getFromWebThread();
+                if (existConfirmation == null) {
+                    createIssueHistory(issueId, null, context.getUserId() + "-" +
+                            StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
+                    IssueConfirmation confirmation = new IssueConfirmation();
+                    confirmation.setIsConfirmed(AppConsts.NO);
+                    confirmation.setIssueId(issue.getId());
+                    confirmation.setRequestFrom(context.getUserId());
+                    confirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
+                    JPAExecutor.save(confirmation);
+                } else  {
+                    createIssueHistory(issueId, existConfirmation.getRequestFrom() + "-" +
+                            existConfirmation.getRequestTo(), context.getUserId() + "-" +
+                            StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
+                    existConfirmation.setIsConfirmed(AppConsts.NO);
+                    existConfirmation.setRequestFrom(context.getUserId());
+                    existConfirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
+                    JPAExecutor.update(existConfirmation);
+                }
+            }
+            for (MultipartFile file : dto.getAttachments()) {
+                createIssueHistory(issueId, null, file.getOriginalFilename(), "attachments");
+            }
             saveAttachments(dto.getAttachments(), issue);
             JPAExecutor.update(issue);
         }
@@ -224,10 +255,10 @@ public class IssueService {
     public Map<String, List<IssueTimelineVO>> retrieveIssueHistory(Long issueId) {
         Issue issue = getIssueById(issueId);
         List<IssueTimelineVO> timelineVOList = new ArrayList<>();
-        List<List<IssueTimelineVO>> sameDayBatch = new ArrayList<>();
         if (issue != null) {
             List<IssueHistory> histories = issueDAO.getHistoryByIssueId(issueId);
             List<IssueNote> issueNotes = issueDAO.getNotesByIssueId(issueId);
+            IssueConfirmation confirmation = issueDAO.getIssueConfirmationByIssueId(issueId);
             for (IssueHistory history : histories) {
                 IssueTimelineVO timeline = new IssueTimelineVO();
                 switch (history.getFieldName()) {
@@ -260,6 +291,18 @@ public class IssueService {
                         MasterCode newSeverity = MasterCodeUtils.getMasterCode("issue.severity", history.getNewValue());
                         timeline.setOldValue(oldSeverity.getValue());
                         timeline.setNewValue(newSeverity.getValue());
+                        break;
+                    case "ATTACHMENTS":
+                        timeline.setNewValue(history.getNewValue());
+                        break;
+                    case "CONFIRMATION":
+                        String[] oldConfirm = history.getOldValue().split("-");
+                        String[] newConfirm = history.getNewValue().split("-");
+                        timeline.setOldValue(userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[0])).getName() + "-" +
+                                userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[1])).getName());
+                        timeline.setNewValue(userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[0])).getName() + "-" +
+                                userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[1])).getName());
+                        break;
                     default:
                         timeline.setOldValue(history.getOldValue());
                         timeline.setNewValue(history.getNewValue());
@@ -298,8 +341,8 @@ public class IssueService {
                 timelineVOList.add(timeline);
             }
         }
-        timelineVOList.sort((Comparator.comparing(IssueTimelineVO::getDate)));
-        Map<String, List<IssueTimelineVO>> timelineUnderSameDay = new HashMap<>();
+        timelineVOList.sort((Comparator.comparing(IssueTimelineVO::getDate, Comparator.reverseOrder())));
+        Map<String, List<IssueTimelineVO>> timelineUnderSameDay = new TreeMap<>();
         for (IssueTimelineVO vo : timelineVOList) {
             String day = DateUtils.getDateString(vo.getDate(), "yyyy/MM/dd");
             timelineUnderSameDay.computeIfAbsent(day, k -> new ArrayList<>());
@@ -307,6 +350,22 @@ public class IssueService {
         }
 
         return timelineUnderSameDay;
+    }
+
+    public Integer getTodayNewIssueCount(Long projectId) {
+        return issueDAO.getTodayNewIssueCount(projectId);
+    }
+
+    public Integer getTodayFixedIssueCount(Long projectId) {
+        return issueDAO.getTodayFixedIssueCount(projectId);
+    }
+
+    public Integer getNotAssignedIssueCount(Long projectId) {
+        return issueDAO.getNotAssignedIssueCount(projectId);
+    }
+
+    public Integer getReopenedIssueCount(Long projectId) {
+        return issueDAO.getReopenedIssueCount(projectId);
     }
 
     private String formatIssueId(String id) {
@@ -322,7 +381,7 @@ public class IssueService {
 
     private void createIssueHistory(Long issueId, String oldValue, String newValue, String fieldName) {
         if (StringUtils.isNotBlank(fieldName) && issueId != null && !(StringUtils.isBlank(oldValue) && StringUtils.isBlank(newValue)) &&
-                ((oldValue != null && !oldValue.trim().equals(newValue)) || (newValue!= null && !newValue.equals(oldValue)))) {
+                ((oldValue != null && !oldValue.trim().equals(newValue)) || (!newValue.equals(oldValue)))) {
             IssueHistory history = new IssueHistory();
             history.setIssueId(issueId);
             history.setOldValue(oldValue);
@@ -353,7 +412,7 @@ public class IssueService {
     }
 
     private String getTimelineType(String fieldName) {
-        String type = null;
+        String type;
         switch (fieldName) {
             case "STATUS":
                 type = "问题状态";
@@ -375,6 +434,12 @@ public class IssueService {
                 break;
             case "PRIORITY":
                 type = "优先级";
+                break;
+            case "CONFIRMATION":
+                type = "等待确认";
+                break;
+            case "ATTACHMENTS":
+                type = "附件";
                 break;
             default:
                 type = "Unknown";
