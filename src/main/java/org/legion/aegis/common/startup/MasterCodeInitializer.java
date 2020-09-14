@@ -6,11 +6,13 @@ import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.general.dao.MasterCodeDAO;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Order(10)
 public class MasterCodeInitializer implements ApplicationRunner {
 
     @Override
