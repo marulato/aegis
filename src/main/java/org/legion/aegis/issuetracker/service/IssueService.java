@@ -298,10 +298,12 @@ public class IssueService {
                         timeline.setNewValue(history.getNewValue());
                         break;
                     case "CONFIRMATION":
-                        String[] oldConfirm = history.getOldValue().split("-");
                         String[] newConfirm = history.getNewValue().split("-");
-                        timeline.setOldValue(userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[0])).getName() + "-" +
-                                userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[1])).getName());
+                        if (StringUtils.isNotBlank(history.getOldValue())) {
+                            String[] oldConfirm = history.getOldValue().split("-");
+                            timeline.setOldValue(userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[0])).getName() + "-" +
+                                    userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[1])).getName());
+                        }
                         timeline.setNewValue(userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[0])).getName() + "-" +
                                 userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[1])).getName());
                         break;

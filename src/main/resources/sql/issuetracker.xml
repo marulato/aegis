@@ -294,7 +294,7 @@
                  LEFT JOIN CM_ISSUE_RESOLUTION ISR
                            ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
                  LEFT JOIN AC_USER_ACCT USER
-                           ON ISS.ASSIGNED_TO = USER.ID
+                           ON ISS.REPORTED_BY = USER.ID
         WHERE ISS.REPORTED_BY = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
         LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
     </select>
@@ -307,7 +307,7 @@
                  LEFT JOIN CM_ISSUE_RESOLUTION ISR
                            ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
                  LEFT JOIN AC_USER_ACCT USER
-                           ON ISS.ASSIGNED_TO = USER.ID
+                           ON ISS.REPORTED_BY = USER.ID
         WHERE ISS.REPORTED_BY = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
     </select>
 </mapper>

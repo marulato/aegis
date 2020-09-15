@@ -55,7 +55,7 @@ public class AttachmentDlController {
         ExportDto exportDto = (ExportDto) SessionManager.getAttribute(IssueController.SESSION_DL_KEY);
         if (exportDto != null) {
             if (StringUtils.isNotBlank(uuid) && uuid.equals(UUID.nameUUIDFromBytes(exportDto.getData()).toString())) {
-                NetworkFileTransfer.download(exportDto.getData(), "Export.pdf", response);
+                NetworkFileTransfer.download(exportDto.getData(), "Export." + exportDto.getType() , response);
             }
         }
         SessionManager.removeAttribute(IssueController.SESSION_DL_KEY);

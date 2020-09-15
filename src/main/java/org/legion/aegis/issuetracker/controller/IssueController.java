@@ -27,6 +27,7 @@ import org.legion.aegis.issuetracker.dto.IssueDto;
 import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
+import org.legion.aegis.issuetracker.generator.IssueExportXlsxGenerator;
 import org.legion.aegis.issuetracker.service.IssueService;
 import org.legion.aegis.issuetracker.vo.IssueVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -268,11 +269,18 @@ public class IssueController {
         param.addParam("export", true);
         SearchResult<IssueVO> searchResult = issueService.search(param);
         ExportDto exportDto = new ExportDto();
+        IDocGenerator generator = null;
         if ("pdf".equals(type)) {
-            IDocGenerator generator = new IssueExportPdfGenerator(searchResult.getResultList());
-            exportDto.setData(generator.generate());
+            generator = new IssueExportPdfGenerator(searchResult.getResultList());
+            exportDto.setType(type);
+        } else if ("xlsx".equals(type)) {
+            generator = new IssueExportXlsxGenerator(searchResult.getResultList());
+            exportDto.setType(type);
         }
-        exportDto.setUuid(UUID.nameUUIDFromBytes(exportDto.getData()).toString());
+        if (generator != null) {
+            exportDto.setData(generator.generate());
+            exportDto.setUuid(UUID.nameUUIDFromBytes(exportDto.getData()).toString());
+        }
         SessionManager.setAttribute(SESSION_DL_KEY, exportDto);
         manager.addDataObject("/web/issue/export/download/" + exportDto.getUuid());
         return manager.respond();

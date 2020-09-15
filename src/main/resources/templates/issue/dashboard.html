@@ -286,7 +286,7 @@
               </table>
             </div>
             <div class="card-footer">
-              <button type="button" class="btn btn-default" style="font-size: 14px">
+              <button type="button" class="btn btn-default" style="font-size: 14px" onclick="exportExcel()">
                 <i class="fa fa-file-export"></i>
                 导出Excel
               </button>
@@ -560,6 +560,38 @@
             dataType: "json",
             success: function (res) {
               location.href = res.data[0];
+            }
+        });
+    }
+
+    function exportExcel() {
+        var obj = {
+            issueId: $("#issueId").val(),
+            projectId: $("#projectId").val(),
+            groupId: $("#groupId").val(),
+            reportedBy: $("#reportedBy").val(),
+            description: $("#description").val(),
+            status: $("#status").val(),
+            severity: $("#severity").val(),
+            resolution: $("#resolution").val(),
+            reportedRange: $("#reportedRange").val(),
+            updatedRange: $("#updatedRange").val()
+
+        }
+
+        var param = {
+            params: obj
+        }
+
+        $.ajax({
+            url: "/web/issue/export/xlsx",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            cache: false,
+            data: JSON.stringify(param),
+            dataType: "json",
+            success: function (res) {
+                location.href = res.data[0];
             }
         });
     }

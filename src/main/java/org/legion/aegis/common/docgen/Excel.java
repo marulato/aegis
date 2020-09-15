@@ -49,6 +49,14 @@ public class Excel {
         stdStyle = Poi.stdContentCellStyle(workbook);
     }
 
+    public Excel() {
+        rowMap = new HashMap<>();
+        content = new ArrayList<>();
+        workbook = new XSSFWorkbook();
+        sheet = workbook.createSheet("Sheet1");
+        stdStyle = Poi.stdContentCellStyle(workbook);
+    }
+
     private void initData() {
         rowMap = Poi.readRowMap(sheet);
         rowMap.forEach((rn, row) -> {
@@ -136,6 +144,17 @@ public class Excel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public byte[] saveAsByteArray() {
+        int size = (maxCol + 1 - minimumCol) / 5;
+        try {
+            autoSizeColumn(size).await();
+            return Poi.saveToByteArray(workbook);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new byte[0];
     }
 
     public byte[] toByteArray() {
