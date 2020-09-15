@@ -41,4 +41,12 @@ public interface IssueDAO {
     Integer getNotAssignedIssueCount(Long projectId);
 
     Integer getReopenedIssueCount(Long projectId);
+
+    List<IssueVO> searchAssignedToMe(@Param("sp") SearchParam searchParam);
+
+    Integer searchAssignedToMeCount(@Param("sp") SearchParam searchParam);
+
+    List<IssueVO> searchReportedByMe(@Param("sp") SearchParam searchParam);
+
+    Integer searchReportedByMeCount(@Param("sp") SearchParam searchParam);
 }

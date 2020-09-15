@@ -4,9 +4,11 @@ import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.consts.SystemConsts;
+import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.webmvc.NetworkFileTransfer;
 import org.legion.aegis.general.entity.FileNet;
 import org.legion.aegis.general.service.FileNetService;
+import org.legion.aegis.issuetracker.dto.ExportDto;
 import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueAttachment;
 import org.legion.aegis.issuetracker.service.IssueService;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class AttachmentDlController {
@@ -31,7 +34,7 @@ public class AttachmentDlController {
     }
 
     @GetMapping("/web/issue/download/{uuid}")
-    public void download(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
+    public void downloadAttachment(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
         Issue issue = (Issue) SessionManager.getAttribute(IssueController.SESSION_KEY);
         if (issue != null) {
             Project project = projectService.getProjectById(issue.getProjectId(), false);
@@ -45,5 +48,16 @@ public class AttachmentDlController {
                 }
             }
         }
+    }
+
+    @GetMapping("/web/issue/export/download/{uuid}")
+    public void export(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
+        ExportDto exportDto = (ExportDto) SessionManager.getAttribute(IssueController.SESSION_DL_KEY);
+        if (exportDto != null) {
+            if (StringUtils.isNotBlank(uuid) && uuid.equals(UUID.nameUUIDFromBytes(exportDto.getData()).toString())) {
+                NetworkFileTransfer.download(exportDto.getData(), "Export.pdf", response);
+            }
+        }
+        SessionManager.removeAttribute(IssueController.SESSION_DL_KEY);
     }
 }

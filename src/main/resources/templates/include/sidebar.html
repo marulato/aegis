@@ -51,8 +51,8 @@
                 <p>总览</p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="#" th:class="${selected == '1.2' ? 'nav-link active' : 'nav-link'}">
+            <li class="nav-item" th:if="${role != 'SYSADMIN'}">
+              <a href="/web/issue/myView" th:class="${selected == '1.2' ? 'nav-link active' : 'nav-link'}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>我的</p>
               </a>

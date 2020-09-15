@@ -135,7 +135,9 @@
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
         </choose>
-        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+        <if test="sp.params.export == null or !sp.params.export or sp.params.export == ''">
+            LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+        </if>
     </select>
 
     <select id="searchCounts" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
@@ -217,7 +219,7 @@
     <select id="getTodayNewIssueCount" resultType="integer">
         SELECT COUNT(ID) FROM ISU_ISSUE
         WHERE REPORTED_AT
-            BETWEEN DATE_FORMAT(NOW(), '%Y/%m%d') AND NOW()
+            BETWEEN DATE_FORMAT(NOW(), '%Y/%m/%d') AND NOW()
         AND PROJECT_ID = #{projectId}
     </select>
 
@@ -227,7 +229,7 @@
                  SELECT *
                  FROM ISU_ISSUE_HISTORY
                  WHERE CREATED_AT
-                     BETWEEN DATE_FORMAT(CREATED_AT, '%Y/%m%d') AND NOW()
+                     BETWEEN DATE_FORMAT(NOW(), '%Y/%m/%d') AND NOW()
                    AND FIELD_NAME = 'RESOLUTION'
                    AND EXISTS(SELECT 1 FROM ISU_ISSUE WHERE ID = ISSUE_ID AND PROJECT_ID = #{projectId} )
                  ORDER BY CREATED_AT DESC
@@ -241,5 +243,71 @@
 
     <select id="getReopenedIssueCount" resultType="integer">
         SELECT COUNT(ID) FROM ISU_ISSUE WHERE STATUS = 'REOPENED' AND PROJECT_ID = #{projectId}
+    </select>
+
+    <select id="searchAssignedToMe" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.issuetracker.vo.IssueVO">
+        SELECT DISTINCT ISS.ID                  AS ID,
+                        ISS.TITLE,
+                        ISS.DESCRIPTION,
+                        IST.DISPLAY_NAME        AS STATUS,
+                        ISR.DISPLAY_NAME        AS RESOLUTION,
+                        USER.NAME               AS ASSIGNED_TO,
+                        IST.COLOR               AS COLOR,
+                        DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISS.ASSIGNED_TO = USER.ID
+        WHERE ISS.ASSIGNED_TO = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchAssignedToMeCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(DISTINCT ISS.ID)
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISS.ASSIGNED_TO = USER.ID
+        WHERE ISS.ASSIGNED_TO = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+    </select>
+
+    <select id="searchReportedByMe" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.issuetracker.vo.IssueVO">
+        SELECT DISTINCT ISS.ID                  AS ID,
+                        ISS.TITLE,
+                        ISS.DESCRIPTION,
+                        IST.DISPLAY_NAME        AS STATUS,
+                        ISR.DISPLAY_NAME        AS RESOLUTION,
+                        USER.NAME               AS ASSIGNED_TO,
+                        IST.COLOR               AS COLOR,
+                        DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISS.ASSIGNED_TO = USER.ID
+        WHERE ISS.REPORTED_BY = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchReportedByMeCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(DISTINCT ISS.ID)
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISS.ASSIGNED_TO = USER.ID
+        WHERE ISS.REPORTED_BY = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
     </select>
 </mapper>

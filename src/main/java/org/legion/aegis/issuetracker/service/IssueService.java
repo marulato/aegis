@@ -85,7 +85,7 @@ public class IssueService {
                 vo.setColor(issueStatus.getColor());
             }
         }
-        if (param.getOrderColumnNo() == 5) {
+        if (param.getOrderColumnNo() != null && param.getOrderColumnNo() == 5) {
             if ("ASC".equalsIgnoreCase(param.getOrder())) {
                 results.sort(Comparator.comparing(IssueVO::getSla));
             } else {
@@ -167,11 +167,13 @@ public class IssueService {
             Module module = projectService.getModuleById(issue.getModuleId());
             vo.setModuleName(module.getName());
             IssueConfirmation confirmation = issueDAO.getIssueConfirmationByIssueId(issue.getId());
-            IssueConfirmationVO confirmationVO = new IssueConfirmationVO();
-            confirmationVO.setRequestFrom(userAccountService.getUserById(confirmation.getRequestFrom()).getName());
-            confirmationVO.setRequestTo(userAccountService.getUserById(confirmation.getRequestTo()).getName());
-            confirmationVO.setIsConfirmed(confirmation.getIsConfirmed());
-            vo.setConfirmation(confirmationVO);
+            if (confirmation != null) {
+                IssueConfirmationVO confirmationVO = new IssueConfirmationVO();
+                confirmationVO.setRequestFrom(userAccountService.getUserById(confirmation.getRequestFrom()).getName());
+                confirmationVO.setRequestTo(userAccountService.getUserById(confirmation.getRequestTo()).getName());
+                confirmationVO.setIsConfirmed(confirmation.getIsConfirmed());
+                vo.setConfirmation(confirmationVO);
+            }
 
             return vo;
         }
@@ -342,7 +344,7 @@ public class IssueService {
             }
         }
         timelineVOList.sort((Comparator.comparing(IssueTimelineVO::getDate, Comparator.reverseOrder())));
-        Map<String, List<IssueTimelineVO>> timelineUnderSameDay = new TreeMap<>();
+        Map<String, List<IssueTimelineVO>> timelineUnderSameDay = new TreeMap<>(Comparator.reverseOrder());
         for (IssueTimelineVO vo : timelineVOList) {
             String day = DateUtils.getDateString(vo.getDate(), "yyyy/MM/dd");
             timelineUnderSameDay.computeIfAbsent(day, k -> new ArrayList<>());
@@ -368,6 +370,24 @@ public class IssueService {
         return issueDAO.getReopenedIssueCount(projectId);
     }
 
+    public SearchResult<IssueVO> searchAssignedToMe(SearchParam param) {
+        SearchResult<IssueVO> searchResult = new SearchResult<>(issueDAO.searchAssignedToMe(param), param);
+        for (IssueVO vo : searchResult.getResultList()) {
+            vo.setIssueId(formatIssueId(String.valueOf(vo.getId())));
+        }
+        searchResult.setTotalCounts(issueDAO.searchAssignedToMeCount(param));
+        return searchResult;
+    }
+
+    public SearchResult<IssueVO> searchReportedByMe(SearchParam param) {
+        SearchResult<IssueVO> searchResult = new SearchResult<>(issueDAO.searchReportedByMe(param), param);
+        for (IssueVO vo : searchResult.getResultList()) {
+            vo.setIssueId(formatIssueId(String.valueOf(vo.getId())));
+        }
+        searchResult.setTotalCounts(issueDAO.searchReportedByMeCount(param));
+        return searchResult;
+    }
+
     private String formatIssueId(String id) {
         if (id.length() < 4) {
             StringBuilder issueId = new StringBuilder(id);
@@ -380,7 +400,8 @@ public class IssueService {
     }
 
     private void createIssueHistory(Long issueId, String oldValue, String newValue, String fieldName) {
-        if (StringUtils.isNotBlank(fieldName) && issueId != null && !(StringUtils.isBlank(oldValue) && StringUtils.isBlank(newValue)) &&
+        if (StringUtils.isNotBlank(fieldName) && issueId != null
+                && !(StringUtils.isBlank(oldValue) && StringUtils.isBlank(newValue)) &&
                 ((oldValue != null && !oldValue.trim().equals(newValue)) || (!newValue.equals(oldValue)))) {
             IssueHistory history = new IssueHistory();
             history.setIssueId(issueId);
@@ -427,7 +448,7 @@ public class IssueService {
                 type = "解决时间";
                 break;
             case "ASSIGNED_TO":
-                type = "转发给";
+                type = "转发";
                 break;
             case "NOTE":
                 type = "备注";

@@ -11,18 +11,24 @@ import org.legion.aegis.common.aop.permission.RequiresLogin;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
+import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
+import org.legion.aegis.common.docgen.IDocGenerator;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
+import org.legion.aegis.common.webmvc.NetworkFileTransfer;
 import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.legion.aegis.issuetracker.consts.IssueConsts;
+import org.legion.aegis.issuetracker.dto.ExportDto;
 import org.legion.aegis.issuetracker.dto.IssueDto;
 import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueNote;
+import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
 import org.legion.aegis.issuetracker.service.IssueService;
+import org.legion.aegis.issuetracker.vo.IssueVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +37,9 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class IssueController {
@@ -42,6 +50,7 @@ public class IssueController {
     private final SystemMgrService systemMgrService;
 
     public static final String SESSION_KEY = "SESSION_ISSUE";
+    public static final String SESSION_DL_KEY = "SESSION_OCTET_STREAM";
 
     @Autowired
     public IssueController(IssueService issueService, ProjectService projectService,
@@ -236,6 +245,58 @@ public class IssueController {
         manager.addDataObject(issueService.getTodayFixedIssueCount(projectId));
         manager.addDataObject(issueService.getNotAssignedIssueCount(projectId));
         manager.addDataObject(issueService.getReopenedIssueCount(projectId));
+        return manager.respond();
+    }
+
+    @GetMapping("/web/issue/myView")
+    @RequiresLogin
+    public ModelAndView myView() {
+        ModelAndView modelAndView = new ModelAndView("issue/myView");
+        AppContext context = AppContext.getFromWebThread();
+        modelAndView.addObject("role", context.getRoleId());
+        return modelAndView;
+    }
+
+    @PostMapping("/web/issue/export/{type}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody generatePdf(@RequestBody SearchParam param, @PathVariable("type") String type) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        param.addParam("roleId", context.getRoleId());
+        param.addParam("userId", context.getUserId());
+        param.addParam("export", true);
+        SearchResult<IssueVO> searchResult = issueService.search(param);
+        ExportDto exportDto = new ExportDto();
+        if ("pdf".equals(type)) {
+            IDocGenerator generator = new IssueExportPdfGenerator(searchResult.getResultList());
+            exportDto.setData(generator.generate());
+        }
+        exportDto.setUuid(UUID.nameUUIDFromBytes(exportDto.getData()).toString());
+        SessionManager.setAttribute(SESSION_DL_KEY, exportDto);
+        manager.addDataObject("/web/issue/export/download/" + exportDto.getUuid());
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/myView/assignedToMe")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody searchAssignedToMe(@RequestBody SearchParam param) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        param.addParam("userId", context.getUserId());
+        manager.addDataObject(issueService.searchAssignedToMe(param));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/myView/reportedByMe")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody searchReportedByMe(@RequestBody SearchParam param) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        param.addParam("userId", context.getUserId());
+        manager.addDataObject(issueService.searchReportedByMe(param));
         return manager.respond();
     }
 

@@ -184,6 +184,7 @@ public class IssueDto extends BaseDto {
             } else if (IssueConsts.ISSUE_STATUS_REOPEN.equals(status)) {
                 return !res.equals(IssueConsts.ISSUE_RESOLUTION_RESOLVED);
             }
+            return true;
         }
         return false;
     }
