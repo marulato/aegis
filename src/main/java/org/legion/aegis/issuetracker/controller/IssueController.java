@@ -30,6 +30,7 @@ import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXlsxGenerator;
+import org.legion.aegis.issuetracker.generator.IssueExportXmlGenerator;
 import org.legion.aegis.issuetracker.service.IssueService;
 import org.legion.aegis.issuetracker.vo.IssueVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ public class IssueController {
     @RequiresLogin
     public AjaxResponseBody search(@RequestBody SearchParam param) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        SessionManager.removeAttribute(SESSION_KEY);
         AppContext context = AppContext.getFromWebThread();
         param.addParam("roleId", context.getRoleId());
         param.addParam("userId", context.getUserId());
@@ -146,6 +148,7 @@ public class IssueController {
     @RequiresLogin
     public AjaxResponseBody reportIssue(IssueDto dto, HttpServletRequest request) throws Exception {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        SessionManager.removeAttribute(SESSION_KEY);
         StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
         List<ConstraintViolation> violations = CommonValidator.validate(dto, "report");
         dto.setAttachments(req.getFiles("attachments"));
@@ -254,6 +257,7 @@ public class IssueController {
     @GetMapping("/web/issue/myView")
     @RequiresRoles(value = {AppConsts.ROLE_SYSTEM_ADMIN}, logical = Logical.NONE)
     public ModelAndView myView() {
+        SessionManager.removeAttribute(SESSION_KEY);
         ModelAndView modelAndView = new ModelAndView("issue/myView");
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
@@ -263,7 +267,7 @@ public class IssueController {
     @PostMapping("/web/issue/export/{type}")
     @RequiresLogin
     @ResponseBody
-    public AjaxResponseBody generatePdf(@RequestBody SearchParam param, @PathVariable("type") String type) throws Exception {
+    public AjaxResponseBody export(@RequestBody SearchParam param, @PathVariable("type") String type) throws Exception {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         AppContext context = AppContext.getFromWebThread();
         param.addParam("roleId", context.getRoleId());
@@ -272,19 +276,22 @@ public class IssueController {
         SearchResult<IssueVO> searchResult = issueService.search(param);
         ExportDto exportDto = new ExportDto();
         IDocGenerator generator = null;
+        exportDto.setType(type);
         if ("pdf".equals(type)) {
             generator = new IssueExportPdfGenerator(searchResult.getResultList());
-            exportDto.setType(type);
         } else if ("xlsx".equals(type)) {
             generator = new IssueExportXlsxGenerator(searchResult.getResultList());
-            exportDto.setType(type);
+        } else if ("xml".equals(type)) {
+            generator = new IssueExportXmlGenerator(searchResult.getResultList());
         }
         if (generator != null) {
             exportDto.setData(generator.generate());
             exportDto.setUuid(UUID.nameUUIDFromBytes(exportDto.getData()).toString());
+            SessionManager.setAttribute(SESSION_DL_KEY, exportDto);
+            manager.addDataObject("/web/issue/export/download/" + exportDto.getUuid());
+        } else {
+            manager.addDataObject("/web/error");
         }
-        SessionManager.setAttribute(SESSION_DL_KEY, exportDto);
-        manager.addDataObject("/web/issue/export/download/" + exportDto.getUuid());
         return manager.respond();
     }
 

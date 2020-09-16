@@ -47,6 +47,7 @@ public class IssueDto extends BaseDto {
     private String priority;
     @ValidateWithMethod(methodName = "validateSeverity", message = "请选择严重程度", profile = {"report", "update"})
     private String severity;
+    @ValidateWithMethod(methodName = "validateAssignedTo", message = "请选择正确的用户", profile = {"report", "update"})
     private String assignedTo;
     @NotBlank(message = "请输入对此问题的详细描述", profile = {"report"})
     private String description;
@@ -59,11 +60,14 @@ public class IssueDto extends BaseDto {
     @ValidateWithMethod(methodName = "validateFixedAt", message = "请输入正确的日期格式", profile = {"update"})
     private String fixedAt;
 
-    @ValidateWithMethod(methodName = "", message = "请选择需要等待确认的人员")
+    @ValidateWithMethod(methodName = "validateConfirmedBy", message = "请选择需要等待确认的人员")
     private String confirmedBy;
 
 
     private List<MultipartFile> attachments;
+
+    //additional
+    private String issueId;
 
     private boolean validateGroupId(String groupId) {
         AppContext context = AppContext.getFromWebThread();
@@ -187,6 +191,40 @@ public class IssueDto extends BaseDto {
             return true;
         }
         return false;
+    }
+
+    private boolean validateAssignedTo(String assignedTo) {
+        if (StringUtils.isNotBlank(assignedTo)) {
+            Long projectId = null;
+            Issue issue = (Issue) SessionManager.getAttribute(IssueController.SESSION_KEY);
+            if (issue != null) {
+                projectId = issue.getProjectId();
+            } else {
+                projectId = StringUtils.parseIfIsLong(this.projectId);
+            }
+            UserAccountService userAccountService = SpringUtils.getBean(UserAccountService.class);
+            List<UserAccount> developers = userAccountService.getDevelopersUnderProject(projectId);
+            List<UserAccount> reporters = userAccountService.getReportersUnderProject(projectId);
+            developers.addAll(reporters);
+            for (UserAccount user : developers) {
+                if (user.getId().equals(Long.valueOf(this.projectId))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateConfirmedBy(String confirmedBy) {
+        if (IssueConsts.ISSUE_STATUS_PENDING_CONFIRMATION.equals(status) && StringUtils.isBlank(confirmedBy)) {
+            return false;
+        } else if (IssueConsts.ISSUE_STATUS_PENDING_CONFIRMATION.equals(status)) {
+            return validateAssignedTo(confirmedBy);
+        } else {
+            this.confirmedBy = null;
+        }
+        return true;
     }
 
     public String getGroupId() {
@@ -331,5 +369,13 @@ public class IssueDto extends BaseDto {
 
     public void setConfirmedBy(String confirmedBy) {
         this.confirmedBy = confirmedBy;
+    }
+
+    public String getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(String issueId) {
+        this.issueId = issueId;
     }
 }

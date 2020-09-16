@@ -163,7 +163,7 @@ public class IssueService {
                 IssueNoteVO noteVO = new IssueNoteVO();
                 noteVO.setContent(note.getContent());
                 noteVO.setCreatedAt(DateUtils.getDateString(note.getCreatedAt(), "yyyy/MM/dd HH:mm:ss"));
-                noteVO.setCreatedBy(note.getCreatedBy());
+                noteVO.setCreatedBy(userAccountService.getUserByLoginId(note.getCreatedBy()).getName());
                 vo.getNotes().add(noteVO);
             }
             ProjectGroup group = projectService.getProjectGroupById(issue.getGroupId());
