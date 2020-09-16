@@ -320,7 +320,20 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+<div class="modal fade" id="waitingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <p><img th:src="@{/dist/img/loading.gif}" style="width: 60px; height: 60px">正在处理，请稍后</p>
+        </div>
+      </div>
 
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -348,6 +361,17 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script>
+
+    function showWaiting() {
+        $('#waitingModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    }
+    function dismissWaiting() {
+        $('#waitingModal').modal('hide');
+    }
     var tableView = null;
     document.addEventListener('DOMContentLoaded', function () {
         toggleProjectSelector();
@@ -533,6 +557,7 @@
     }
 
     function exportPdf() {
+        showWaiting();
         var obj = {
             issueId: $("#issueId").val(),
             projectId: $("#projectId").val(),
@@ -559,12 +584,16 @@
             data: JSON.stringify(param),
             dataType: "json",
             success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
               location.href = res.data[0];
             }
         });
     }
 
     function exportExcel() {
+        showWaiting();
         var obj = {
             issueId: $("#issueId").val(),
             projectId: $("#projectId").val(),
@@ -591,6 +620,9 @@
             data: JSON.stringify(param),
             dataType: "json",
             success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
                 location.href = res.data[0];
             }
         });

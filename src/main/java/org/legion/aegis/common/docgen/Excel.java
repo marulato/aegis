@@ -192,8 +192,12 @@ public class Excel {
 
     private CountDownLatch autoSizeColumn(int size) {
         CountDownLatch latch = new CountDownLatch(size);
-        for (int i = 0; i < size; i++) {
-            new Thread(new RunAutoSize(i * 5, i * 5 + 4, latch)).start();
+        for (int i = 0; i <= size; i++) {
+            int end = i * 5 + 4;
+            if (end > maxCol) {
+                end = maxCol;
+            }
+            new Thread(new RunAutoSize(i * 5, end, latch)).start();
         }
         return latch;
     }
