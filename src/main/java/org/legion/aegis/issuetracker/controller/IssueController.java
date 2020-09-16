@@ -7,7 +7,9 @@ import org.legion.aegis.admin.service.SystemMgrService;
 import org.legion.aegis.admin.service.UserAccountService;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.SessionManager;
+import org.legion.aegis.common.aop.permission.Logical;
 import org.legion.aegis.common.aop.permission.RequiresLogin;
+import org.legion.aegis.common.aop.permission.RequiresRoles;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
@@ -250,7 +252,7 @@ public class IssueController {
     }
 
     @GetMapping("/web/issue/myView")
-    @RequiresLogin
+    @RequiresRoles(value = {AppConsts.ROLE_SYSTEM_ADMIN}, logical = Logical.NONE)
     public ModelAndView myView() {
         ModelAndView modelAndView = new ModelAndView("issue/myView");
         AppContext context = AppContext.getFromWebThread();

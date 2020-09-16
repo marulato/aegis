@@ -76,8 +76,14 @@ public class IssueService {
         }
         List<IssueVO> results = issueDAO.search(param);
         for (IssueVO vo : results) {
-            vo.setSla(String.valueOf(Calculator.divide(DateUtils.getHoursBetween(
-                    DateUtils.parseDatetime(vo.getReportedAt()), new Date()), 24, 1)));
+            if (vo.getFixedAt() == null) {
+                vo.setSla(String.valueOf(Calculator.divide(DateUtils.getHoursBetween(
+                        DateUtils.parseDatetime(vo.getReportedAt()), new Date()), 24, 1)));
+            } else {
+                vo.setSla(String.valueOf(Calculator.divide(DateUtils.getHoursBetween(
+                        DateUtils.parseDatetime(vo.getReportedAt()),
+                        DateUtils.parseDatetime(vo.getFixedAt())), 24, 1)));
+            }
             vo.setIssueId(formatIssueId(String.valueOf(vo.getId())));
             Issue issue = issueDAO.getIssueById(vo.getId());
             IssueStatus issueStatus = systemMgrService.getIssueStatusByCode(issue.getStatus());
@@ -203,9 +209,13 @@ public class IssueService {
             createIssueHistory(issueId, issue.getPriority(), dto.getPriority(), "priority");
             issue.setPriority(dto.getPriority());
 
-            createIssueHistory(issueId, DateUtils.getDateString(issue.getFixedAt(), "yyyy/MM/dd HH:mm"),
-                    dto.getFixedAt(), "fixedAt");
-            issue.setFixedAt(DateUtils.parseDatetime(dto.getFixedAt(), "yyyy/MM/dd HH:mm"));
+            if (dto.getFixedAt() != null && (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(dto.getStatus())
+            || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(dto.getStatus())
+                    || IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE.equals(dto.getStatus()))) {
+                createIssueHistory(issueId, DateUtils.getDateString(issue.getFixedAt(), "yyyy/MM/dd HH:mm"),
+                        dto.getFixedAt(), "fixedAt");
+                issue.setFixedAt(DateUtils.parseDatetime(dto.getFixedAt(), "yyyy/MM/dd HH:mm"));
+            }
 
             if (StringUtils.isNotBlank(dto.getUpdatedNote())) {
                 IssueNote issueNote = new IssueNote();
