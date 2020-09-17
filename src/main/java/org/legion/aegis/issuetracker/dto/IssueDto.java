@@ -207,7 +207,7 @@ public class IssueDto extends BaseDto {
             List<UserAccount> reporters = userAccountService.getReportersUnderProject(projectId);
             developers.addAll(reporters);
             for (UserAccount user : developers) {
-                if (user.getId().equals(Long.valueOf(this.projectId))) {
+                if (user.getId().equals(Long.parseLong(assignedTo))) {
                     return true;
                 }
             }

@@ -335,7 +335,7 @@ public class IssueService {
                         break;
                     case "FOLLOWER":
                         UserAccount oldFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getOldValue()));
-                        UserAccount newFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getOldValue()));
+                        UserAccount newFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getNewValue()));
                         if (oldFollower != null) {
                             timeline.setOldValue(oldFollower.getName());
                             timeline.setNewValue("关注了该问题");
@@ -344,6 +344,7 @@ public class IssueService {
                             timeline.setNewValue(newFollower.getName());
                             timeline.setOldValue("取消关注");
                         }
+                        break;
                     default:
                         timeline.setOldValue(history.getOldValue());
                         timeline.setNewValue(history.getNewValue());
@@ -379,17 +380,6 @@ public class IssueService {
                 timeline.setOldValue(null);
                 timeline.setNewValue(note.getContent());
                 timeline.setDate(note.getCreatedAt());
-                timelineVOList.add(timeline);
-            }
-            List<IssueFollower> followers = issueDAO.getFollowerByIssueId(issueId);
-            for (IssueFollower follower : followers) {
-                IssueTimelineVO timeline = new IssueTimelineVO();
-                timeline.setType(getTimelineType("FOLLOWER"));
-                timeline.setUpdated(true);
-                timeline.setBy(userAccountService.getUserById(follower.getUserAcctId()).getName());
-                timeline.setNewValue("关注了该问题");
-                timeline.setDate(follower.getCreatedAt());
-                timeline.setAt(DateUtils.getDateString(follower.getCreatedAt(), DateUtils.STD_FORMAT_2));
                 timelineVOList.add(timeline);
             }
         }
@@ -444,7 +434,7 @@ public class IssueService {
             if (issueFollower != null) {
                 JPAExecutor.save(issueFollower);
                 createIssueHistory(StringUtils.parseIfIsLong(dto.getIssueId()), null,
-                        dto.getUserAcctId(), "FOLLOW");
+                        dto.getUserAcctId(), "follower");
             }
         }
     }
@@ -453,7 +443,7 @@ public class IssueService {
         IssueFollower follower = issueDAO.getFollowerByIssueIdAndUserId(issueId, userId);
         if (follower != null) {
             JPAExecutor.delete(follower);
-            createIssueHistory(issueId, String.valueOf(userId), null, "FOLLOW");
+            createIssueHistory(issueId, String.valueOf(userId), null, "follower");
         }
     }
 
@@ -532,7 +522,7 @@ public class IssueService {
                 type = "附件";
                 break;
             case "FOLLOWER":
-                type = "关注人";
+                type = "关注";
                 break;
             default:
                 type = "Unknown";

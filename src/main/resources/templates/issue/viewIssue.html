@@ -358,7 +358,7 @@
               关注此问题
             </button>
             <button th:if="${!issue.canConfirm && issue.canCancel}" type="button" class="btn btn-warning" style="font-size: 14px"
-                    onclick="">
+                    onclick="doCancelFollow()">
               <i class="fa fa-user-minus"></i>
               取消关注
             </button>
@@ -554,7 +554,7 @@
         <div class="row">
           <div class="col-md-12">
             <div class="form-group">
-              <label for="isNoticed">接收邮件提醒</label>
+              <label for="isNoticed">接收邮件提醒</label><br>
               <input type="checkbox" class="form-control" name="isNoticed" id="isNoticed">
               <input type="hidden" class="form-control" name="notification" id="notification">
             </div>
@@ -754,6 +754,24 @@
                 if (res.status == 200) {
                     toastr.success("关已注");
                } else {
+                    toastr.warning(res.data[0]);
+                }
+            }
+
+
+        });
+    }
+
+    function doCancelFollow() {
+        $.ajax({
+            url: "/web/issue/followIssue/" + "cancel",
+            type: "post",
+            dataType: "json",
+            success: function (res) {
+                $("#modal_follow").modal("hide");
+                if (res.status == 200) {
+                    toastr.success("已取消关注");
+                } else {
                     toastr.warning(res.data[0]);
                 }
             }
