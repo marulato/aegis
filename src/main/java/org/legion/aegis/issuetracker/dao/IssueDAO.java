@@ -49,4 +49,10 @@ public interface IssueDAO {
     List<IssueVO> searchReportedByMe(@Param("sp") SearchParam searchParam);
 
     Integer searchReportedByMeCount(@Param("sp") SearchParam searchParam);
+
+    @Select("SELECT * FROM ISU_FOLLOWER WHERE ISSUE_ID = #{issueId}")
+    List<IssueFollower> getFollowerByIssueId(Long issueId);
+
+    @Select("SELECT * FROM ISU_FOLLOWER WHERE ISSUE_ID = #{param1} AND USER_ACCT_ID = #{param2}")
+    IssueFollower getFollowerByIssueIdAndUserId(Long issueId, Long userId);
 }

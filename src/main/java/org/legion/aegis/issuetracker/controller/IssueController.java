@@ -26,7 +26,9 @@ import org.legion.aegis.general.ex.PermissionDeniedException;
 import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dto.ExportDto;
 import org.legion.aegis.issuetracker.dto.IssueDto;
+import org.legion.aegis.issuetracker.dto.IssueFollowerDto;
 import org.legion.aegis.issuetracker.entity.Issue;
+import org.legion.aegis.issuetracker.entity.IssueFollower;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXlsxGenerator;
@@ -314,6 +316,31 @@ public class IssueController {
         AppContext context = AppContext.getFromWebThread();
         param.addParam("userId", context.getUserId());
         manager.addDataObject(issueService.searchReportedByMe(param));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/followIssue/{action}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody followIssue(@PathVariable("action") String action, HttpServletRequest request) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Issue issue = (Issue) SessionManager.getAttribute(SESSION_KEY);
+        AppContext context = AppContext.getFromWebThread();
+        if ("follow".equals(action)) {
+            IssueFollowerDto dto = new IssueFollowerDto();
+            dto.setIssueId(String.valueOf(issue.getId()));
+            dto.setUserAcctId(String.valueOf(context.getUserId()));
+            dto.setIsNotificationEnabled(request.getParameter("notification"));
+            List<ConstraintViolation> violations = CommonValidator.validate(dto);
+            if (!violations.isEmpty()) {
+                manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                manager.addDataObject(violations.get(0).getMessage());
+            } else {
+                issueService.followIssue(dto);
+            }
+        } else if ("cancel".equals(action)) {
+            issueService.cancelFollow(issue.getId(), context.getUserId());
+        }
         return manager.respond();
     }
 

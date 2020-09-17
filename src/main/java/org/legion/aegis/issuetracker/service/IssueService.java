@@ -18,6 +18,7 @@ import org.legion.aegis.general.service.FileNetService;
 import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dao.IssueDAO;
 import org.legion.aegis.issuetracker.dto.IssueDto;
+import org.legion.aegis.issuetracker.dto.IssueFollowerDto;
 import org.legion.aegis.issuetracker.entity.*;
 import org.legion.aegis.issuetracker.vo.IssueConfirmationVO;
 import org.legion.aegis.issuetracker.vo.IssueNoteVO;
@@ -129,6 +130,7 @@ public class IssueService {
 
     public IssueVO getIssueVOForView(Issue issue) {
         if (issue != null) {
+            AppContext context = AppContext.getFromWebThread();
             IssueVO vo = new IssueVO();
             vo.setStatusCode(issue.getStatus());
             vo.setSeverityCode(issue.getSeverity());
@@ -180,7 +182,22 @@ public class IssueService {
                 confirmationVO.setIsConfirmed(confirmation.getIsConfirmed());
                 vo.setConfirmation(confirmationVO);
             }
-
+            List<IssueFollower> followers = issueDAO.getFollowerByIssueId(issue.getId());
+            vo.setCanConfirm(true);
+            if (issue.getAssignedTo().equals(context.getUserId())
+                    || issue.getReportedBy().equals(context.getUserId())) {
+                vo.setCanCancel(false);
+                vo.setCanConfirm(false);
+            }
+            vo.setFollowers(new ArrayList<>());
+            for (IssueFollower follower : followers) {
+                vo.getFollowers().add(userAccountService.getUserById(follower.getUserAcctId()).getName());
+                if (follower.getUserAcctId().equals(context.getUserId())) {
+                    vo.setCanCancel(true);
+                    vo.setCanConfirm(false);
+                    break;
+                }
+            }
             return vo;
         }
         return null;
@@ -270,7 +287,6 @@ public class IssueService {
         if (issue != null) {
             List<IssueHistory> histories = issueDAO.getHistoryByIssueId(issueId);
             List<IssueNote> issueNotes = issueDAO.getNotesByIssueId(issueId);
-            IssueConfirmation confirmation = issueDAO.getIssueConfirmationByIssueId(issueId);
             for (IssueHistory history : histories) {
                 IssueTimelineVO timeline = new IssueTimelineVO();
                 switch (history.getFieldName()) {
@@ -317,6 +333,17 @@ public class IssueService {
                         timeline.setNewValue(userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[0])).getName() + "-" +
                                 userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[1])).getName());
                         break;
+                    case "FOLLOWER":
+                        UserAccount oldFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getOldValue()));
+                        UserAccount newFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getOldValue()));
+                        if (oldFollower != null) {
+                            timeline.setOldValue(oldFollower.getName());
+                            timeline.setNewValue("关注了该问题");
+                        }
+                        if (newFollower != null) {
+                            timeline.setNewValue(newFollower.getName());
+                            timeline.setOldValue("取消关注");
+                        }
                     default:
                         timeline.setOldValue(history.getOldValue());
                         timeline.setNewValue(history.getNewValue());
@@ -352,6 +379,17 @@ public class IssueService {
                 timeline.setOldValue(null);
                 timeline.setNewValue(note.getContent());
                 timeline.setDate(note.getCreatedAt());
+                timelineVOList.add(timeline);
+            }
+            List<IssueFollower> followers = issueDAO.getFollowerByIssueId(issueId);
+            for (IssueFollower follower : followers) {
+                IssueTimelineVO timeline = new IssueTimelineVO();
+                timeline.setType(getTimelineType("FOLLOWER"));
+                timeline.setUpdated(true);
+                timeline.setBy(userAccountService.getUserById(follower.getUserAcctId()).getName());
+                timeline.setNewValue("关注了该问题");
+                timeline.setDate(follower.getCreatedAt());
+                timeline.setAt(DateUtils.getDateString(follower.getCreatedAt(), DateUtils.STD_FORMAT_2));
                 timelineVOList.add(timeline);
             }
         }
@@ -398,6 +436,25 @@ public class IssueService {
         }
         searchResult.setTotalCounts(issueDAO.searchReportedByMeCount(param));
         return searchResult;
+    }
+
+    public void followIssue(IssueFollowerDto dto) throws Exception {
+        if (dto != null) {
+            IssueFollower issueFollower = BeanUtils.mapFromDto(dto, IssueFollower.class);
+            if (issueFollower != null) {
+                JPAExecutor.save(issueFollower);
+                createIssueHistory(StringUtils.parseIfIsLong(dto.getIssueId()), null,
+                        dto.getUserAcctId(), "FOLLOW");
+            }
+        }
+    }
+
+    public void cancelFollow(Long issueId, Long userId) {
+        IssueFollower follower = issueDAO.getFollowerByIssueIdAndUserId(issueId, userId);
+        if (follower != null) {
+            JPAExecutor.delete(follower);
+            createIssueHistory(issueId, String.valueOf(userId), null, "FOLLOW");
+        }
     }
 
     private String formatIssueId(String id) {
@@ -473,6 +530,9 @@ public class IssueService {
                 break;
             case "ATTACHMENTS":
                 type = "附件";
+                break;
+            case "FOLLOWER":
+                type = "关注人";
                 break;
             default:
                 type = "Unknown";

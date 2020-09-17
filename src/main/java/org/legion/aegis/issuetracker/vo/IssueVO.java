@@ -3,6 +3,7 @@ package org.legion.aegis.issuetracker.vo;
 import org.legion.aegis.common.base.BaseVO;
 import org.legion.aegis.general.entity.FileNet;
 import org.legion.aegis.issuetracker.entity.IssueConfirmation;
+import org.legion.aegis.issuetracker.entity.IssueFollower;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 
 import java.util.Date;
@@ -42,10 +43,14 @@ public class IssueVO extends BaseVO {
 
     private List<FileNet> attachments;
     private List<IssueNoteVO> notes;
+    private List<String> followers;
 
     private String fixedAt;
 
     private IssueConfirmationVO confirmation;
+
+    private boolean canConfirm;
+    private boolean canCancel;
 
     public Long getId() {
         return id;
@@ -293,5 +298,29 @@ public class IssueVO extends BaseVO {
 
     public void setConfirmation(IssueConfirmationVO confirmation) {
         this.confirmation = confirmation;
+    }
+
+    public boolean isCanConfirm() {
+        return canConfirm;
+    }
+
+    public void setCanConfirm(boolean canConfirm) {
+        this.canConfirm = canConfirm;
+    }
+
+    public boolean isCanCancel() {
+        return canCancel;
+    }
+
+    public void setCanCancel(boolean canCancel) {
+        this.canCancel = canCancel;
+    }
+
+    public List<String> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(List<String> followers) {
+        this.followers = followers;
     }
 }
