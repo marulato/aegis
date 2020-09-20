@@ -44,7 +44,7 @@
                  LEFT JOIN AC_USER_ACCT USER2
                            ON ISS.ASSIGNED_TO = USER2.ID
         <where>
-            <if test="sp.params.issueId != null and sp.params.issueId != ''">
+            <if test="sp.params.issueId != null and sp.params.issueId != '' and sp.params.issueId &gt;0">
                 AND ISS.ID = #{sp.params.issueId}
             </if>
             <if test="sp.params.issueId == null or sp.params.issueId == '' or sp.params.issueId &lt;1">
@@ -309,5 +309,42 @@
                  LEFT JOIN AC_USER_ACCT USER
                            ON ISS.REPORTED_BY = USER.ID
         WHERE ISS.REPORTED_BY = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+    </select>
+
+    <select id="searchFollowedByMe" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.issuetracker.vo.IssueVO">
+        SELECT DISTINCT ISS.ID                  AS ID,
+                        ISS.TITLE,
+                        ISS.DESCRIPTION,
+                        IST.DISPLAY_NAME        AS STATUS,
+                        ISR.DISPLAY_NAME        AS RESOLUTION,
+                        USER.NAME               AS ASSIGNED_TO,
+                        IST.COLOR               AS COLOR,
+                        DATE_FORMAT(ISS.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 INNER JOIN ISU_FOLLOWER ISF
+                           ON ISF.ISSUE_ID = ISS.ID
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISF.USER_ACCT_ID = USER.ID
+        WHERE ISF.USER_ACCT_ID = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchFollowedByMeCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(DISTINCT ISS.ID)
+        FROM ISU_ISSUE ISS
+                 LEFT JOIN CM_ISSUE_STATUS IST
+                           ON IST.STATUS_CODE = ISS.STATUS
+                 LEFT JOIN CM_ISSUE_RESOLUTION ISR
+                           ON ISR.RESOLUTION_CODE = ISS.RESOLUTION
+                 INNER JOIN ISU_FOLLOWER ISF
+                            ON ISF.ISSUE_ID = ISS.ID
+                 LEFT JOIN AC_USER_ACCT USER
+                           ON ISF.USER_ACCT_ID = USER.ID
+        WHERE ISF.USER_ACCT_ID = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
     </select>
 </mapper>

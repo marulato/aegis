@@ -4,13 +4,14 @@ package org.legion.aegis.common.jpa.exec;
 
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.BasePO;
+import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.SpringUtils;
 
 import java.util.Date;
 
 public class JPAExecutor {
 
-    private static IExecutor executor = SpringUtils.getBean(IExecutor.class);
+    private static final IExecutor executor = SpringUtils.getBean(IExecutor.class);
 
     public static void save(BasePO entity) {
         if (entity != null) {
@@ -20,6 +21,7 @@ public class JPAExecutor {
             entity.setUpdatedAt(now);
             entity.setCreatedBy(appContext.getLoginId());
             entity.setUpdatedBy(appContext.getLoginId());
+            BeanUtils.formatEmptyString(entity);
             executor.insert(entity);
         }
     }
@@ -30,6 +32,7 @@ public class JPAExecutor {
             AppContext appContext = AppContext.getFromWebThread();
             entity.setUpdatedAt(now);
             entity.setUpdatedBy(appContext.getLoginId());
+            BeanUtils.formatEmptyString(entity);
             executor.update(entity);
         }
     }

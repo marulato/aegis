@@ -20,4 +20,8 @@ public class IssueConsts {
     public static final String ISSUE_RESOLUTION_NO_NEED       = "NO_NEED";
     public static final String ISSUE_RESOLUTION_NOT_PROCEED   = "NOT_PROCEED";
 
+    public static final String ISSUE_RELATIONSHIP_RESEMBLE   = "RESEMBLE";
+    public static final String ISSUE_RELATIONSHIP_DUPLICATED = "DUPLICATED";
+    public static final String ISSUE_RELATIONSHIP_CONFLICTED = "CONFLICTED";
+
 }

@@ -208,4 +208,24 @@
             </if>
         </where>
     </select>
+
+    <select id="searchLoginHistory" parameterType="org.legion.aegis.common.base.SearchParam" resultType="org.legion.aegis.admin.vo.UserLoginHistoryVO">
+        SELECT CASE LOGIN_STATUS WHEN 0 THEN '登录成功' ELSE '登录失败' END AS LOGIN_STATUS,
+               CASE LOGIN_STATUS WHEN 0 THEN '#000000' ELSE '#FF0000' END AS COLOR,
+               IP_ADDRESS,
+               DATE_FORMAT(LOGIN_AT, '%Y/%m/%d %T') AS LOGIN_AT,
+               BROWSER
+        FROM AC_USER_LOGIN_HIS
+        WHERE DATE_FORMAT(LOGIN_AT, '%Y/%m/%d') >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+            AND USER_ACCT_ID = #{sp.params.userId}
+        ORDER BY LOGIN_AT DESC
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize};
+    </select>
+
+    <select id="searchLoginHistoryCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(USER_ACCT_ID)
+        FROM AC_USER_LOGIN_HIS WHERE DATE_FORMAT(LOGIN_AT, '%Y/%m/%d') >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+            AND USER_ACCT_ID = #{sp.params.userId}
+        ORDER BY LOGIN_AT DESC
+    </select>
 </mapper>

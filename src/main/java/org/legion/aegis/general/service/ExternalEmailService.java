@@ -55,16 +55,19 @@ public class ExternalEmailService {
         }
         String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
         if (!StringUtils.parseBoolean(isEmailEnabled)) {
+            archiveEmail(StringUtils.isBlank(sentFrom) ? ConfigUtils.get("legion.server.mail.host") : sentFrom,
+                    sentTo, cc, subject, content, attachment, AppConsts.EMAIL_STATUS_NOT_SENT);
             return;
         }
-        EmailArchive emailArchive = new EmailArchive();
+        String status = AppConsts.EMAIL_STATUS_NOT_SENT;
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             if (StringUtils.isNotBlank(sentFrom)) {
                 mimeMessageHelper.setFrom(sentFrom);
             } else {
-                mimeMessageHelper.setFrom(ConfigUtils.get("legion.server.mail.host"));
+                sentFrom = ConfigUtils.get("legion.server.mail.host");
+                mimeMessageHelper.setFrom(sentFrom);
             }
             List<String> sentToList = Arrays.asList(sentTo);
             validateEmail(sentToList);
@@ -89,41 +92,30 @@ public class ExternalEmailService {
                         attachFileName : "attachment", new ByteArrayResource(attachment));
             }
             mailSender.send(mimeMessage);
-            emailArchive.setStatus(AppConsts.EMAIL_STATUS_SENT);
+            status = AppConsts.EMAIL_STATUS_SENT;
         } catch (Exception e) {
             log.error("Email sent FAILED", e);
-            emailArchive.setStatus(AppConsts.EMAIL_STATUS_SENT_FAILED);
+            status = AppConsts.EMAIL_STATUS_SENT_FAILED;
             //throw e; DO NOT throw it, Email Failure should not trigger rollback
         } finally {
-            emailArchive.setSubject(subject);
-            emailArchive.setAttachment(attachment);
-            emailArchive.setSentFrom(sentFrom);
-            emailArchive.setContent(content.getBytes(StandardCharsets.UTF_8));
-            emailArchive.setSentTo(ArrayUtils.toString(sentTo, ";"));
-            emailArchive.setCc(ArrayUtils.toString(cc, ";"));
-            JPAExecutor.save(emailArchive);
+            archiveEmail(sentFrom, sentTo, cc, subject, content, attachment, status);
         }
 
     }
 
     public void sendEmail(String[] sentTo, String[] cc, String subject, String content) throws Exception {
-        String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
-        if (!StringUtils.parseBoolean(isEmailEnabled)) {
-            return;
-        }
         sendEmail(ConfigUtils.get("server.smtp.username"), sentTo, cc, subject, content, null, null);
     }
 
     public void sendEmail(EmailEntity emailEntity) throws Exception {
-        String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
-        if (!StringUtils.parseBoolean(isEmailEnabled)) {
-            return;
-        }
         if (emailEntity != null) {
+            String[] ccTo = null;
             String[] sentTo = emailEntity.getSentTo().split(";");
-            String[] ccTo = emailEntity.getCc().split(";");
+            if (StringUtils.isNotBlank(emailEntity.getCc())) {
+                ccTo = emailEntity.getCc().split(";");
+            }
             sendEmail(emailEntity.getSentFrom(), sentTo, ccTo, emailEntity.getSubject(),
-                    new String(emailEntity.getContent()), emailEntity.getAttachFileName(), emailEntity.getAttachment());
+                    new String(emailEntity.getContent(), StandardCharsets.UTF_8), emailEntity.getAttachFileName(), emailEntity.getAttachment());
         }
     }
 
@@ -136,6 +128,19 @@ public class ExternalEmailService {
                 log.warn("Invalid email address [" + email + "], will NOT send email to this address.");
             }
         }
+    }
+
+    private void archiveEmail(String sentFrom, String[] sentTo, String[] cc, String subject,
+                         String content, byte[] attachment, String status) {
+        EmailArchive emailArchive = new EmailArchive();
+        emailArchive.setSubject(subject);
+        emailArchive.setStatus(status);
+        emailArchive.setAttachment(attachment);
+        emailArchive.setSentFrom(sentFrom);
+        emailArchive.setContent(content.getBytes(StandardCharsets.UTF_8));
+        emailArchive.setSentTo(ArrayUtils.toString(sentTo, ";"));
+        emailArchive.setCc(ArrayUtils.toString(cc, ";"));
+        JPAExecutor.save(emailArchive);
     }
 
 }

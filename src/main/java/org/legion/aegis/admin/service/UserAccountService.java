@@ -9,6 +9,7 @@ import org.legion.aegis.admin.dto.UserDto;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.generator.NewUserEmailGenerator;
 import org.legion.aegis.admin.vo.UserAccountVO;
+import org.legion.aegis.admin.vo.UserLoginHistoryVO;
 import org.legion.aegis.admin.vo.UserProjectVO;
 import org.legion.aegis.admin.vo.UserSearchVO;
 import org.legion.aegis.common.AppContext;
@@ -410,20 +411,6 @@ public class UserAccountService {
         }
     }
 
-
-    private void assignProjects(Collection<Project> projects, Long userId) {
-        if (projects != null && userId != null) {
-            for (Project var : projects) {
-                UserProjectAssign projectAssign = new UserProjectAssign();
-                projectAssign.setUserAcctId(userId);
-                projectAssign.setGroupId(var.getGroupId());
-                projectAssign.setProjectId(var.getId());
-                projectAssign.setAssignReason("User Modified");
-                JPAExecutor.save(projectAssign);
-            }
-        }
-    }
-
     public List<UserAccount> getReportersUnderProject(Long groupId) {
         List<UserAccount> reporters = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_QA);
         List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_QA_SUPERVISOR);
@@ -436,5 +423,29 @@ public class UserAccountService {
         List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_DEV_SUPERVISOR);
         devs.addAll(supervisors);
         return devs;
+    }
+
+    public SearchResult<UserLoginHistoryVO> searchLoginHistory(SearchParam param) {
+        SearchResult<UserLoginHistoryVO> searchResult = new SearchResult<>(userAccountDAO.searchLoginHistory(param), param);
+        int i = (param.getPageNo() - 1) * param.getPageSize();
+        for (UserLoginHistoryVO vo : searchResult.getResultList()) {
+            vo.setBrowser(StringUtils.getBrowser(vo.getBrowser()));
+            vo.setIndex(++i);
+        }
+        searchResult.setTotalCounts(userAccountDAO.searchLoginHistoryCount(param));
+        return searchResult;
+    }
+
+    private void assignProjects(Collection<Project> projects, Long userId) {
+        if (projects != null && userId != null) {
+            for (Project var : projects) {
+                UserProjectAssign projectAssign = new UserProjectAssign();
+                projectAssign.setUserAcctId(userId);
+                projectAssign.setGroupId(var.getGroupId());
+                projectAssign.setProjectId(var.getId());
+                projectAssign.setAssignReason("User Modified");
+                JPAExecutor.save(projectAssign);
+            }
+        }
     }
 }

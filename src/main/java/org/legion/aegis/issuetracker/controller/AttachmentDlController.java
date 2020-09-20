@@ -4,6 +4,7 @@ import org.legion.aegis.admin.entity.Project;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.consts.SystemConsts;
+import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.webmvc.NetworkFileTransfer;
 import org.legion.aegis.general.entity.FileNet;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +57,8 @@ public class AttachmentDlController {
         ExportDto exportDto = (ExportDto) SessionManager.getAttribute(IssueController.SESSION_DL_KEY);
         if (exportDto != null) {
             if (StringUtils.isNotBlank(uuid) && uuid.equals(UUID.nameUUIDFromBytes(exportDto.getData()).toString())) {
-                NetworkFileTransfer.download(exportDto.getData(), "Export." + exportDto.getType() , response);
+                String date = DateUtils.getDateString(new Date(), DateUtils.TODAY_FORMAT);
+                NetworkFileTransfer.download(exportDto.getData(), "Export " + date + "." + exportDto.getType() , response);
             }
         }
         SessionManager.removeAttribute(IssueController.SESSION_DL_KEY);

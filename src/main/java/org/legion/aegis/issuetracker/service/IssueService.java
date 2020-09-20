@@ -19,11 +19,10 @@ import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dao.IssueDAO;
 import org.legion.aegis.issuetracker.dto.IssueDto;
 import org.legion.aegis.issuetracker.dto.IssueFollowerDto;
+import org.legion.aegis.issuetracker.dto.IssueRelationshipDto;
+import org.legion.aegis.issuetracker.dto.IssueVcsTrackerDto;
 import org.legion.aegis.issuetracker.entity.*;
-import org.legion.aegis.issuetracker.vo.IssueConfirmationVO;
-import org.legion.aegis.issuetracker.vo.IssueNoteVO;
-import org.legion.aegis.issuetracker.vo.IssueTimelineVO;
-import org.legion.aegis.issuetracker.vo.IssueVO;
+import org.legion.aegis.issuetracker.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,15 +38,18 @@ public class IssueService {
     private final FileNetService fileNetService;
     private final ProjectService projectService;
     private final UserAccountService userAccountService;
+    private final IssueEmailService emailService;
 
     @Autowired
     public IssueService(IssueDAO issueDAO, SystemMgrService systemMgrService,
-                        FileNetService fileNetService, ProjectService projectService, UserAccountService userAccountService) {
+                        FileNetService fileNetService, ProjectService projectService, UserAccountService userAccountService,
+                        IssueEmailService emailService) {
         this.issueDAO = issueDAO;
         this.systemMgrService = systemMgrService;
         this.fileNetService = fileNetService;
         this.projectService = projectService;
         this.userAccountService = userAccountService;
+        this.emailService = emailService;
     }
 
     public SearchResult<IssueVO> search(SearchParam param) {
@@ -121,6 +123,7 @@ public class IssueService {
             issue.createAuditValues(context);
             issueDAO.createIssue(issue);
             saveAttachments(dto.getAttachments(), issue);
+            emailService.sendEmailNewIssueReported(issue);
         }
     }
 
@@ -132,6 +135,7 @@ public class IssueService {
         if (issue != null) {
             AppContext context = AppContext.getFromWebThread();
             IssueVO vo = new IssueVO();
+            vo.setId(issue.getId());
             vo.setStatusCode(issue.getStatus());
             vo.setSeverityCode(issue.getSeverity());
             vo.setPriorityCode(issue.getPriority());
@@ -197,6 +201,29 @@ public class IssueService {
                     vo.setCanConfirm(false);
                     break;
                 }
+            }
+            List<IssueRelationship> relationships = issueDAO.getRelationship(issue.getId());
+            vo.setRelationships(new ArrayList<>());
+            for (IssueRelationship relationship : relationships) {
+                IssueRelationshipVO relationshipVO = new IssueRelationshipVO();
+                relationshipVO.setId(relationship.getId());
+                relationshipVO.setSrcId(relationship.getSrcIssueId());
+                if (relationship.getSrcIssueId().equals(issue.getId())) {
+                    relationshipVO.setDestIssueId(formatIssueId(String.valueOf(relationship.getDestIssueId())));
+                    relationshipVO.setDestId(String.valueOf(relationship.getDestIssueId()));
+                } else if (relationship.getDestIssueId().equals(issue.getId())) {
+                    relationshipVO.setDestIssueId(formatIssueId(String.valueOf(relationship.getSrcIssueId())));
+                    relationshipVO.setDestId(String.valueOf(relationship.getSrcIssueId()));
+                }
+                relationshipVO.setRelationshipType(MasterCodeUtils.getMasterCode("issue.relationship",
+                        relationship.getRelationshipType()).getValue());
+                vo.getRelationships().add(relationshipVO);
+            }
+            List<IssueVcsTracker> vcsTrackers = issueDAO.getIssueVcsTrackerByIssueId(issue.getId());
+            vo.setVcsTrackers(new ArrayList<>());
+            for (IssueVcsTracker tracker : vcsTrackers) {
+                IssueVcsTrackerVO trackerVO = new IssueVcsTrackerVO(tracker);
+                vo.getVcsTrackers().add(trackerVO);
             }
             return vo;
         }
@@ -428,6 +455,15 @@ public class IssueService {
         return searchResult;
     }
 
+    public SearchResult<IssueVO> searchFollowedByMe(SearchParam param) {
+        SearchResult<IssueVO> searchResult = new SearchResult<>(issueDAO.searchFollowedByMe(param), param);
+        for (IssueVO vo : searchResult.getResultList()) {
+            vo.setIssueId(formatIssueId(String.valueOf(vo.getId())));
+        }
+        searchResult.setTotalCounts(issueDAO.searchFollowedByMeCount(param));
+        return searchResult;
+    }
+
     public void followIssue(IssueFollowerDto dto) throws Exception {
         if (dto != null) {
             IssueFollower issueFollower = BeanUtils.mapFromDto(dto, IssueFollower.class);
@@ -439,12 +475,59 @@ public class IssueService {
         }
     }
 
+    public void createRelationShip(IssueRelationshipDto dto) throws Exception {
+        if (dto != null) {
+            IssueRelationship relationship = BeanUtils.mapFromDto(dto, IssueRelationship.class);
+            if (relationship != null) {
+                JPAExecutor.save(relationship);
+                createIssueHistory(relationship.getSrcIssueId(), null,
+                        String.valueOf(relationship.getDestIssueId()), "relationship");
+            }
+        }
+    }
+
+    public boolean terminateRelationship(Long id, Issue issue) {
+        IssueRelationship relationship = issueDAO.getRelationshipById(id);
+        if (relationship != null && issue != null && relationship.getSrcIssueId().equals(issue.getId())) {
+            createIssueHistory(issue.getId(), String.valueOf(relationship.getDestIssueId()),
+                    null, "relationship");
+            JPAExecutor.delete(relationship);
+            return true;
+        }
+        return false;
+    }
+
     public void cancelFollow(Long issueId, Long userId) {
         IssueFollower follower = issueDAO.getFollowerByIssueIdAndUserId(issueId, userId);
         if (follower != null) {
             JPAExecutor.delete(follower);
             createIssueHistory(issueId, String.valueOf(userId), null, "follower");
         }
+    }
+
+    public void createVcs(IssueVcsTrackerDto dto, Issue issue) throws Exception {
+        IssueVcsTracker tracker = BeanUtils.mapFromDto(dto, IssueVcsTracker.class);
+        if (tracker != null && issue != null) {
+            tracker.setIssueId(issue.getId());
+            JPAExecutor.save(tracker);
+        }
+    }
+
+    public void updateVcs(IssueVcsTrackerDto dto) throws Exception {
+        IssueVcsTracker tracker = BeanUtils.mapFromDto(dto, IssueVcsTracker.class);
+        IssueVcsTracker old = getIssueVcsById(dto.getId());
+        if (old != null) {
+            old.setBranch(tracker.getBranch());
+            old.setBranchVersion(tracker.getBranchVersion());
+            old.setFileFullPath(tracker.getFileFullPath());
+            old.setMasterVersion(tracker.getMasterVersion());
+            old.setTag(tracker.getTag());
+            JPAExecutor.update(old);
+        }
+    }
+
+    public IssueVcsTracker getIssueVcsById(Long id) {
+        return issueDAO.getIssueVcsTrackerById(id);
     }
 
     private String formatIssueId(String id) {
@@ -523,6 +606,9 @@ public class IssueService {
                 break;
             case "FOLLOWER":
                 type = "关注";
+                break;
+            case "RELATIONSHIP":
+                type = "相关性";
                 break;
             default:
                 type = "Unknown";

@@ -44,6 +44,8 @@ public class IssueVO extends BaseVO {
     private List<FileNet> attachments;
     private List<IssueNoteVO> notes;
     private List<String> followers;
+    private List<IssueRelationshipVO> relationships;
+    private List<IssueVcsTrackerVO> vcsTrackers;
 
     private String fixedAt;
 
@@ -322,5 +324,21 @@ public class IssueVO extends BaseVO {
 
     public void setFollowers(List<String> followers) {
         this.followers = followers;
+    }
+
+    public List<IssueRelationshipVO> getRelationships() {
+        return relationships;
+    }
+
+    public void setRelationships(List<IssueRelationshipVO> relationships) {
+        this.relationships = relationships;
+    }
+
+    public List<IssueVcsTrackerVO> getVcsTrackers() {
+        return vcsTrackers;
+    }
+
+    public void setVcsTrackers(List<IssueVcsTrackerVO> vcsTrackers) {
+        this.vcsTrackers = vcsTrackers;
     }
 }

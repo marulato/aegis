@@ -97,28 +97,13 @@
           </ul>
         </li>
 
-        <li th:class="${(selected == '4.1' || selected == '4.2') ? 'nav-item menu-open' : 'nav-item'}">
-          <a href="#" th:class="${(selected == '4.1' || selected == '4.2') ? 'nav-link active' : 'nav-link'}">
+        <li th:class="nav-item">
+          <a href="/web/myAccount" th:class="${(selected == '4') ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-address-card"></i>
             <p>
               个人中心
-              <i class="right fas fa-angle-left"></i>
             </p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="#" th:class="${selected == '4.1' ? 'nav-link active' : 'nav-link'}">
-                <i class="far fa-circle nav-icon"></i>
-                <p>个人信息</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#" th:class="${selected == '4.2' ? 'nav-link active' : 'nav-link'}">
-                <i class="far fa-circle nav-icon"></i>
-                <p>修改密码</p>
-              </a>
-            </li>
-          </ul>
         </li>
 
         <li th:if="${role == 'SYSADMIN' || role == 'DEV_S' || role == 'QA_S'}" th:class="${(selected == '5.1' || selected == '5.2') ? 'nav-item menu-open' : 'nav-item'}">

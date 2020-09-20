@@ -1,5 +1,9 @@
 package org.legion.aegis.common.consts;
 
+import org.legion.aegis.common.AppContext;
+
+import java.io.File;
+
 public class SystemConsts {
 
     public static final String CLASSPATH    = SystemConsts.class.getResource("/").
@@ -10,4 +14,5 @@ public class SystemConsts {
     public static final String MODE_UAT = "UAT";
 
     public static final String ROOT_STORAGE_PATH = CLASSPATH.replace("classes", "data");
+    public static final String ROOT_TEMP_PATH = CLASSPATH.replace("classes", "temp");
 }

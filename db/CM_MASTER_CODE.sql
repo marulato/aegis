@@ -72,19 +72,19 @@ VALUES ('issue.resolution.default', 'RESOLVED', 'Resolved', '已解决', 'Y', 'Y
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.resolution.default', 'RESOLVING', 'Resolving', '正在解决', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.resolution.default', 'RESOLVING', 'Resolving', '正在解决', 'Y', 'Y', 2, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.resolution.default', 'POSTPONE', 'Postpone', '推迟处理', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.resolution.default', 'POSTPONE', 'Postpone', '推迟处理', 'Y', 'Y', 3, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.resolution.default', 'NOT_PROCEED', 'Not Proceed', '暂不处理', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.resolution.default', 'NOT_PROCEED', 'Not Proceed', '暂不处理', 'Y', 'Y', 4, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.resolution.default', 'UNSOLVABLE', 'Unsolvable', '无法处理', 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.resolution.default', 'UNSOLVABLE', 'Unsolvable', '无法处理', 'Y', 'Y', 5, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 --
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
@@ -114,19 +114,19 @@ VALUES ('issue.reproducibility', 'ALWAYS', '始终', NULL, 'Y', 'Y', 1, 'N', NOW
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.reproducibility', 'SOMETIMES', '偶尔', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.reproducibility', 'SOMETIMES', '偶尔', NULL, 'Y', 'Y', 2, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.reproducibility', 'RANDOM', '随机', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.reproducibility', 'RANDOM', '随机', NULL, 'Y', 'Y', 3, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.reproducibility', 'NEVER', '从不', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.reproducibility', 'NEVER', '从不', NULL, 'Y', 'Y', 4, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.reproducibility', 'NA', '未知', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.reproducibility', 'NA', '未知', NULL, 'Y', 'Y', 5, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 
 
@@ -138,34 +138,34 @@ VALUES ('issue.priority', 'NORMAL', '普通', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SY
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.priority', 'LOW', '低', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.priority', 'LOW', '低', NULL, 'Y', 'Y', 2, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.priority', 'MEDIUM', '中等', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.priority', 'MEDIUM', '中等', NULL, 'Y', 'Y', 3, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.priority', 'URGENT', '紧急', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.priority', 'URGENT', '紧急', NULL, 'Y', 'Y', 4, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.priority', 'V_URGENT', '十分紧急', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.priority', 'V_URGENT', '十分紧急', NULL, 'Y', 'Y', 5, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 
 
 --
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.severity', 'S0', '高危', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.severity', 'S0', '高危', NULL, 'Y', 'Y', 5, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.severity', 'S1', '严重', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.severity', 'S1', '严重', NULL, 'Y', 'Y', 4, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.severity', 'S2', '重要', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.severity', 'S2', '重要', NULL, 'Y', 'Y', 3, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
@@ -173,7 +173,19 @@ VALUES ('issue.severity', 'S3', '普通', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM
 
 INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
                             CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
-VALUES ('issue.severity', 'S4', '建议', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+VALUES ('issue.severity', 'S4', '建议', NULL, 'Y', 'Y', 2, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+    VALUES ('issue.relationship', 'RESEMBLE', '原因相似/相同', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('issue.relationship', 'DUPLICATED', '重复', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
+
+INSERT INTO CM_MASTER_CODE (TYPE, CODE, VALUE, DESCRIPTION, IS_CACHED, IS_SYSTEM, DISPLAY_ORDER, IS_EDITABLE,
+                            CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY)
+VALUES ('issue.relationship', 'CONFLICTED', '冲突', NULL, 'Y', 'Y', 1, 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM');
 
 

@@ -50,9 +50,25 @@ public interface IssueDAO {
 
     Integer searchReportedByMeCount(@Param("sp") SearchParam searchParam);
 
+    List<IssueVO> searchFollowedByMe(@Param("sp") SearchParam searchParam);
+
+    Integer searchFollowedByMeCount (@Param("sp") SearchParam searchParam);
+
     @Select("SELECT * FROM ISU_FOLLOWER WHERE ISSUE_ID = #{issueId}")
     List<IssueFollower> getFollowerByIssueId(Long issueId);
 
     @Select("SELECT * FROM ISU_FOLLOWER WHERE ISSUE_ID = #{param1} AND USER_ACCT_ID = #{param2}")
     IssueFollower getFollowerByIssueIdAndUserId(Long issueId, Long userId);
+
+    @Select("SELECT * FROM ISU_RELATIONSHIP WHERE SRC_ISSUE_ID = #{issueId} OR DEST_ISSUE_ID = #{issueId}")
+    List<IssueRelationship> getRelationship(Long issueId);
+
+    @Select("SELECT * FROM ISU_RELATIONSHIP WHERE ID = #{id}")
+    IssueRelationship getRelationshipById(Long id);
+
+    @Select("SELECT * FROM ISU_VCS_TRACKER WHERE ISSUE_ID = #{issueId}")
+    List<IssueVcsTracker> getIssueVcsTrackerByIssueId(Long issueId);
+
+    @Select("SELECT * FROM ISU_VCS_TRACKER WHERE ID = #{id}")
+    IssueVcsTracker getIssueVcsTrackerById(Long id);
 }

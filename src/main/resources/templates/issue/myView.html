@@ -117,6 +117,36 @@
           </div>
         </div>
 
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">我关注的</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="followedByMe" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 20%">ID</th>
+                    <th style="width: 50%">概述</th>
+                    <th style="width: 30%">更新时间</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- /.row (main row) -->
       </div><!-- /.container-fluid -->
     </section>
@@ -173,7 +203,7 @@
         "info": true,
         "autoWidth": false,
         "responsive": true,
-        "aLengthMenu": [10, 25, 50, 100],
+        "aLengthMenu": [10, 25, 50],
         "bPaginate": true,
         "serverSide": true,
         ajax: function (data, callback, settings) {
@@ -211,12 +241,51 @@
         "info": true,
         "autoWidth": false,
         "responsive": true,
-        "aLengthMenu": [10, 25, 50, 100],
+        "aLengthMenu": [10, 25, 50],
         "bPaginate": true,
         "serverSide": true,
         ajax: function (data, callback, settings) {
             var obj = {};
             aegis.callDataTableAjax("/web/issue/myView/reportedByMe", obj, data, callback);
+        },
+        columns: [
+            {
+                "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                    $(nTd).css("text-align", "center");
+                },
+                render: function (data, type, full, meta) {
+                    return "<a href='/web/issue/view/" + full.id + "'> " + full.issueId + "</a>";
+                }
+            },
+            {"data": "title", "defaultContent": "-"},
+
+            {
+                "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                    $(nTd).css("text-align", "center");
+                }
+            },
+        ],
+        fnCreatedRow: function (row, data, dataIndex, cells) {
+            $(row).css("background-color", data.color);
+        },
+        language: aegis.locale
+    });
+
+
+    var followedByMe = $('#followedByMe').DataTable({
+        "processing": true,
+        "lengthChange": true,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "aLengthMenu": [10, 25, 50],
+        "bPaginate": true,
+        "serverSide": true,
+        ajax: function (data, callback, settings) {
+            var obj = {};
+            aegis.callDataTableAjax("/web/issue/myView/followedByMe", obj, data, callback);
         },
         columns: [
             {

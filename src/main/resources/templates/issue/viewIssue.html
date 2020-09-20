@@ -212,7 +212,7 @@
                   </div>
                 </div>
               </div>
-
+              <br/>
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -223,7 +223,7 @@
                   </div>
                 </div>
               </div>
-
+              <br/>
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -234,7 +234,7 @@
                   </div>
                 </div>
               </div>
-
+              <br/>
               <div class="row" th:if="${issue.confirmation != null}">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -246,7 +246,7 @@
                   </div>
                 </div>
               </div>
-
+              <br/>
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -257,7 +257,24 @@
                   </div>
                 </div>
               </div>
+              <br/>
 
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="assignedTo">与之关联的问题:</label>
+                    <div th:each="rel, stats:${issue.relationships}">
+                      <span>
+                        <a th:href="'/web/issue/view/' + ${rel.destId} " th:text="${rel.destIssueId}"></a>
+                        &nbsp;
+                        <span th:text="${rel.relationshipType}"></span>
+                        &nbsp;
+                        <a th:if="${rel.srcId == issue.id}" href="javascript:void(0);" style="color: red" th:onclick="terminate([[${rel.id}]])"><i class="fas fa-times"></i></a>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -335,6 +352,53 @@
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">文件版本控制</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th style="width: 5%">#</th>
+                    <th style="width: 10%">分支</th>
+                    <th style="width: 10%">Tag</th>
+                    <th style="width: 45%">文件路径</th>
+                    <th style="width: 10%">主干版本</th>
+                    <th style="width: 10%">分支版本</th>
+                    <th style="width: 5%">修改时间</th>
+                    <th style="width: 5%">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="vcs, stats:${issue.vcsTrackers}">
+                    <td th:text="${stats.index + 1}"></td>
+                    <td th:text="${vcs.branch}"></td>
+                    <td th:text="${vcs.tag}"></td>
+                    <td th:text="${vcs.fileFullPath}"></td>
+                    <td th:text="${vcs.masterVersion}"></td>
+                    <td th:text="${vcs.branchVersion}"></td>
+                    <td th:text="${vcs.updatedAt}"></td>
+                    <td>
+                      <a style="color: #666666" href='javascript:void(0)' th:onclick="showUpdateVCS([[${vcs.id}]])" title="修改"><i class="fa fa-pencil-alt"></i></a>
+                      &emsp;
+                      <a style="color: #666666" href='javascript:void(0)' th:onclick="showDeleteVcs([[${vcs.id}]])" title="删除"><i class="fa fa-eraser"></i></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card-footer">
+              <button type="button" class="btn btn-info" style="font-size: 14px;" onclick="showVCS()"><i class="fas fa-plus"></i>&nbsp;添加</button>
+            </div>
+          </div>
+
         </div>
       </div>
       <div class="col-12">
@@ -350,6 +414,12 @@
                     onclick="showUpdate()">
               <i class="fa fa-edit"></i>
               更新
+            </button>
+            &nbsp;
+            <button type="button" class="btn btn-primary" style="font-size: 14px"
+                    onclick="showRelationship()">
+              <i class="fa fa-link"></i>
+              相关性
             </button>
             &nbsp;
             <button th:if="${issue.canConfirm && !issue.canCancel}" type="button" class="btn btn-info" style="font-size: 14px"
@@ -572,6 +642,106 @@
 </div>
 
 
+<div class="modal fade" id="modal_relationship">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >添加相关性</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="destIssueId">与</label><br>
+              <input type="text" class="form-control" name="destIssueId" id="destIssueId" placeholder="请输入问题ID">
+            </div>
+            <div class="form-group">
+              <label for="relationshipType">相关性</label><br>
+              <select class="custom-select" name="relationshipType" id="relationshipType">
+                <option th:each="rel, stats:${relationship}" th:text="${rel.value}" th:value="${rel.code}"></option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="doRelationshipAdd()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+<div class="modal fade" id="modal_vcs">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="vcsTitle">添加文件</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <input type="hidden" name="vcsId" id="vcsId">
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="fileFullPath">文件路径</label><br>
+              <input type="text" class="form-control" name="fileFullPath" id="fileFullPath" placeholder="请输入完整的文件路径">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="branch">分支</label><br>
+              <input type="text" class="form-control" name="branch" id="branch" placeholder="请输入所在分支">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="tag">Tag</label><br>
+              <input type="text" class="form-control" name="tag" id="tag" placeholder="标签">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="masterVersion">主干版本</label><br>
+              <input type="text" class="form-control" name="masterVersion" id="masterVersion">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="branchVersion">分支版本</label><br>
+              <input type="text" class="form-control" name="branchVersion" id="branchVersion">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button id="addBtn" type="button" class="btn btn-success" style="font-size: 14px" onclick="doAddFile()">确认</button>
+        <button id="updateBtn" type="button" class="btn btn-success" style="font-size: 14px" onclick="doUpdateVcs()">保存</button>
+        <button id="deleteBtn" type="button" class="btn btn-danger" style="font-size: 14px" onclick="doDeleteFile()">删除</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
 
 <!-- jQuery -->
 <script th:src="@{/plugins/jquery/jquery.min.js}"></script>
@@ -780,6 +950,197 @@
         });
     }
 
+    function showRelationship() {
+        $("#modal_relationship").modal("show");
+    }
+
+    function doRelationshipAdd() {
+        aegis.clearErrors();
+        $.ajax({
+            url: "/web/issue/relationship/add",
+            type: "post",
+            data: {"destIssueId": $("#destIssueId").val(), "relationshipType": $("#relationshipType").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#modal_follow").modal("hide");
+                if (res.status == 200) {
+                    toastr.success("添加成功");
+                } else {
+                    aegis.showErrors(res.data);
+                }
+            }
+
+
+        });
+    }
+
+    function terminate(id) {
+        $.ajax({
+            url: "/web/issue/relationship/terminate",
+            type: "post",
+            data: {"id": id},
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    toastr.success("删除成功");
+                } else {
+                    toastr.error("操作失败");
+                }
+            }
+
+
+        });
+    }
+
+    function doAddFile() {
+        aegis.clearErrors();
+        var obj = {
+            fileFullPath: $("#fileFullPath").val(),
+            masterVersion: $("#masterVersion").val(),
+            branch: $("#branch").val(),
+            branchVersion: $("#branchVersion").val(),
+            tag: $("#tag").val()
+        };
+
+        $.ajax({
+            url: "/web/issue/vcs",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify(obj),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_vcs").modal("hide");
+                    toastr.success("添加文件成功");
+                }
+            }
+        });
+    }
+
+    function showVCS() {
+        aegis.clearErrors();
+        readOnly(false);
+        $("#deleteBtn").hide();
+        $("#updateBtn").hide();
+        $("#addBtn").show();
+        clearVcs();
+        $("#vcsTitle").html("添加文件");
+        $("#modal_vcs").modal("show");
+    }
+
+    function showUpdateVCS(id) {
+        readOnly(false);
+        aegis.clearErrors();
+        $("#deleteBtn").hide();
+        $("#addBtn").hide();
+        $("#updateBtn").show();
+        clearVcs();
+        $("#vcsTitle").html("编辑文件");
+        $("#modal_vcs").modal("show");
+        $.ajax({
+            url: "/web/issue/vcs/" + id,
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    var obj = res.data[0];
+                    $("#fileFullPath").val(obj.fileFullPath);
+                    $("#masterVersion").val(obj.masterVersion);
+                    $("#branch").val(obj.branch);
+                    $("#branchVersion").val(obj.branchVersion);
+                    $("#tag").val(obj.tag);
+                    $("#vcsId").val(obj.id);
+                    $("#modal_vcs").modal("show");
+                }
+            }
+        });
+    }
+
+    function clearVcs() {
+        $("#fileFullPath").val('');
+        $("#masterVersion").val('');
+        $("#branch").val('');
+        $("#branchVersion").val('');
+        $("#tag").val('');
+    }
+
+    function doUpdateVcs() {
+        aegis.clearErrors();
+        var obj = {
+            fileFullPath: $("#fileFullPath").val(),
+            masterVersion: $("#masterVersion").val(),
+            branch: $("#branch").val(),
+            branchVersion: $("#branchVersion").val(),
+            tag: $("#tag").val(),
+            id: $("#vcsId").val()
+        };
+        $.ajax({
+            url: "/web/issue/vcs/" + $("#vcsId").val() + "/update",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify(obj),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_vcs").modal("hide");
+                    toastr.success("修改成功");
+                }
+            }
+        });
+    }
+
+    function showDeleteVcs(id) {
+        showUpdateVCS(id);
+        aegis.clearErrors();
+        $("#deleteBtn").show();
+        $("#addBtn").hide();
+        $("#updateBtn").hide();
+        $("#vcsTitle").html("删除文件");
+        $("#modal_vcs").modal("show");
+        readOnly(true);
+    }
+
+    function doDeleteFile() {
+        var obj = {
+            fileFullPath: $("#fileFullPath").val(),
+            masterVersion: $("#masterVersion").val(),
+            branch: $("#branch").val(),
+            branchVersion: $("#branchVersion").val(),
+            tag: $("#tag").val(),
+            id: $("#vcsId").val()
+        };
+        $.ajax({
+            url: "/web/issue/vcs/" + $("#vcsId").val() + "/delete",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify(obj),
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_vcs").modal("hide");
+                    toastr.success("删除成功");
+                }
+            }
+        });
+    }
+
+    function readOnly(readOnly) {
+        if (readOnly) {
+            $("#modal_vcs").find("input").each(function (idx, ipt){
+                $(ipt).attr("readonly", true);
+            });
+        } else {
+            $("#modal_vcs").find("input").each(function (idx, ipt){
+                $(ipt).removeAttr("readonly");
+            });
+        }
+    }
 </script>
 </body>
 </html>

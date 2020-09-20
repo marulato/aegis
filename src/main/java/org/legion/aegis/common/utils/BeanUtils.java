@@ -109,4 +109,24 @@ public class BeanUtils {
         return null;
     }
 
+    public static void formatEmptyString(BasePO po) {
+        if (po != null) {
+            Class<?> type = po.getClass();
+            Field[] fields = type.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (field.getType() == String.class) {
+                    try {
+                        String value = (String) Reflections.getValue(field, type, po);
+                        if (StringUtils.isEmpty(value)) {
+                            field.set(po, null);
+                        }
+                    } catch (Exception ignored) {
+
+                    }
+                }
+            }
+        }
+    }
+
 }

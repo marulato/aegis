@@ -104,8 +104,8 @@ aegis.callDataTableAjax = function (url, param, tableData, callback) {
     var args = {
         pageNo: pageNo,
         pageSize: pageSize,
-        orderColumnNo: tableData.order[0]["column"],
-        order: tableData.order[0]["dir"],
+        orderColumnNo: tableData.order[0] != null ? tableData.order[0]["column"] : 0,
+        order: tableData.order[0] != null ? tableData.order[0]["dir"] : null,
         draw: tableData.draw,
         params: param
     };

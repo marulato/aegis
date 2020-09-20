@@ -77,6 +77,7 @@ public class AppConsts {
 
 
     public static final String EMAIL_STATUS_SENT           = "SENT";
+    public static final String EMAIL_STATUS_NOT_SENT       = "NOT_SENT";
     public static final String EMAIL_STATUS_SENT_FAILED    = "FAILED";
 
 

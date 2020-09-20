@@ -32,7 +32,7 @@
 </div>
 <div>
   <span>解决状态状态：</span>
-  <span>${reslolution}</span>
+  <span>${resolution}</span>
 </div>
 <div>
   <span>严重性：</span>

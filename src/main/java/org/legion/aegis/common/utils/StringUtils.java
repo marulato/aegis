@@ -130,4 +130,15 @@ public class StringUtils {
         }
         return src;
     }
+
+    public static String getBrowser(String name) {
+        if (isNotBlank(name)) {
+            if (name.contains("Chrome")) {
+                return name.substring(name.indexOf("Chrome"));
+            } else if (name.contains("Firefox")) {
+                return name.substring(name.indexOf("Firefox"));
+            }
+        }
+        return name;
+    }
 }

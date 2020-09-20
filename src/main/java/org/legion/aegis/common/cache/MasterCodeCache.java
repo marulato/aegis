@@ -63,6 +63,7 @@ public class MasterCodeCache implements ICache<String, MasterCode> {
                     }
                 }
             }
+            list.sort(Comparator.comparing(MasterCode::getDisplayOrder));
         }
         return List.copyOf(list);
     }

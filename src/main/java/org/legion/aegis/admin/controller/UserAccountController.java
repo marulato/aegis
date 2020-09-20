@@ -14,6 +14,7 @@ import org.legion.aegis.admin.vo.UserProjectVO;
 import org.legion.aegis.admin.vo.UserSearchVO;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.SessionManager;
+import org.legion.aegis.common.aop.permission.RequiresLogin;
 import org.legion.aegis.common.aop.permission.RequiresRoles;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
@@ -282,7 +283,7 @@ public class UserAccountController {
     @PostMapping("/web/user/resetPassword")
     @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN})
     @ResponseBody
-    public AjaxResponseBody resetPassword(@RequestBody Map<String, Object> params) {
+    public AjaxResponseBody adminResetPassword(@RequestBody Map<String, Object> params) {
         UserAccountVO userAccountVO = (UserAccountVO) SessionManager.getAttribute(SESSION_KEY);
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         if (userAccountVO != null) {
@@ -298,10 +299,63 @@ public class UserAccountController {
         return manager.respond();
     }
 
+    @GetMapping("/web/myAccount")
+    @RequiresLogin
+    public ModelAndView getMyInfoPage() {
+        ModelAndView modelAndView = new ModelAndView("admin/myAccount");
+        AppContext context = AppContext.getFromWebThread();
+        modelAndView.addObject("role", context.getRoleId());
+        UserAccountVO userVO = accountService.searchUserInfo(context.getUserId());
+        List<UserProjectVO> projectVOList = accountService.searchUserProjects(context.getUserId(), userVO.getRoleId());
+        modelAndView.addObject("user", userVO);
+        modelAndView.addObject("projects", projectVOList);
+        return modelAndView;
+    }
+
+    @PostMapping("/web/myAccount/resetPassword")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody resetPassword(@RequestBody Map<String, Object> params) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        UserAccount user = accountService.getUserById(context.getUserId());
+        if (user != null) {
+            Map<String, String> errors = new ResetPasswordValidator().doValidate(params);
+            if (!errors.isEmpty()) {
+                manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                manager.addErrors(errors);
+            } else {
+                accountService.resetPassord(user, (String) params.get("pwd1"));
+            }
+        }
+        return manager.respond();
+    }
+
+    @PostMapping("/web/myAccount/loginHistory")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody searchLoginHistory(@RequestBody SearchParam param) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        param.addParam("userId", context.getUserId());
+        manager.addDataObject(accountService.searchLoginHistory(param));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/myAccount/sendVerificationCode")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody sendVerificationCode() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        return manager.respond();
+    }
+
     private void verifyRequest(String userId) {
         UserAccountVO userAccountVO = (UserAccountVO) SessionManager.getAttribute(SESSION_KEY);
         if (userAccountVO == null || !userAccountVO.getId().equals(StringUtils.parseIfIsLong(userId))) {
             throw new PermissionDeniedException("请求参数与预期不一致");
         }
     }
+
+
 }

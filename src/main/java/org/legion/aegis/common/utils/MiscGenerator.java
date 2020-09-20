@@ -45,4 +45,15 @@ public class MiscGenerator {
         return pwd.toString();
     }
 
+    public static String generateVerificationCode() {
+        char[] codes = ArrayUtils.joint(UPPER_CASE, NUMBER);
+        SecureRandom random = new SecureRandom();
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            char ch = codes[random.nextInt(codes.length)];
+            code.append(ch);
+        }
+        return code.toString();
+    }
+
 }

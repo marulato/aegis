@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AEGIS Issue Tracker</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
+  <!-- iCheck -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+
+  <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
+
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+
+  <!-- Daterange picker -->
+  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <div th:replace="/include/topbar::topmenu"></div>
+  <!-- /.navbar -->
+
+  <div th:replace="/include/sidebar::leftmenu('4', ${role})"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark"><a href="#"><i class="fa fa-chevron-left"></i></a>&nbsp;个人信息</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">主页</a></li>
+              <li class="breadcrumb-item active">个人信息</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <form id="mainForm">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">个人信息</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <dl class="row">
+                  <dt class="col-sm-4">登录ID</dt>
+                  <dd class="col-sm-8" th:text="${user.loginId}"></dd>
+
+                  <dt class="col-sm-4">用户名</dt>
+                  <dd class="col-sm-8" th:text="${user.name}"></dd>
+
+                  <dt class="col-sm-4">邮箱</dt>
+                  <dd class="col-sm-8" th:text="${user.email}"></dd>
+
+                  <dt class="col-sm-4">状态</dt>
+                  <dd class="col-sm-8" th:text="${user.statusDesc}"></dd>
+
+                  <dt class="col-sm-4">权限</dt>
+                  <dd class="col-sm-8" th:text="${user.roleName}"></dd>
+
+                  <dt class="col-sm-4">有效期</dt>
+                  <dd class="col-sm-8" th:text="${user.activatedAt} + ' - ' + ${user.deactivatedAt}"></dd>
+                </dl>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-info" style="font-size: 14px" onclick="showResetPassword()"><i class="fas fa-key"></i>&nbsp;修改密码</button>
+                &nbsp;
+                <button type="button" class="btn btn-success" style="font-size: 14px" onclick="showResetEmail()"><i class="fas fa-envelope"></i>&nbsp;更改邮箱</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">项目信息</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="projectTable" class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>项目组</th>
+                      <th>项目</th>
+                      <th>邀请人</th>
+                      <th>加入日期</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="project, stats:${projects}">
+                      <td th:text="${project.groupName}"></td>
+                      <td th:text="${project.projectName}"></td>
+                      <td th:text="${project.assignedBy}"></td>
+                      <td th:text="${project.assignedAt}"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">30天内登录记录</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <table id="loginHistoryTable" class="table table-hover text-nowrap">
+                  <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>登录时间</th>
+                    <th>浏览器内核</th>
+                    <th>IP</th>
+                    <th>登录状态</th>
+                  </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- /.row -->
+
+      <!-- /.row (main row) -->
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+ <div th:replace="/include/footer::footer"></div>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<div class="modal fade" id="modal_resetPassword">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >修改密码</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="pwd1">新密码</label>
+              <input class="form-control" type="password" name="pwd1" id="pwd1">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="pwd2">确认新密码</label>
+              <input class="form-control" type="password" name="pwd2" id="pwd2">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="resetPassword()">确认</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal_resetEmail">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" >更换邮箱</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-9">
+            <div class="form-group">
+              <label for="email">新邮箱</label>
+              <div class="input-group">
+                <input class="form-control" type="password" name="email" id="email">
+                &nbsp;&nbsp;
+                <button id="sendCodeBtn" type="button" class="btn btn-primary" style="font-size: 14px" onclick="disableSendCode()"><i class="fas fa-reply"></i>&nbsp;发送验证码</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="display: none">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="vCode">验证码</label>
+              <div class="input-group">
+                <input class="form-control" type="text" name="vCode" id="vCode">
+                &nbsp;&nbsp;
+                <button type="button" class="btn btn-success" style="font-size: 14px"><i class="fas fa-reply"></i>&nbsp;确认</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- jQuery -->
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!-- daterangepicker -->
+<script th:src="@{/plugins/moment/moment.min.js}"></script>
+<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+<script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>
+
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.js}"></script>
+<!-- AdminLTE for demo purposes -->
+<script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+
+    });
+
+    toastr.options = { // toastr配置
+        "closeButton": false, //是否显示关闭按钮
+        "debug": false, //是否使用debug模式
+        "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+        "positionClass": "toast-top-right",//显示的动画时间
+        "showDuration": "200", //显示的动画时间
+        "hideDuration": "300", //消失的动画时间
+        "timeOut": "1000", //展现时间
+        "extendedTimeOut": "500", //加长展示时间
+        "showEasing": "swing", //显示时的动画缓冲方式
+        "hideEasing": "linear", //消失时的动画缓冲方式
+        "showMethod": "fadeIn", //显示时的动画方式
+        "hideMethod": "fadeOut" //消失时的动画方式
+    }
+
+    toastr.options.onHidden = function() {
+        location.href = "/web/logout";
+    }
+
+    function showResetPassword() {
+        $("#modal_resetPassword").modal("show");
+    }
+
+    function resetPassword() {
+        var obj = {
+            pwd1: $("#pwd1").val(),
+            pwd2: $("#pwd2").val()
+        }
+        $.ajax({
+            url: "/web/myAccount/resetPassword",
+            type: "post",
+            data: JSON.stringify(obj),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                if (res.status == 200) {
+                    $("#modal_resetPassword").modal("hide");
+                    toastr.success("修改成功，即将退出登录，请用新密码重新登陆！");
+                } else {
+                    aegis.showErrors(res.data);
+                }
+            }
+        });
+    }
+
+    var loginHistoryTable = $('#loginHistoryTable').DataTable({
+        "processing": true,
+        "lengthChange": true,
+        "searching": false,
+        "ordering": false,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "aLengthMenu": [10, 25, 50],
+        "bPaginate": true,
+        "serverSide": true,
+        ajax: function (data, callback, settings) {
+            var obj = {};
+            aegis.callDataTableAjax("/web/myAccount/loginHistory", obj, data, callback);
+        },
+        columns: [
+            {"data": "index", "defaultContent": "-"},
+            {"data": "loginAt", "defaultContent": "-"},
+            {"data": "browser", "defaultContent": "-"},
+            {"data": "ipAddress", "defaultContent": "-"},
+            {"data": "loginStatus", "defaultContent": "-", render: function (data, type, full, meta){
+                return "<span style='color: "+ full.color +"'>"+ full.loginStatus +"</span>";
+                }}
+        ],
+        language: aegis.locale
+    });
+
+    function showResetEmail() {
+        $("#modal_resetEmail").modal("show");
+    }
+
+    function disableSendCode() {
+        $("#sendCodeBtn").attr("disabled", true);
+        for (var i = 0; i < 60; i++) {
+            (function (i) {
+                setTimeout(() => $("#sendCodeBtn").html((60 - i) + "s 后重新发送"), 1000*i);
+            })(i);
+        }
+        setTimeout(function () {
+            $("#sendCodeBtn").removeAttr("disabled");
+            $("#sendCodeBtn").html("发送验证码");
+        }, 60000);
+    }
+</script>
+</body>
+</html>

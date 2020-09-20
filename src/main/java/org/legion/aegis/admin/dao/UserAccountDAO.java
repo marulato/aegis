@@ -6,6 +6,7 @@ import org.legion.aegis.admin.entity.UserProjectAssign;
 import org.legion.aegis.admin.entity.UserRole;
 import org.legion.aegis.admin.entity.UserRoleAssign;
 import org.legion.aegis.admin.vo.UserAccountVO;
+import org.legion.aegis.admin.vo.UserLoginHistoryVO;
 import org.legion.aegis.admin.vo.UserProjectVO;
 import org.legion.aegis.admin.vo.UserSearchVO;
 import org.legion.aegis.common.base.SearchParam;
@@ -63,4 +64,8 @@ public interface UserAccountDAO {
     void deleteGroupAssign(Long userId, Long groupId);
 
     List<UserAccount> getUsersUnderProject(Long projectId, String roleId);
+
+    List<UserLoginHistoryVO> searchLoginHistory(@Param("sp") SearchParam param);
+
+    Integer searchLoginHistoryCount(@Param("sp") SearchParam param);
 }

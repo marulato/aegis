@@ -233,11 +233,10 @@
             </div>
 
             <div class="card-footer" id="filterFooter">
-              <button type="button" class="btn btn-primary btn-sm" onclick="search()">
+              <button type="button" class="btn btn-primary btn-sm" style="font-size: 14px;" onclick="search()">
                 <i class="fas fa-search"></i>
-              </button>
-              <button type="button" class="btn btn-default btn-sm" onclick="reset()">
-                <i class="fas fa-redo-alt"></i>
+                &nbsp;
+                搜索
               </button>
             </div>
             <!-- /.card-body -->
@@ -252,7 +251,7 @@
               <div style="float: right">
                 <div class="col-sm-9" style="float: right">
                   <div class="input-group mb-4">
-                    <input name="issueId" id="issueId" type="text" class="form-control" placeholder="ID">
+                    <input name="issueId" id="issueId" type="number" class="form-control" placeholder="ID">
                     <div class="input-group-append">
                       <span class="input-group-text" onmouseover="this.style.cursor='pointer'" onclick="searchById()">
                         <i class="fa fa-search"></i>
@@ -299,6 +298,11 @@
               <button type="button" class="btn btn-default" style="font-size: 14px" onclick="exportIssue('xml')">
                 <i class="fa fa-file-export"></i>
                 导出XML
+              </button>
+              &nbsp;
+              <button type="button" class="btn btn-default" style="font-size: 14px" onclick="exportIssue('zip')">
+                <i class="fa fa-file-export"></i>
+                导出ZIP
               </button>
             </div>
           </div>
@@ -373,88 +377,38 @@
         $('#waitingModal').modal('hide');
     }
     var tableView = null;
+
+    function fillBackSearchParam() {
+        $.ajax({
+            url: "/web/issue/view/searchParam",
+            type: "get",
+            dataType: "json",
+            async: false,
+            success: function (res) {
+                if (res.data[0] != null && res.data[0] !== "") {
+                    var obj = res.data[0].params;
+                    $("#groupId").val(obj.groupId);
+                    $("#projectId").val(obj.projectId);
+                    //$("#moduleId").val(obj.moduleId);
+                    //$("#reportedBy").val(obj.reportedBy);
+                    $("#status").val(obj.status);
+                    $("#severity").val(obj.severity);
+                    $("#resolution").val(obj.resolution);
+                }
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         toggleProjectSelector();
         toggleReporterSelector();
         toggleDeveloperSelector();
         getCount();
-       $("#reportedRange").daterangepicker({
-           locale: {
-               format: 'YYYY/MM/DD',
-           },
-           startDate: moment().subtract(30, 'days'),
-           endDate: moment()
-       });
+        defaultDateRange();
 
-       $("#updatedRange").daterangepicker({
-           locale: {
-               format: 'YYYY/MM/DD'
-           },
-           startDate: moment().subtract(30, 'days'),
-           endDate: moment()
-       });
 
-        tableView = $('#issueTable').DataTable({
-            "processing": true,
-            "lengthChange": true,
-            "searching": false,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "responsive": true,
-            "aLengthMenu":[10,25,50,100],
-            "bPaginate": true,
-            "serverSide": true,
-            ajax: function (data, callback, settings) {
-                var obj = {
-                    issueId: $("#issueId").val(),
-                    projectId: $("#projectId").val(),
-                    groupId: $("#groupId").val(),
-                    reportedBy: $("#reportedBy").val(),
-                    description: $("#description").val(),
-                    status: $("#status").val(),
-                    severity: $("#severity").val(),
-                    resolution: $("#resolution").val(),
-                    reportedRange: $("#reportedRange").val(),
-                    updatedRange: $("#updatedRange").val()
-
-                }
-                aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
-            },
-            columns: [
-                {
-                    "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                        $(nTd).css("text-align", "center");
-                    },
-                    render: function (data, type, full, meta) {
-                      return "<a href='/web/issue/view/"+ full.id +"'> "+ full.issueId +"</a>";
-                    }
-                },
-                {"data": "reportedBy", "defaultContent": "-"},
-                {"data": "assignedTo", "defaultContent": "-"},
-                {"data": "moduleName", "defaultContent": "-"},
-                {"data": "severity", "defaultContent": "-"},
-                {"data": "sla", "defaultContent": "-"},
-                {"data": "resolution", "defaultContent": "-"},
-                {"data": "status", "defaultContent": "-"},
-                {"data": "title", "defaultContent": "-"},
-                {
-                    "data": "reportedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                        $(nTd).css("text-align", "center");
-                    }
-                },
-                {
-                    "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                        $(nTd).css("text-align", "center");
-                    }
-                },
-            ],
-            fnCreatedRow: function (row, data, dataIndex, cells) {
-              $(row).css("background-color", data.color);
-            },
-            language: aegis.locale
-        });
     });
+
 
     function toggleProjectSelector() {
         $.ajax({
@@ -467,8 +421,73 @@
                     var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
                     $("#projectId").append(option);
                 });
-                tableView.draw();
                 toggleModuleSelector();
+                fillBackSearchParam();
+                if (tableView == null) {
+                    tableView = $('#issueTable').DataTable({
+                        "processing": true,
+                        "lengthChange": true,
+                        "searching": false,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": true,
+                        "aLengthMenu":[10,25,50,100],
+                        "bPaginate": true,
+                        "serverSide": true,
+                        ajax: function (data, callback, settings) {
+                            var obj = {
+                                issueId: $("#issueId").val(),
+                                projectId: $("#projectId").val(),
+                                groupId: $("#groupId").val(),
+                                reportedBy: $("#reportedBy").val(),
+                                status: $("#status").val(),
+                                severity: $("#severity").val(),
+                                resolution: $("#resolution").val(),
+                                reportedRange: $("#reportedRange").val(),
+                                updatedRange: $("#updatedRange").val()
+
+                            }
+                            aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
+
+                        },
+                        columns: [
+                            {
+                                "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                                    $(nTd).css("text-align", "center");
+                                },
+                                render: function (data, type, full, meta) {
+                                    return "<a href='/web/issue/view/"+ full.id +"'> "+ full.issueId +"</a>";
+                                }
+                            },
+                            {"data": "reportedBy", "defaultContent": "-"},
+                            {"data": "assignedTo", "defaultContent": "-"},
+                            {"data": "moduleName", "defaultContent": "-"},
+                            {"data": "severity", "defaultContent": "-"},
+                            {"data": "sla", "defaultContent": "-"},
+                            {"data": "resolution", "defaultContent": "-"},
+                            {"data": "status", "defaultContent": "-"},
+                            {"data": "title", "defaultContent": "-"},
+                            {
+                                "data": "reportedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                                    $(nTd).css("text-align", "center");
+                                }
+                            },
+                            {
+                                "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                                    $(nTd).css("text-align", "center");
+                                }
+                            },
+                        ],
+                        fnCreatedRow: function (row, data, dataIndex, cells) {
+                            $(row).css("background-color", data.color);
+                        },
+                        language: aegis.locale
+                    });
+                } else {
+                    tableView.draw();
+                }
+
             }
         });
     }
@@ -523,13 +542,11 @@
 
     function reset() {
         $("#issueId").val('');
-        $("#description").val('');
         $("#status").val('');
         $("#severity").val('');
         $("#resolution").val('');
-        $("#reportedRange").val('');
-        $("#updatedRange").val('');
-        tableView.draw();
+        defaultDateRange()
+        toggleProjectSelector();
     }
 
     function search() {
@@ -563,7 +580,6 @@
             projectId: $("#projectId").val(),
             groupId: $("#groupId").val(),
             reportedBy: $("#reportedBy").val(),
-            description: $("#description").val(),
             status: $("#status").val(),
             severity: $("#severity").val(),
             resolution: $("#resolution").val(),
@@ -592,6 +608,23 @@
         });
     }
 
+    function defaultDateRange() {
+        $("#reportedRange").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD',
+            },
+            startDate: moment().subtract(30, 'days'),
+            endDate: moment()
+        });
+
+        $("#updatedRange").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD'
+            },
+            startDate: moment().subtract(30, 'days'),
+            endDate: moment()
+        });
+    }
 
 </script>
 </body>

@@ -17,34 +17,31 @@ import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.docgen.IDocGenerator;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
+import org.legion.aegis.common.utils.CompressUtils;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
-import org.legion.aegis.common.webmvc.NetworkFileTransfer;
 import org.legion.aegis.general.ex.PermissionDeniedException;
-import org.legion.aegis.issuetracker.consts.IssueConsts;
-import org.legion.aegis.issuetracker.dto.ExportDto;
-import org.legion.aegis.issuetracker.dto.IssueDto;
-import org.legion.aegis.issuetracker.dto.IssueFollowerDto;
+import org.legion.aegis.issuetracker.dto.*;
 import org.legion.aegis.issuetracker.entity.Issue;
-import org.legion.aegis.issuetracker.entity.IssueFollower;
 import org.legion.aegis.issuetracker.entity.IssueNote;
+import org.legion.aegis.issuetracker.entity.IssueVcsTracker;
 import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXlsxGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXmlGenerator;
+import org.legion.aegis.issuetracker.generator.IssueZipGenerator;
 import org.legion.aegis.issuetracker.service.IssueService;
 import org.legion.aegis.issuetracker.vo.IssueVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -57,6 +54,7 @@ public class IssueController {
 
     public static final String SESSION_KEY = "SESSION_ISSUE";
     public static final String SESSION_DL_KEY = "SESSION_OCTET_STREAM";
+    public static final String SESSION_SEARCH_PARAM = "SEARCH_PARAM";
 
     @Autowired
     public IssueController(IssueService issueService, ProjectService projectService,
@@ -77,6 +75,7 @@ public class IssueController {
         param.addParam("roleId", context.getRoleId());
         param.addParam("userId", context.getUserId());
         manager.addDataObject(issueService.search(param));
+        SessionManager.setAttribute(SESSION_SEARCH_PARAM, param);
         return manager.respond();
     }
 
@@ -93,6 +92,15 @@ public class IssueController {
         modelAndView.addObject("resolution", systemMgrService.getAllInuseResolutions());
         modelAndView.addObject("severity", MasterCodeUtils.getMasterCodeByType("issue.severity"));
         return modelAndView;
+    }
+
+    @GetMapping("/web/issue/view/searchParam")
+    @ResponseBody
+    @RequiresLogin
+    public AjaxResponseBody fillBackSearchParam() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        manager.addDataObject(SessionManager.getAttribute(SESSION_SEARCH_PARAM));
+        return manager.respond();
     }
 
     @GetMapping("/web/issue/selector/{type}/{parentId}")
@@ -181,6 +189,7 @@ public class IssueController {
             modelAndView.addObject("resolution", systemMgrService.getAllInuseResolutions());
             modelAndView.addObject("severity", MasterCodeUtils.getMasterCodeByType("issue.severity"));
             modelAndView.addObject("priority", MasterCodeUtils.getMasterCodeByType("issue.priority"));
+            modelAndView.addObject("relationship", MasterCodeUtils.getMasterCodeByType("issue.relationship"));
             modelAndView.addObject("timeline", issueService.retrieveIssueHistory(issue.getId()));
         }
         SessionManager.setAttribute(SESSION_KEY, issue);
@@ -285,6 +294,8 @@ public class IssueController {
             generator = new IssueExportXlsxGenerator(searchResult.getResultList());
         } else if ("xml".equals(type)) {
             generator = new IssueExportXmlGenerator(searchResult.getResultList());
+        } else if ("zip".equals(type)) {
+            generator = new IssueZipGenerator(searchResult.getResultList());
         }
         if (generator != null) {
             exportDto.setData(generator.generate());
@@ -319,6 +330,17 @@ public class IssueController {
         return manager.respond();
     }
 
+    @PostMapping("/web/issue/myView/followedByMe")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody searchFollowedByMe(@RequestBody SearchParam param) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        AppContext context = AppContext.getFromWebThread();
+        param.addParam("userId", context.getUserId());
+        manager.addDataObject(issueService.searchFollowedByMe(param));
+        return manager.respond();
+    }
+
     @PostMapping("/web/issue/followIssue/{action}")
     @RequiresLogin
     @ResponseBody
@@ -340,8 +362,97 @@ public class IssueController {
             }
         } else if ("cancel".equals(action)) {
             issueService.cancelFollow(issue.getId(), context.getUserId());
+        }else {
+            throw new PermissionDeniedException("Invalid path variable in request: " + action);
         }
         return manager.respond();
     }
+
+    @PostMapping("/web/issue/relationship/{action}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody addRelationship(@PathVariable("action") String action, HttpServletRequest request) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Issue issue = (Issue) SessionManager.getAttribute(SESSION_KEY);
+        if ("add".equals(action)) {
+            IssueRelationshipDto dto = new IssueRelationshipDto();
+            dto.setSrcIssueId(String.valueOf(issue.getId()));
+            dto.setDestIssueId(request.getParameter("destIssueId"));
+            dto.setRelationshipType(request.getParameter("relationshipType"));
+            List<ConstraintViolation> violations = CommonValidator.validate(dto);
+            if (!violations.isEmpty()) {
+                manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                manager.addValidations(violations);
+            } else {
+                issueService.createRelationShip(dto);
+            }
+        } else if ("terminate".equals(action)){
+            boolean isValid = issueService.terminateRelationship(StringUtils.parseIfIsLong(request.getParameter("id")), issue);
+            if (!isValid) {
+                manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            }
+        } else {
+            throw new PermissionDeniedException("Invalid path variable in request: " + action);
+        }
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/vcs")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody addVcsFile(@RequestBody IssueVcsTrackerDto dto) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        Issue issue = (Issue) SessionManager.getAttribute(SESSION_KEY);
+        dto.setIssueId(issue.getId());
+        List<ConstraintViolation> violations = CommonValidator.validate(dto);
+        if (!violations.isEmpty()) {
+            manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            manager.addValidations(violations);
+        } else {
+            issueService.createVcs(dto, issue);
+        }
+        return manager.respond();
+    }
+
+    @GetMapping("/web/issue/vcs/{id}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody retrieveVcsTracker(@PathVariable("id") String id) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        IssueVcsTracker vcsTracker = issueService.getIssueVcsById(StringUtils.parseIfIsLong(id));
+        Issue issue = (Issue) SessionManager.getAttribute(SESSION_KEY);
+        if (vcsTracker != null && vcsTracker.getIssueId().equals(issue.getId())) {
+            manager.addDataObject(vcsTracker);
+        } else {
+            manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+        }
+        return manager.respond();
+    }
+
+    @PostMapping("/web/issue/vcs/{id}/{action}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody updateVcsTracker(@PathVariable("id") String id, @PathVariable("action") String action, @RequestBody IssueVcsTrackerDto dto) throws Exception {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        IssueVcsTracker vcsTracker = issueService.getIssueVcsById(StringUtils.parseIfIsLong(id));
+        if ("update".equals(action)) {
+            if (vcsTracker.getId().equals(dto.getId())) {
+                List<ConstraintViolation> violations = CommonValidator.validate(dto);
+                if (!violations.isEmpty()) {
+                    manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                    manager.addValidations(violations);
+                } else {
+                    issueService.updateVcs(dto);
+                }
+            }
+        } else if ("delete".equals(action)) {
+            Issue issue = (Issue) SessionManager.getAttribute(SESSION_KEY);
+            if (issue.getId().equals(vcsTracker.getIssueId())) {
+                JPAExecutor.delete(vcsTracker);
+            }
+        }
+        return manager.respond();
+    }
+
 
 }
