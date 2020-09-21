@@ -2,7 +2,7 @@
 spring:
   ##数据库连接信息
   datasource:
-    url: jdbc:mysql://localhost:3306/aegis?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/aegis?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&charset=utf8
     username: mysql
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -89,6 +89,7 @@ spring:
     protocol: smtps
   thymeleaf:
     cache: false
+    encoding: UTF-8
 
 
 
