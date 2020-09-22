@@ -90,7 +90,7 @@
 
     <!--=============================================================================================================-->
 
-    <logger name="org.legion.aegis.common.webmvc.GlobalExceptionHandler" level="error" additivity="false">
+    <logger name="org.legion.aegis.common.webmvc.GlobalExceptionHandler" level="error" additivity="true">
         <appender-ref ref="GLOBAL_EXCEPTION_FILE"/>
     </logger>
 

@@ -23,6 +23,8 @@ import org.legion.aegis.issuetracker.dto.IssueRelationshipDto;
 import org.legion.aegis.issuetracker.dto.IssueVcsTrackerDto;
 import org.legion.aegis.issuetracker.entity.*;
 import org.legion.aegis.issuetracker.vo.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,8 @@ public class IssueService {
     private final ProjectService projectService;
     private final UserAccountService userAccountService;
     private final IssueEmailService emailService;
+
+    private static final Logger log = LoggerFactory.getLogger(IssueService.class);
 
     @Autowired
     public IssueService(IssueDAO issueDAO, SystemMgrService systemMgrService,
@@ -237,20 +241,21 @@ public class IssueService {
     @Transactional
     public void updateIssue(IssueDto dto, Long issueId) throws Exception {
         Issue issue = getIssueById(issueId);
+        boolean isNotModified = true;
         if (dto != null && issue != null) {
-            createIssueHistory(issueId, issue.getStatus(), dto.getStatus(), "status");
+            isNotModified = createIssueHistory(issueId, issue.getStatus(), dto.getStatus(), "status");
             issue.setStatus(dto.getStatus());
 
-            createIssueHistory(issueId, issue.getRootCause(), dto.getRootCause(), "rootCause");
+            isNotModified = isNotModified && createIssueHistory(issueId, issue.getRootCause(), dto.getRootCause(), "rootCause");
             issue.setRootCause(dto.getRootCause());
 
-            createIssueHistory(issueId, issue.getResolution(), dto.getResolution(), "resolution");
+            isNotModified = isNotModified && createIssueHistory(issueId, issue.getResolution(), dto.getResolution(), "resolution");
             issue.setResolution(dto.getResolution());
 
-            createIssueHistory(issueId, issue.getSeverity(), dto.getSeverity(), "severity");
+            isNotModified = isNotModified && createIssueHistory(issueId, issue.getSeverity(), dto.getSeverity(), "severity");
             issue.setSeverity(dto.getSeverity());
 
-            createIssueHistory(issueId, issue.getPriority(), dto.getPriority(), "priority");
+            isNotModified = isNotModified && createIssueHistory(issueId, issue.getPriority(), dto.getPriority(), "priority");
             issue.setPriority(dto.getPriority());
 
             if (dto.getFixedAt() != null && (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(dto.getStatus())
@@ -259,6 +264,7 @@ public class IssueService {
                 createIssueHistory(issueId, DateUtils.getDateString(issue.getFixedAt(), "yyyy/MM/dd HH:mm"),
                         dto.getFixedAt(), "fixedAt");
                 issue.setFixedAt(DateUtils.parseDatetime(dto.getFixedAt(), "yyyy/MM/dd HH:mm"));
+                isNotModified = false;
             }
 
             if (StringUtils.isNotBlank(dto.getUpdatedNote())) {
@@ -266,35 +272,55 @@ public class IssueService {
                 issueNote.setIssueId(issue.getId());
                 issueNote.setContent(dto.getUpdatedNote());
                 JPAExecutor.save(issueNote);
+                isNotModified = false;
             }
 
-            if (StringUtils.isNotBlank(dto.getConfirmedBy())) {
-                IssueConfirmation existConfirmation = issueDAO.getIssueConfirmationByIssueId(issueId);
-                AppContext context = AppContext.getFromWebThread();
-                if (existConfirmation == null) {
-                    createIssueHistory(issueId, null, context.getUserId() + "-" +
-                            StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
-                    IssueConfirmation confirmation = new IssueConfirmation();
-                    confirmation.setIsConfirmed(AppConsts.NO);
-                    confirmation.setIssueId(issue.getId());
-                    confirmation.setRequestFrom(context.getUserId());
-                    confirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
-                    JPAExecutor.save(confirmation);
-                } else  {
-                    createIssueHistory(issueId, existConfirmation.getRequestFrom() + "-" +
-                            existConfirmation.getRequestTo(), context.getUserId() + "-" +
-                            StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
-                    existConfirmation.setIsConfirmed(AppConsts.NO);
-                    existConfirmation.setRequestFrom(context.getUserId());
-                    existConfirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
-                    JPAExecutor.update(existConfirmation);
-                }
+            IssueConfirmation existConfirmation = issueDAO.getIssueConfirmationByIssueId(issueId);
+            AppContext context = AppContext.getFromWebThread();
+            if (existConfirmation == null && StringUtils.isNotBlank(dto.getConfirmedBy())) {
+                //add confirmation
+                log.info("Add Confirmation");
+                isNotModified = false;
+                createIssueHistory(issueId, null, context.getUserId() + "-" +
+                        StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
+                IssueConfirmation confirmation = new IssueConfirmation();
+                confirmation.setIsConfirmed(AppConsts.NO);
+                confirmation.setIssueId(issue.getId());
+                confirmation.setRequestFrom(context.getUserId());
+                confirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
+                JPAExecutor.save(confirmation);
+            } else if (existConfirmation != null && !IssueConsts.ISSUE_STATUS_PENDING_CONFIRMATION.equals(dto.getStatus())) {
+                //delete confirmation
+                log.info("Delete Confirmation");
+                isNotModified = false;
+                createIssueHistory(issueId, existConfirmation.getRequestFrom() + "-" +
+                        existConfirmation.getRequestTo(), null, "confirmation");
+                JPAExecutor.delete(existConfirmation);
+
+            } else if (existConfirmation != null && StringUtils.isNotBlank(dto.getConfirmedBy())
+                    && IssueConsts.ISSUE_STATUS_PENDING_CONFIRMATION.equals(dto.getStatus())) {
+                //update confirmation
+                log.info("Update Confirmation");
+                isNotModified = false;
+                createIssueHistory(issueId, existConfirmation.getRequestFrom() + "-" +
+                        existConfirmation.getRequestTo(), context.getUserId() + "-" +
+                        StringUtils.parseIfIsLong(dto.getConfirmedBy()), "confirmation");
+                existConfirmation.setIsConfirmed(AppConsts.NO);
+                existConfirmation.setRequestFrom(context.getUserId());
+                existConfirmation.setRequestTo(StringUtils.parseIfIsLong(dto.getConfirmedBy()));
+                JPAExecutor.update(existConfirmation);
             }
+            dto.getAttachments().removeIf(var -> StringUtils.isBlank(var.getOriginalFilename()));
             for (MultipartFile file : dto.getAttachments()) {
                 createIssueHistory(issueId, null, file.getOriginalFilename(), "attachments");
+                isNotModified = false;
             }
             saveAttachments(dto.getAttachments(), issue);
-            JPAExecutor.update(issue);
+            if (!isNotModified) {
+                JPAExecutor.update(issue);
+            } else {
+                log.info(LogUtils.around("No update was made", "="));
+            }
         }
     }
 
@@ -351,14 +377,16 @@ public class IssueService {
                         timeline.setNewValue(history.getNewValue());
                         break;
                     case "CONFIRMATION":
-                        String[] newConfirm = history.getNewValue().split("-");
+                        if (StringUtils.isNotBlank(history.getNewValue())) {
+                            String[] newConfirm = history.getNewValue().split("-");
+                            timeline.setNewValue(userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[0])).getName() + "-" +
+                                    userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[1])).getName());
+                        }
                         if (StringUtils.isNotBlank(history.getOldValue())) {
                             String[] oldConfirm = history.getOldValue().split("-");
                             timeline.setOldValue(userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[0])).getName() + "-" +
                                     userAccountService.getUserById(StringUtils.parseIfIsLong(oldConfirm[1])).getName());
                         }
-                        timeline.setNewValue(userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[0])).getName() + "-" +
-                                userAccountService.getUserById(StringUtils.parseIfIsLong(newConfirm[1])).getName());
                         break;
                     case "FOLLOWER":
                         UserAccount oldFollower = userAccountService.getUserById(StringUtils.parseIfIsLong(history.getOldValue()));
@@ -541,7 +569,10 @@ public class IssueService {
         return null;
     }
 
-    private void createIssueHistory(Long issueId, String oldValue, String newValue, String fieldName) {
+    /**
+     * @return isNotModified, if created, return true.
+     */
+    private boolean createIssueHistory(Long issueId, String oldValue, String newValue, String fieldName) {
         if (StringUtils.isNotBlank(fieldName) && issueId != null
                 && !(StringUtils.isBlank(oldValue) && StringUtils.isBlank(newValue)) &&
                 ((oldValue != null && !oldValue.trim().equals(newValue)) || (!newValue.equals(oldValue)))) {
@@ -551,7 +582,9 @@ public class IssueService {
             history.setNewValue(newValue);
             history.setFieldName(NameConvertor.getColumn(fieldName));
             JPAExecutor.save(history);
+            return false;
         }
+        return true;
     }
 
     private void saveAttachments(List<MultipartFile> attachments, Issue issue) throws Exception {
