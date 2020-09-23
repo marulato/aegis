@@ -1,5 +1,8 @@
 package org.legion.aegis.issuetracker.consts;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class IssueConsts {
 
     public static final String ISSUE_STATUS_OPEN                    = "OPEN";
@@ -23,5 +26,28 @@ public class IssueConsts {
     public static final String ISSUE_RELATIONSHIP_RESEMBLE   = "RESEMBLE";
     public static final String ISSUE_RELATIONSHIP_DUPLICATED = "DUPLICATED";
     public static final String ISSUE_RELATIONSHIP_CONFLICTED = "CONFLICTED";
+
+    private static final Map<String, String> fieldTypeMap;
+
+    public static String getTimelineType(String field) {
+        String name =  fieldTypeMap.get(field);
+        return name == null ? "Unknown" : name;
+    }
+
+    static {
+        fieldTypeMap = new HashMap<>();
+        fieldTypeMap.put("STATUS", "问题状态");
+        fieldTypeMap.put("RESOLUTION", "解决状态");
+        fieldTypeMap.put("ROOT_CAUSE", "问题原因");
+        fieldTypeMap.put("FIXED_AT", "解决时间");
+        fieldTypeMap.put("ASSIGNED_TO", "转发");
+        fieldTypeMap.put("NOTE", "备注");
+        fieldTypeMap.put("PRIORITY", "优先级");
+        fieldTypeMap.put("CONFIRMATION", "等待确认");
+        fieldTypeMap.put("ATTACHMENTS", "附件");
+        fieldTypeMap.put("FOLLOWER", "关注");
+        fieldTypeMap.put("RELATIONSHIP", "相关性");
+
+    }
 
 }

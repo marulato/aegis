@@ -1,11 +1,11 @@
 package org.legion.aegis.general.service;
 
+import com.google.common.base.Stopwatch;
+import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
-import org.legion.aegis.common.utils.ArrayUtils;
-import org.legion.aegis.common.utils.ConfigUtils;
-import org.legion.aegis.common.utils.StringUtils;
-import org.legion.aegis.common.utils.ValidationUtils;
+import org.legion.aegis.common.utils.*;
+import org.legion.aegis.general.dao.DocumentDAO;
 import org.legion.aegis.general.entity.EmailArchive;
 import org.legion.aegis.general.entity.EmailEntity;
 import org.slf4j.Logger;
@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ExternalEmailService {
@@ -53,13 +54,13 @@ public class ExternalEmailService {
                 (StringUtils.isEmpty(subject) && StringUtils.isEmpty(content) && attachment == null)) {
             return;
         }
+        AppContext context = AppContext.getFromWebThread();
         String isEmailEnabled = ConfigUtils.get("server.smtp.enabled");
         if (!StringUtils.parseBoolean(isEmailEnabled)) {
             archiveEmail(StringUtils.isBlank(sentFrom) ? ConfigUtils.get("legion.server.mail.host") : sentFrom,
-                    sentTo, cc, subject, content, attachment, AppConsts.EMAIL_STATUS_NOT_SENT);
+                    sentTo, cc, subject, content, attachment, AppConsts.EMAIL_STATUS_NOT_SENT, context);
             return;
         }
-        String status = AppConsts.EMAIL_STATUS_NOT_SENT;
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -91,20 +92,17 @@ public class ExternalEmailService {
                 mimeMessageHelper.addAttachment(StringUtils.isNotBlank(attachFileName) ?
                         attachFileName : "attachment", new ByteArrayResource(attachment));
             }
-            mailSender.send(mimeMessage);
-            status = AppConsts.EMAIL_STATUS_SENT;
+            //mailSender.send(mimeMessage);
+            new Thread(new EmailThread(mimeMessage, sentFrom, sentTo, cc, subject, content, attachment, context)).start();
         } catch (Exception e) {
             log.error("Email sent FAILED", e);
-            status = AppConsts.EMAIL_STATUS_SENT_FAILED;
             //throw e; DO NOT throw it, Email Failure should not trigger rollback
-        } finally {
-            archiveEmail(sentFrom, sentTo, cc, subject, content, attachment, status);
         }
 
     }
 
     public void sendEmail(String[] sentTo, String[] cc, String subject, String content) throws Exception {
-        sendEmail(ConfigUtils.get("server.smtp.username"), sentTo, cc, subject, content, null, null);
+        sendEmail(ConfigUtils.get("legion.server.mail.host"), sentTo, cc, subject, content, null, null);
     }
 
     public void sendEmail(EmailEntity emailEntity) throws Exception {
@@ -131,7 +129,7 @@ public class ExternalEmailService {
     }
 
     private void archiveEmail(String sentFrom, String[] sentTo, String[] cc, String subject,
-                         String content, byte[] attachment, String status) {
+                              String content, byte[] attachment, String status, AppContext context) {
         EmailArchive emailArchive = new EmailArchive();
         emailArchive.setSubject(subject);
         emailArchive.setStatus(status);
@@ -140,7 +138,48 @@ public class ExternalEmailService {
         emailArchive.setContent(content.getBytes(StandardCharsets.UTF_8));
         emailArchive.setSentTo(ArrayUtils.toString(sentTo, ";"));
         emailArchive.setCc(ArrayUtils.toString(cc, ";"));
-        JPAExecutor.save(emailArchive);
+        emailArchive.createAuditValues(context);
+        SpringUtils.getBean(DocumentDAO.class).createEmailArchive(emailArchive);
+    }
+
+    private class EmailThread implements Runnable {
+
+        private final MimeMessage mimeMessage;
+        private final String sentFrom;
+        private final String[] sentTo;
+        private final String[] cc;
+        private final String subject;
+        private final String content;
+        private final byte[] attachment;
+        private final AppContext context;
+
+        EmailThread(MimeMessage mimeMessage, String sentFrom, String[] sentTo, String[] cc, String subject,
+                    String content, byte[] attachment, AppContext context) {
+            this.mimeMessage = mimeMessage;
+            this.sentFrom = sentFrom;
+            this.sentTo = sentTo;
+            this.cc = cc;
+            this.subject = subject;
+            this.content = content;
+            this.attachment = attachment;
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            String status = null;
+            try {
+                mailSender.send(mimeMessage);
+                status = AppConsts.EMAIL_STATUS_SENT;
+            } catch (Exception e) {
+                log.error("Email Sent FAILED", e);
+                status = AppConsts.EMAIL_STATUS_SENT_FAILED;
+            } finally {
+                archiveEmail(sentFrom, sentTo, cc, subject, content, attachment, status, context);
+                log.info("Send Email Time Cost: " + stopwatch.stop().elapsed(TimeUnit.MILLISECONDS) + " ms");
+            }
+        }
     }
 
 }

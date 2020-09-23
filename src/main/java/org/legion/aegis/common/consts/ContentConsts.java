@@ -1,5 +1,7 @@
 package org.legion.aegis.common.consts;
 
+import org.legion.aegis.common.utils.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,27 +43,36 @@ public class ContentConsts {
     public static final String TK_TRM                               = "application/x-msterminal";
     public static final String TK_CSV                               = "text/csv";
 
-    public static Map<String, String> getExtensionMimeMap() {
-        Map<String, String> map = new HashMap<>(20);
-        map.put("PDF", MT_PDF);
-        map.put("DOC", MT_DOC);
-        map.put("DOCX", MT_DOCX);
-        map.put("XLS", MT_XLS);
-        map.put("XLSX", MT_XLSX);
-        map.put("JPG", MT_JPG);
-        map.put("JPEG", MT_JPEG);
-        map.put("PNG", MT_PNG);
-        map.put("ZIP", MT_ZIP);
-        map.put("MP4", MT_MP4);
-        map.put("MOV", MT_MOV);
-        map.put("AVI", MT_AVI);
-        map.put("WMV", MT_WMV);
-        map.put("WAV", MT_WAV);
-        map.put("MP3", MT_MP3);
-        map.put("TRM", MT_TRM);
-        map.put("TXT", MT_TXT);
-        map.put(AppConsts.FILE_NET_FILE_TYPE_UNKNOWN, "application/text");
-        return map;
+    public static String getMimeType(String extension) {
+        String mime = extensionMimeMap.get(extension);
+        if (StringUtils.isBlank(mime)) {
+            mime = extensionMimeMap.get(AppConsts.FILE_NET_FILE_TYPE_UNKNOWN);
+        }
+        return mime;
+    }
+
+    private static final Map<String, String> extensionMimeMap;
+
+    static {
+        extensionMimeMap = new HashMap<>(20);
+        extensionMimeMap.put("PDF", MT_PDF);
+        extensionMimeMap.put("DOC", MT_DOC);
+        extensionMimeMap.put("DOCX", MT_DOCX);
+        extensionMimeMap.put("XLS", MT_XLS);
+        extensionMimeMap.put("XLSX", MT_XLSX);
+        extensionMimeMap.put("JPG", MT_JPG);
+        extensionMimeMap.put("JPEG", MT_JPEG);
+        extensionMimeMap.put("PNG", MT_PNG);
+        extensionMimeMap.put("ZIP", MT_ZIP);
+        extensionMimeMap.put("MP4", MT_MP4);
+        extensionMimeMap.put("MOV", MT_MOV);
+        extensionMimeMap.put("AVI", MT_AVI);
+        extensionMimeMap.put("WMV", MT_WMV);
+        extensionMimeMap.put("WAV", MT_WAV);
+        extensionMimeMap.put("MP3", MT_MP3);
+        extensionMimeMap.put("TRM", MT_TRM);
+        extensionMimeMap.put("TXT", MT_TXT);
+        extensionMimeMap.put(AppConsts.FILE_NET_FILE_TYPE_UNKNOWN, "application/text");
     }
 
 }

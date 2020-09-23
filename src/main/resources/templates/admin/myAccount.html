@@ -230,9 +230,10 @@
               <label for="email">新邮箱</label>
               <div class="input-group">
                 <input class="form-control" type="password" name="email" id="email">
-                &nbsp;&nbsp;
+                &nbsp;
                 <button id="sendCodeBtn" type="button" class="btn btn-primary" style="font-size: 14px" onclick="disableSendCode()"><i class="fas fa-reply"></i>&nbsp;发送验证码</button>
               </div>
+              <label id="message"></label>
             </div>
           </div>
         </div>
@@ -363,6 +364,7 @@
     });
 
     function showResetEmail() {
+        $("#message").html('');
         $("#modal_resetEmail").modal("show");
     }
 
@@ -377,6 +379,16 @@
             $("#sendCodeBtn").removeAttr("disabled");
             $("#sendCodeBtn").html("发送验证码");
         }, 60000);
+        $.ajax({
+            url: "/web/myAccount/sendVerificationCode",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#message").css("color", "green");
+                $("#message").html(res.data[0]);
+            }
+        });
+
     }
 </script>
 </body>

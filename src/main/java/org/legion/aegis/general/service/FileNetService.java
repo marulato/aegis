@@ -119,12 +119,7 @@ public class FileNetService {
 
     public String getMimeType(String extension) {
         if (StringUtils.isNotBlank(extension)) {
-            Map<String, String> map = ContentConsts.getExtensionMimeMap();
-            String mimeType = map.get(extension.toUpperCase());
-            if (StringUtils.isBlank(mimeType)) {
-                mimeType = map.get(AppConsts.FILE_NET_FILE_TYPE_UNKNOWN);
-            }
-            return mimeType;
+            return ContentConsts.getMimeType(extension);
         }
         return null;
     }

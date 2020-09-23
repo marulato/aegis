@@ -6,6 +6,7 @@ import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.generator.NoticeOfNewUserGenerator;
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.admin.service.UserAccountService;
+import org.legion.aegis.admin.service.VerificationCodeService;
 import org.legion.aegis.admin.validator.ResetPasswordValidator;
 import org.legion.aegis.admin.validator.UserModifyValidator;
 import org.legion.aegis.admin.vo.ProjectVO;
@@ -23,6 +24,7 @@ import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.DateUtils;
+import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
@@ -342,11 +344,14 @@ public class UserAccountController {
         return manager.respond();
     }
 
-    @PostMapping("/web/myAccount/sendVerificationCode")
+    @GetMapping("/web/myAccount/sendVerificationCode")
     @RequiresLogin
     @ResponseBody
     public AjaxResponseBody sendVerificationCode() {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        VerificationCodeService verificationCodeService = SpringUtils.getBean(VerificationCodeService.class);
+        verificationCodeService.sendConfirmEmailForResetEmail(AppContext.getFromWebThread().getUserId());
+        manager.addDataObject("验证码已发送至您的新邮箱地址");
         return manager.respond();
     }
 
