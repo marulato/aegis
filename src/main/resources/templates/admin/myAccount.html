@@ -224,34 +224,37 @@
         </button>
       </div>
       <div class="modal-body">
+        <div class="alert alert-danger" id="errorAlert" style="display: none">
+          <h5><i class="icon fas fa-ban"></i>错误！</h5>
+          <span id="errorMsg"></span>
+        </div>
         <div class="row">
           <div class="col-md-9">
             <div class="form-group">
               <label for="email">新邮箱</label>
-              <div class="input-group">
+              <div class="input-group" name="email_append">
                 <input class="form-control" type="password" name="email" id="email">
-                &nbsp;
-                <button id="sendCodeBtn" type="button" class="btn btn-primary" style="font-size: 14px" onclick="disableSendCode()"><i class="fas fa-reply"></i>&nbsp;发送验证码</button>
+                &emsp;
+                <button id="sendCodeBtn" type="button" class="btn btn-primary" style="font-size: 14px"
+                        onclick="disableSendCode()"><i class="fas fa-reply"></i>&nbsp;发送验证码
+                </button>
               </div>
               <label id="message"></label>
             </div>
           </div>
         </div>
-        <div class="row" style="display: none">
+        <div class="row">
           <div class="col-md-6">
             <div class="form-group">
               <label for="vCode">验证码</label>
-              <div class="input-group">
-                <input class="form-control" type="text" name="vCode" id="vCode">
-                &nbsp;&nbsp;
-                <button type="button" class="btn btn-success" style="font-size: 14px"><i class="fas fa-reply"></i>&nbsp;确认</button>
-              </div>
+              <input class="form-control" type="text" name="vCode" id="vCode">
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px"><i class="fas fa-reply"></i>&nbsp;确认</button>
       </div>
     </div>
     <!-- /.modal-content -->
@@ -311,10 +314,12 @@
     }
 
     function showResetPassword() {
+        aegis.clearErrors();
         $("#modal_resetPassword").modal("show");
     }
 
     function resetPassword() {
+        aegis.clearErrors();
         var obj = {
             pwd1: $("#pwd1").val(),
             pwd2: $("#pwd2").val()
@@ -364,28 +369,36 @@
     });
 
     function showResetEmail() {
+        $("#errorAlert").hide();
         $("#message").html('');
         $("#modal_resetEmail").modal("show");
     }
 
     function disableSendCode() {
-        $("#sendCodeBtn").attr("disabled", true);
-        for (var i = 0; i < 60; i++) {
-            (function (i) {
-                setTimeout(() => $("#sendCodeBtn").html((60 - i) + "s 后重新发送"), 1000*i);
-            })(i);
-        }
-        setTimeout(function () {
-            $("#sendCodeBtn").removeAttr("disabled");
-            $("#sendCodeBtn").html("发送验证码");
-        }, 60000);
+        $("#errorAlert").hide();
         $.ajax({
             url: "/web/myAccount/sendVerificationCode",
-            type: "get",
+            type: "post",
+            data: {"email": $("#email").val()},
             dataType: "json",
             success: function (res) {
-                $("#message").css("color", "green");
-                $("#message").html(res.data[0]);
+                if (res.status == 200) {
+                    $("#sendCodeBtn").attr("disabled", true);
+                    for (var i = 0; i < 60; i++) {
+                        (function (i) {
+                            setTimeout(() => $("#sendCodeBtn").html((60 - i) + "s 后重新发送"), 1000*i);
+                        })(i);
+                    }
+                    setTimeout(function () {
+                        $("#sendCodeBtn").removeAttr("disabled");
+                        $("#sendCodeBtn").html("发送验证码");
+                    }, 60000);
+                    $("#message").css("color", "green");
+                    $("#message").html(res.data[0]);
+                } else {
+                    $("#errorAlert").show();
+                    $("#errorMsg").html(res.data.email);
+                }
             }
         });
 

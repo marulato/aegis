@@ -22,10 +22,7 @@ import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
-import org.legion.aegis.common.utils.BeanUtils;
-import org.legion.aegis.common.utils.DateUtils;
-import org.legion.aegis.common.utils.SpringUtils;
-import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.common.utils.*;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.common.webmvc.NetworkFileTransfer;
@@ -344,14 +341,27 @@ public class UserAccountController {
         return manager.respond();
     }
 
-    @GetMapping("/web/myAccount/sendVerificationCode")
+    @PostMapping("/web/myAccount/sendVerificationCode")
     @RequiresLogin
     @ResponseBody
-    public AjaxResponseBody sendVerificationCode() {
+    public AjaxResponseBody sendVerificationCode(HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         VerificationCodeService verificationCodeService = SpringUtils.getBean(VerificationCodeService.class);
-        verificationCodeService.sendConfirmEmailForResetEmail(AppContext.getFromWebThread().getUserId());
-        manager.addDataObject("验证码已发送至您的新邮箱地址");
+        Date lastReqAt = (Date) SessionManager.getAttribute("lastRequestTime");
+        if (lastReqAt == null || DateUtils.getMillisBetween(lastReqAt, new Date()) > 60000) {
+            String email = request.getParameter("email");
+            if (ValidationUtils.isValidEmail(email)) {
+                verificationCodeService.sendConfirmEmailForResetEmail(AppContext.getFromWebThread().getUserId(), email);
+                manager.addDataObject("验证码已发送至您的新邮箱地址");
+                SessionManager.setAttribute("lastRequestTime", new Date());
+            } else {
+                manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+                manager.addError("email", "邮箱格式不正确");
+            }
+        } else {
+            manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
+            manager.addError("email", "请求过于频繁，请稍等再试");
+        }
         return manager.respond();
     }
 

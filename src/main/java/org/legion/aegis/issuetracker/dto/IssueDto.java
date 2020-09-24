@@ -194,7 +194,7 @@ public class IssueDto extends BaseDto {
     }
 
     private boolean validateAssignedTo(String assignedTo) {
-        if (StringUtils.isNotBlank(assignedTo)) {
+        if (StringUtils.isNotBlank(assignedTo) && !"0". equals(assignedTo)) {
             Long projectId = null;
             Issue issue = (Issue) SessionManager.getAttribute(IssueController.SESSION_KEY);
             if (issue != null) {

@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.legion.aegis.admin.entity.MasterCode;
 import org.legion.aegis.admin.entity.UserRole;
+import org.legion.aegis.common.utils.BeanUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +56,8 @@ public class MasterCodeCache implements ICache<String, MasterCode> {
             Set<String> keySet = map.keySet();
             for (String key : keySet) {
                 if (map.get(key) != null) {
-                    try {
-                        MasterCode masterCode =(MasterCode) map.get(key).clone();
-                        list.add(masterCode);
-                    } catch (CloneNotSupportedException e) {
-                        log.error("", e);
-                    }
+                    MasterCode masterCode = BeanUtils.deepClone(map.get(key));
+                    list.add(masterCode);
                 }
             }
             list.sort(Comparator.comparing(MasterCode::getDisplayOrder));

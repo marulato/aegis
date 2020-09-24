@@ -35,12 +35,12 @@ public class VerificationCodeService {
         return StringUtils.isNotBlank(correctCode) && correctCode.equalsIgnoreCase(code);
     }
 
-    public void sendConfirmEmailForResetEmail(Long userId) {
+    public void sendConfirmEmailForResetEmail(Long userId, String newEmail) {
         UserAccount user = userAccountService.getUserById(userId);
-        if (user != null) {
+        if (user != null && StringUtils.isNotBlank(newEmail)) {
             try {
                 ResetEmailGenerator generator = new ResetEmailGenerator(generateForResetEmail(userId));
-                emailService.sendEmail(new String[]{user.getEmail()}, null, generator.getSubject(), generator.getEmailContent());
+                emailService.sendEmail(new String[]{newEmail}, null, generator.getSubject(), generator.getEmailContent());
             } catch (Exception e) {
                 resetEmailVerificationCode.invalidate(userId);
             }
