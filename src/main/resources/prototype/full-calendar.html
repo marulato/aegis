@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>LEGION学业管理平台</title>
+
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/vendors/iconfonts/mdi/css/materialdesignicons.min.css}">
+<!--      <link rel="stylesheet" th:href="@{/vendors/css/vendor.bundle.base.css}">-->
+<!--      <link rel="stylesheet" th:href="@{/vendors/css/vendor.bundle.addons.css}">-->
+
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <!-- endinject -->
+  <link rel="shortcut icon" th:href="@{/images/favicon.png}"/>
+  <style>
+
+    /*body {*/
+    /*  margin: 40px 10px;*/
+    /*  padding: 0;*/
+    /*  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;*/
+    /*  font-size: 14px;*/
+    /*}*/
+
+    #calendar {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+
+
+
+  </style>
+</head>
+
+<body>
+<div class="container-scroller">
+  <!--top menu-->
+  <nav th:replace="/topmenu::topbar"></nav>
+  <div class="container-fluid page-body-wrapper" style="padding-left: 0px; padding-right: 0px">
+    <!-- left menu -->
+    <nav th:replace="/leftmenu::sidebar"></nav>
+    <!-- main -->
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" style="position: absolute; right:0; z-index: 999">
+          <div class="toast-header" id="toastHeader" style="background-color: #00bf60">
+            <strong class="mr-auto" id="hint" style="color: white">提示</strong>
+            <small id="justNow" style="color: white">刚刚</small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close" style="color: white">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="toast-body" id="toastContent" style="color: white; background-color: #00bf60">
+            加载成功！&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          </div>
+        </div>
+          <div id="calendar"></div>
+      </div>
+      <!-- content-wrapper ends -->
+      <!-- partial:partials/_footer.html -->
+      <footer th:replace="/footer::foot"></footer>
+      <!-- main -->
+    </div>
+    <!-- main-panel ends -->
+  </div>
+  <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/vendors/js/vendor.bundle.addons.js}"></script>
+
+<script th:src="@{/js/off-canvas.js}"></script>
+<script th:src="@{/js/misc.js}"></script>
+<script th:src="@{/js/main.min.js}"></script>
+<script th:src="@{/js/zh-cn.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            navLinks: true, // can click day/week names to navigate views
+            editable: true,
+            selectable: true,
+            nowIndicator: true,
+            businessHours: true,
+            droppable: true,
+            dayMaxEvents: true, // allow "more" link when too many events
+            locale: 'zh-cn',
+            events: function (info, successCallback, failureCallback) {
+                $.ajax({
+                    url: "/web/events",
+                    method: "get",
+                    dataType: "json",
+                    success: function (res) {
+                        successCallback(res.data);
+                        $(".toast").toast('show');
+                    }
+                });
+            },
+            eventClick: function (info) {
+                let event = info.event;
+                $("#event_title").html('修改: ' + event.title);
+                $("#title").val(event.title);
+                $("#start").val(event.start);
+                $("#eventModal").modal({backdrop: true, show: true});
+            },
+            dateClick: function (info) {
+                $("#event_title").html('添加事件: ' + info.dateStr);
+                $("#start").val(info.dateStr);
+                $("#eventModal").modal({backdrop: true, show: true});
+            },
+            eventMouseEnter: function () {
+                $("#calendar").css("cursor","pointer");
+            },
+            eventMouseLeave: function () {
+                $("#calendar").css("cursor","default");
+            }
+        });
+
+        calendar.render();
+        //$(".fc-button").css("height","auto");
+    });
+
+</script>
+<!-- End custom js for this page-->
+
+<div class="modal fade" id="eventModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header" style="background-color: rgb(231,234,237)">
+        <h4 class="modal-title" id="event_title"></h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+
+      <div class="modal-body" style="background-color: white">
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="title" class="control-label">标题</label>
+              <input type="text" class="form-control" name="title" id="title" placeholder="事件标题">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="start" class="control-label">开始时间</label>
+              <input type="text" class="form-control" name="start" id="start" placeholder="">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="end" class="control-label">结束时间</label>
+              <input type="text" class="form-control" name="end" id="end" placeholder="">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="content" class="control-label">内容</label>
+              <textarea class="form-control" name="content" id="content" placeholder="Boston" style="height: 8em"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="type" class="control-label">类型</label>
+              <select class="form-control" name="type" id="type">
+                <option>默认</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group" style="padding-top: 1.2em; padding-left: 1em">
+              <div class="form-check form-check-flat">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input"> 接收邮件通知
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger">删除</button>
+        <button type="button" class="btn btn-primary" >保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>
