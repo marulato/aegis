@@ -13,7 +13,7 @@ public class AppContext implements Serializable {
     private Long userId;
     private String loginId;
     private String domain;
-    private String userType;
+    private String name;
     private boolean isAdminRole;
     private boolean hasAdminRole;
     private boolean loggedIn;
@@ -89,12 +89,12 @@ public class AppContext implements Serializable {
         this.domain = domain;
     }
 
-    public String getUserType() {
-        return userType;
+    public String getName() {
+        return name;
     }
 
-    public void setUserType(String userType) {
-        this.userType = userType;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isAdminRole() {

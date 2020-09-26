@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aegis缺陷管理平台</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
+  <!-- iCheck -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+
+  <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+
+  <!-- Daterange picker -->
+  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <div th:replace="/include/topbar::topmenu"></div>
+  <!-- /.navbar -->
+
+  <div th:replace="/include/sidebar::leftmenu('2', ${role})"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">统计报表</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">主页</a></li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- ./col -->
+        <!-- Main row -->
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">问题状态统计</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="project_status">项目</label>
+                      <select class="custom-select" name="project_status" id="project_status" onchange="prepareStatusData()">
+                        <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <table class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 50%">状态</th>
+                    <th style="width: 25%">数量</th>
+                    <th style="width: 25%">占比（%）</th>
+                  </tr>
+                  </thead>
+                  <tbody id="statusTableBody">
+
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="">
+                  <i class="fa fa-file-export"></i>
+                  导出Excel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">解决状态统计</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="project_res">项目</label>
+                      <select class="custom-select" name="project_res" id="project_res" onchange="prepareResData()">
+                        <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <table class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 50%">状态</th>
+                    <th style="width: 25%">数量</th>
+                    <th style="width: 25%">占比（%）</th>
+                  </tr>
+                  </thead>
+                  <tbody id="resTableBody">
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">人员统计</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="project_user">项目</label>
+                      <select class="custom-select" name="project_user" id="project_user" onchange="">
+                        <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <table id="userStatTable" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 20%">用户名</th>
+                    <th style="width: 10%">提交数</th>
+                    <th style="width: 10%">接收数</th>
+                    <th style="width: 10%">已修复</th>
+                    <th style="width: 10%">未修复</th>
+                    <th style="width: 10%">平均SLA</th>
+                    <th style="width: 10%">提交占比</th>
+                    <th style="width: 10%">接收占比</th>
+                    <th style="width: 10%">操作</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <div th:replace="/include/footer::footer"></div>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!-- daterangepicker -->
+<script th:src="@{/plugins/moment/moment.min.js}"></script>
+<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+
+<script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.js}"></script>
+<!-- AdminLTE for demo purposes -->
+<script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        prepareStatusData()
+        prepareResData();
+
+    });
+
+    function prepareStatusData() {
+        $.ajax({
+            url: "/web/issue/statistics/status",
+            type: "get",
+            data: {"projectId": $("#project_status").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#statusTableBody").empty();
+                if (res.data.length > 0) {
+                    $.each(res.data, function (idx, obj) {
+                        let tr = "";
+                        tr += "<tr><td>" + obj.name + "</td>";
+                        tr += "<td>" + obj.count + "</td>";
+                        tr += "<td>" + obj.percent + "</td></tr>";
+                        $("#statusTableBody").append(tr);
+                    });
+                } else {
+                    $("#statusTableBody").append("<tr><td style='text-align: center' colspan='3'>没有数据</td></tr>");
+                }
+            }
+        });
+    }
+
+    function prepareResData() {
+        $.ajax({
+            url: "/web/issue/statistics/res",
+            type: "get",
+            data: {"projectId": $("#project_res").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#resTableBody").empty();
+                if (res.data.length > 0) {
+                    $.each(res.data, function (idx, obj) {
+                        let tr = "";
+                        tr += "<tr><td>" + obj.name + "</td>";
+                        tr += "<td>" + obj.count + "</td>";
+                        tr += "<td>" + obj.percent + "</td></tr>";
+                        $("#resTableBody").append(tr);
+                    });
+                } else {
+                    $("#resTableBody").append("<tr><td style='text-align: center' colspan='3'>没有数据</td></tr>");
+                }
+            }
+        });
+    }
+
+
+
+</script>
+</body>
+</html>

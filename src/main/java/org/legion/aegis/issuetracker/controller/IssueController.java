@@ -19,14 +19,17 @@ import org.legion.aegis.common.docgen.IDocGenerator;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.CompressUtils;
 import org.legion.aegis.common.utils.MasterCodeUtils;
+import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.general.ex.PermissionDeniedException;
+import org.legion.aegis.issuetracker.dao.IssueDAO;
 import org.legion.aegis.issuetracker.dto.*;
 import org.legion.aegis.issuetracker.entity.Issue;
 import org.legion.aegis.issuetracker.entity.IssueNote;
 import org.legion.aegis.issuetracker.entity.IssueVcsTracker;
+import org.legion.aegis.issuetracker.entity.SearchFilter;
 import org.legion.aegis.issuetracker.generator.IssueExportPdfGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXlsxGenerator;
 import org.legion.aegis.issuetracker.generator.IssueExportXmlGenerator;
@@ -91,6 +94,8 @@ public class IssueController {
         modelAndView.addObject("status", systemMgrService.getAllInuseStatus());
         modelAndView.addObject("resolution", systemMgrService.getAllInuseResolutions());
         modelAndView.addObject("severity", MasterCodeUtils.getMasterCodeByType("issue.severity"));
+        modelAndView.addObject("filter", SpringUtils.getBean(IssueDAO.class).
+                getSearchFilterByUserId(context.getUserId()));
         return modelAndView;
     }
 
@@ -111,21 +116,26 @@ public class IssueController {
         AppContext context = AppContext.getFromWebThread();
         if ("project".equals(type)) {
             List<Project> projects = projectService.getAccessibleProjectsForUser(context, StringUtils.parseIfIsLong(parentId));
-            manager.addDataObjects(projects);
-        } else if ("reporter".equals(type)) {
+            manager.addDataObject(projects);
+            SearchFilter filter = SpringUtils.getBean(IssueDAO.class).getSearchFilterByUserId(context.getUserId());
+            if (filter != null) {
+                for (Project project : projects) {
+                    if (filter.getProjectId().equals(project.getId())) {
+                        manager.addDataObject(filter.getProjectId());
+                        break;
+                    }
+                }
+                manager.addDataObject(projects.get(0).getId());
+            }
+        } else if ("reporter".equals(type) || "developer".equals(type)) {
             List<UserAccount> reporters = userAccountService.getReportersUnderProject(StringUtils.parseIfIsLong(parentId));
+            List<UserAccount> developers = userAccountService.getDevelopersUnderProject(StringUtils.parseIfIsLong(parentId));
+            reporters.addAll(developers);
             UserAccount account = new UserAccount();
             account.setId(0L);
             account.setName("- 请选择 -");
             reporters.add(0, account);
             manager.addDataObjects(reporters);
-        } else if ("developer".equals(type)) {
-            List<UserAccount> developers = userAccountService.getDevelopersUnderProject(StringUtils.parseIfIsLong(parentId));
-            UserAccount account = new UserAccount();
-            account.setId(0L);
-            account.setName("- 请选择 -");
-            developers.add(0, account);
-            manager.addDataObjects(developers);
         } else if ("module".equals(type)) {
             List<Module> modules = projectService.getModulesByProjectId(StringUtils.parseIfIsLong(parentId));
             Module module = new Module();

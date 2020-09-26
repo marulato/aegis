@@ -58,7 +58,7 @@ public class AttachmentDlController {
         if (exportDto != null) {
             if (StringUtils.isNotBlank(uuid) && uuid.equals(UUID.nameUUIDFromBytes(exportDto.getData()).toString())) {
                 String date = DateUtils.getDateString(new Date(), DateUtils.TODAY_FORMAT);
-                NetworkFileTransfer.download(exportDto.getData(), "Export " + date + "." + exportDto.getType() , response);
+                NetworkFileTransfer.download(exportDto.getData(), "Export-" + date + "." + exportDto.getType() , response);
             }
         }
         SessionManager.removeAttribute(IssueController.SESSION_DL_KEY);

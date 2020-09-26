@@ -305,7 +305,7 @@
             dataType: "json",
             success: function (res) {
                 $("#projectId").empty();
-                $.each(res.data, function (idx, opt) {
+                $.each(res.data[0], function (idx, opt) {
                     var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#projectId").append(option);
                 });

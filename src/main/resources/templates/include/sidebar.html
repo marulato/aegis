@@ -15,7 +15,7 @@
         <img th:src="@{/dist/img/user2-160x160.jpg}" class="img-circle elevation-2" alt="User Image">
       </div>
       <div class="info">
-        <a href="#" class="d-block">Alexander Pierce</a>
+        <a href="#" class="d-block" th:text="${session.Legion_Web_Session_Context.name}"></a>
       </div>
     </div>
 
@@ -66,7 +66,7 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a href="#" th:class="${selected == '2' ? 'nav-link active' : 'nav-link'}">
+          <a href="/web/issue/statistics" th:class="${selected == '2' ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-chart-pie"></i>
             <p>
               统计报表
@@ -92,6 +92,37 @@
               <a href="/web/project" th:class="${selected == '3.2' ? 'nav-link active' : 'nav-link'}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>子项目管理</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+
+        <li th:class="${(selected == '7.1' || selected == '7.2' || selected == '7.3') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#"  th:class="${(selected == '7.1' || selected == '7.2' || selected == '7.3')  ? 'nav-link active' : 'nav-link'}">
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              任务中心
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item" th:if="${role == 'SYSADMIN' || role == 'DEV_S'}">
+              <a href="#" th:class="${selected == '7.1' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>任务管理</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" th:class="${selected == '7.2' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>我的任务</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" th:class="${selected == '7.3' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>进度追踪</p>
               </a>
             </li>
           </ul>

@@ -7,10 +7,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.legion.aegis.common.utils.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -79,10 +76,18 @@ public final class Poi {
         sheet.autoSizeColumn(c);
     }
 
-    public static void setValue(XSSFCell cell, String value, XSSFCellStyle style) {
-        if (cell != null) {
+    public static void setValue(XSSFCell cell, Object value, XSSFCellStyle style) {
+        if (cell != null && value != null) {
             cell.setCellStyle(style);
-            cell.setCellValue(value);
+            if (value instanceof String) {
+                cell.setCellValue((String) value);
+            } else if (value instanceof Double) {
+                cell.setCellValue((Double)value);
+            } else if (value instanceof Integer) {
+                cell.setCellValue(((Integer) value).doubleValue());
+            } else if (value instanceof Date) {
+                cell.setCellValue((Date) value);
+            }
         }
     }
 

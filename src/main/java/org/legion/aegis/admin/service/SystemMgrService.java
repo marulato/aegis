@@ -30,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SystemMgrService {
@@ -77,7 +79,7 @@ public class SystemMgrService {
         }
     }
 
-    public void updateIssueResolutin(IssueResolution resolution) {
+    public void updateIssueResolution(IssueResolution resolution) {
         if (resolution != null) {
             IssueResolution old = getIssueResolutionByCode(resolution.getResolutionCode());
             if (old != null) {
@@ -171,5 +173,23 @@ public class SystemMgrService {
 
     public List<IssueResolution> getAllInuseResolutions() {
         return systemMgrDAO.getAllInuseIssueResolutions();
+    }
+
+    public Map<String, IssueStatus> getIssueStatusMap() {
+        List<IssueStatus> statusList = systemMgrDAO.getAllIssueStatus();
+        Map<String, IssueStatus> map = new HashMap<>(statusList.size());
+        for (IssueStatus var : statusList) {
+            map.put(var.getStatusCode(), var);
+        }
+        return map;
+    }
+
+    public Map<String, IssueResolution> getIssueResolutionMap() {
+        List<IssueResolution> statusList = systemMgrDAO.getAllIssueResolutions();
+        Map<String, IssueResolution> map = new HashMap<>(statusList.size());
+        for (IssueResolution var : statusList) {
+            map.put(var.getResolutionCode(), var);
+        }
+        return map;
     }
 }

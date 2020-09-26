@@ -107,6 +107,19 @@ public class IssueService {
         }
         SearchResult<IssueVO> searchResult = new SearchResult<>(results, param);
         searchResult.setTotalCounts(issueDAO.searchCounts(param));
+        AppContext context = AppContext.getFromWebThread();
+        SearchFilter filter = issueDAO.getSearchFilterByUserId(context.getUserId());
+        if (filter == null) {
+            filter = new SearchFilter();
+            filter.setUserAcctId(context.getUserId());
+            filter.setGroupId(Long.parseLong((String) param.getParams().get("groupId")));
+            filter.setProjectId(Long.parseLong((String) param.getParams().get("projectId")));
+            JPAExecutor.save(filter);
+        } else {
+            filter.setGroupId(Long.parseLong((String) param.getParams().get("groupId")));
+            filter.setProjectId(Long.parseLong((String) param.getParams().get("projectId")));
+            JPAExecutor.update(filter);
+        }
         return searchResult;
     }
 
@@ -241,7 +254,7 @@ public class IssueService {
     @Transactional
     public void updateIssue(IssueDto dto, Long issueId) throws Exception {
         Issue issue = getIssueById(issueId);
-        boolean isNotModified = true;
+        boolean isNotModified;
         if (dto != null && issue != null) {
             isNotModified = createIssueHistory(issueId, issue.getStatus(), dto.getStatus(), "status");
             issue.setStatus(dto.getStatus());
@@ -405,7 +418,7 @@ public class IssueService {
                         timeline.setNewValue(history.getNewValue());
                         break;
                 }
-                timeline.setType(getTimelineType(history.getFieldName()));
+                timeline.setType(IssueConsts.getTimelineType(history.getFieldName()));
                 timeline.setDate(history.getCreatedAt());
                 if (StringUtils.isEmpty(history.getOldValue())) {
                     timeline.setAdded(true);
@@ -426,7 +439,7 @@ public class IssueService {
             for (IssueNote note : issueNotes) {
                 IssueTimelineVO timeline = new IssueTimelineVO();
                 timeline.setAdded(true);
-                timeline.setType(getTimelineType("NOTE"));
+                timeline.setType(IssueConsts.getTimelineType("NOTE"));
                 UserAccount user = userAccountService.getUserByLoginId(note.getCreatedBy());
                 if (user != null) {
                     timeline.setBy(user.getName());
@@ -605,48 +618,6 @@ public class IssueService {
 
             }
         }
-    }
-
-    private String getTimelineType(String fieldName) {
-        String type;
-        switch (fieldName) {
-            case "STATUS":
-                type = "问题状态";
-                break;
-            case "RESOLUTION":
-                type = "解决状态";
-                break;
-            case "ROOT_CAUSE":
-                type = "问题原因";
-                break;
-            case "FIXED_AT":
-                type = "解决时间";
-                break;
-            case "ASSIGNED_TO":
-                type = "转发";
-                break;
-            case "NOTE":
-                type = "备注";
-                break;
-            case "PRIORITY":
-                type = "优先级";
-                break;
-            case "CONFIRMATION":
-                type = "等待确认";
-                break;
-            case "ATTACHMENTS":
-                type = "附件";
-                break;
-            case "FOLLOWER":
-                type = "关注";
-                break;
-            case "RELATIONSHIP":
-                type = "相关性";
-                break;
-            default:
-                type = "Unknown";
-        }
-        return type;
     }
 
 }

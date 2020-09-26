@@ -65,7 +65,8 @@ public class ProjectService {
 
     public List<Project> getAccessibleProjectsForUser(AppContext context, Long groupId) {
         List<Project> projects = projectDAO.getAllProjectsUnderUser(context.getUserId(), context.getRoleId());
-        projects.removeIf(var -> (!var.getGroupId().equals(groupId) || var.getStatus().equals(AppConsts.STATUS_BANNED)));
+        projects.removeIf(var -> ((groupId != null && groupId > 0) && !var.getGroupId().equals(groupId)
+                || var.getStatus().equals(AppConsts.STATUS_BANNED)));
         return projects;
     }
 

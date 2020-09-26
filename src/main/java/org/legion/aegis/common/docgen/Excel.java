@@ -94,7 +94,7 @@ public class Excel {
      * @param coordinate the coordinate of the cell in excel like 'A1'
      * @param value content
      */
-    public void setValue(String coordinate, String value) {
+    public void setValue(String coordinate, Object value) {
         String cord = Poi.getNumericCoordinate(coordinate);
         if (StringUtils.isNotEmpty(cord)) {
             String[] matrix = cord.split(",");
@@ -108,9 +108,9 @@ public class Excel {
      * @param cn column number
      * @param value content
      */
-    public void setValue(int rn, int cn, String value) {
+    public void setValue(int rn, int cn, Object value) {
         XSSFRow row = getRow(rn);
-        if (row != null && StringUtils.isNotEmpty(value)) {
+        if (row != null && value != null) {
             XSSFCell cell = getCell(row, cn);
             Poi.setValue(cell, value, stdStyle);
         }

@@ -71,4 +71,7 @@ public interface IssueDAO {
 
     @Select("SELECT * FROM ISU_VCS_TRACKER WHERE ID = #{id}")
     IssueVcsTracker getIssueVcsTrackerById(Long id);
+
+    @Select("SELECT * FROM ISU_SEARCH_FILTER WHERE USER_ACCT_ID = #{userId}")
+    SearchFilter getSearchFilterByUserId(Long userId);
 }

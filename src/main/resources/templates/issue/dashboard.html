@@ -139,7 +139,7 @@
                     <div class="form-group-sm">
                       <label for="groupId">项目组:</label>
                       <select class="custom-select" name="groupId" id="groupId" onchange="toggleProjectSelector()">
-                        <option th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
+                        <option th:selected="${filter.groupId == group.id}" th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
                       </select>
                     </div>
                   </div>
@@ -376,7 +376,6 @@
     function dismissWaiting() {
         $('#waitingModal').modal('hide');
     }
-    var tableView = null;
 
     function fillBackSearchParam() {
         $.ajax({
@@ -399,95 +398,94 @@
         });
     }
 
+    var tableView = null;
+
     document.addEventListener('DOMContentLoaded', function () {
         toggleProjectSelector();
+        toggleModuleSelector();
         toggleReporterSelector();
         toggleDeveloperSelector();
         getCount();
         defaultDateRange();
+        tableView = $('#issueTable').DataTable({
+            "processing": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "aLengthMenu":[10,25,50,100],
+            "bPaginate": true,
+            "serverSide": true,
+            ajax: function (data, callback, settings) {
+                var obj = {
+                    issueId: $("#issueId").val(),
+                    projectId: $("#projectId").val(),
+                    groupId: $("#groupId").val(),
+                    reportedBy: $("#reportedBy").val(),
+                    status: $("#status").val(),
+                    severity: $("#severity").val(),
+                    resolution: $("#resolution").val(),
+                    reportedRange: $("#reportedRange").val(),
+                    updatedRange: $("#updatedRange").val()
 
+                }
+                aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
+
+            },
+            columns: [
+                {
+                    "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    },
+                    render: function (data, type, full, meta) {
+                        return "<a href='/web/issue/view/"+ full.id +"'> "+ full.issueId +"</a>";
+                    }
+                },
+                {"data": "reportedBy", "defaultContent": "-"},
+                {"data": "assignedTo", "defaultContent": "-"},
+                {"data": "moduleName", "defaultContent": "-"},
+                {"data": "severity", "defaultContent": "-"},
+                {"data": "sla", "defaultContent": "-"},
+                {"data": "resolution", "defaultContent": "-"},
+                {"data": "status", "defaultContent": "-"},
+                {"data": "title", "defaultContent": "-"},
+                {
+                    "data": "reportedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    }
+                },
+                {
+                    "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
+                        $(nTd).css("text-align", "center");
+                    }
+                },
+            ],
+            fnCreatedRow: function (row, data, dataIndex, cells) {
+                $(row).css("background-color", data.color);
+            },
+            language: aegis.locale
+        });
 
     });
-
 
     function toggleProjectSelector() {
         $.ajax({
             url: "/web/issue/selector/project/" + $("#groupId").val(),
             type: "get",
             dataType: "json",
+            async: false,
             success: function (res) {
                 $("#projectId").empty();
-                $.each(res.data, function (idx, opt){
-                    var option = "<option value='"+ opt.id +"'>"+ opt.name +"</option>"
+                $.each(res.data[0], function (idx, opt) {
+                    var option = "<option value='" + opt.id + "'>" + opt.name + "</option>"
                     $("#projectId").append(option);
                 });
-                toggleModuleSelector();
-                fillBackSearchParam();
-                if (tableView == null) {
-                    tableView = $('#issueTable').DataTable({
-                        "processing": true,
-                        "lengthChange": true,
-                        "searching": false,
-                        "ordering": true,
-                        "info": true,
-                        "autoWidth": false,
-                        "responsive": true,
-                        "aLengthMenu":[10,25,50,100],
-                        "bPaginate": true,
-                        "serverSide": true,
-                        ajax: function (data, callback, settings) {
-                            var obj = {
-                                issueId: $("#issueId").val(),
-                                projectId: $("#projectId").val(),
-                                groupId: $("#groupId").val(),
-                                reportedBy: $("#reportedBy").val(),
-                                status: $("#status").val(),
-                                severity: $("#severity").val(),
-                                resolution: $("#resolution").val(),
-                                reportedRange: $("#reportedRange").val(),
-                                updatedRange: $("#updatedRange").val()
-
-                            }
-                            aegis.callDataTableAjax("/web/issue/view", obj, data, callback);
-
-                        },
-                        columns: [
-                            {
-                                "data": "issueId", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                                    $(nTd).css("text-align", "center");
-                                },
-                                render: function (data, type, full, meta) {
-                                    return "<a href='/web/issue/view/"+ full.id +"'> "+ full.issueId +"</a>";
-                                }
-                            },
-                            {"data": "reportedBy", "defaultContent": "-"},
-                            {"data": "assignedTo", "defaultContent": "-"},
-                            {"data": "moduleName", "defaultContent": "-"},
-                            {"data": "severity", "defaultContent": "-"},
-                            {"data": "sla", "defaultContent": "-"},
-                            {"data": "resolution", "defaultContent": "-"},
-                            {"data": "status", "defaultContent": "-"},
-                            {"data": "title", "defaultContent": "-"},
-                            {
-                                "data": "reportedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                                    $(nTd).css("text-align", "center");
-                                }
-                            },
-                            {
-                                "data": "updatedAt", "defaultContent": "-", createdCell: function (nTd, sData, oData, iRow, iCol) {
-                                    $(nTd).css("text-align", "center");
-                                }
-                            },
-                        ],
-                        fnCreatedRow: function (row, data, dataIndex, cells) {
-                            $(row).css("background-color", data.color);
-                        },
-                        language: aegis.locale
-                    });
-                } else {
-                    tableView.draw();
+                if (res.data[1] != null) {
+                    $("#projectId").val(res.data[1]);
                 }
-
+                toggleModuleSelector();
             }
         });
     }

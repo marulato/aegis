@@ -35,4 +35,7 @@ public interface SystemMgrDAO {
 
     @Select("SELECT * FROM CM_ISSUE_RESOLUTION WHERE IS_INUSE = 'Y'")
     List<IssueResolution> getAllInuseIssueResolutions();
+
+    @Select("SELECT * FROM CM_ISSUE_RESOLUTION")
+    List<IssueResolution> getAllIssueResolutions();
 }
