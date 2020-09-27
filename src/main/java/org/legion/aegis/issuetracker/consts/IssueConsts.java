@@ -6,7 +6,7 @@ import java.util.Map;
 public class IssueConsts {
 
     public static final String ISSUE_STATUS_OPEN                    = "OPEN";
-    public static final String ISSUE_STATUS_REOPEN                  = "REOPEN";
+    public static final String ISSUE_STATUS_REOPEN                  = "REOPENED";
     public static final String ISSUE_STATUS_CLOSED                  = "CLOSED";
     public static final String ISSUE_STATUS_INVESTIGATION           = "INVEST";
     public static final String ISSUE_STATUS_VERIFIED_DEV            = "VERIFIED_DEV";
