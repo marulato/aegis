@@ -139,7 +139,7 @@
                     <div class="form-group-sm">
                       <label for="groupId">项目组:</label>
                       <select class="custom-select" name="groupId" id="groupId" onchange="toggleProjectSelector()">
-                        <option th:selected="${filter.groupId == group.id}" th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
+                        <option th:selected="${filter != null && filter.groupId == group.id}" th:each="group, stats:${groupSelector}" th:value="${group.id}" th:text="${group.name}"></option>
                       </select>
                     </div>
                   </div>
@@ -317,6 +317,8 @@
   <!-- /.content-wrapper -->
   <div th:replace="/include/footer::footer"></div>
 
+  <input type="hidden" name="ws_id" id="ws_id" th:value="${session.Legion_Web_Session_Context.userId}">
+  <input type="hidden" name="tk_id" id="tk_id" th:value="${session.token}">
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
     <!-- Control sidebar content goes here -->
@@ -401,6 +403,11 @@
     var tableView = null;
 
     document.addEventListener('DOMContentLoaded', function () {
+
+        var socket = new WebSocket("ws://localhost:8080/websocket/issue/" + $("#ws_id").val() + "/" + $("#tk_id").val());
+        socket.onmessage = function(event){
+            aegis.newIssueToast(event);
+        }
         toggleProjectSelector();
         toggleModuleSelector();
         toggleReporterSelector();

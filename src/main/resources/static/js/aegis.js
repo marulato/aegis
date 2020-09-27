@@ -130,3 +130,12 @@ aegis.callDataTableAjax = function (url, param, tableData, callback) {
         }
     });
 }
+
+aegis.newIssueToast = function (event) {
+    $(document).Toasts('create', {
+        class: 'bg-maroon',
+        title: '新问题&emsp;',
+        subtitle: '有新问题提交至您的账号名下',
+        body: event.data
+    });
+}

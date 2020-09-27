@@ -15,6 +15,7 @@ import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.*;
 import org.legion.aegis.general.entity.FileNet;
 import org.legion.aegis.general.service.FileNetService;
+import org.legion.aegis.general.websocket.MessageWebSocketServer;
 import org.legion.aegis.issuetracker.consts.IssueConsts;
 import org.legion.aegis.issuetracker.dao.IssueDAO;
 import org.legion.aegis.issuetracker.dto.IssueDto;
@@ -141,6 +142,9 @@ public class IssueService {
             issueDAO.createIssue(issue);
             saveAttachments(dto.getAttachments(), issue);
             emailService.sendEmailNewIssueReported(issue);
+            MessageWebSocketServer socketServer = SpringUtils.getBean(MessageWebSocketServer.class);
+            socketServer.sendMessage(issue.getAssignedTo(),
+                    formatIssueId("[" + issue.getId()) + "] " + issue.getTitle());
         }
     }
 

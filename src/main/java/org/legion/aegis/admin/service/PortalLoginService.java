@@ -1,5 +1,7 @@
 package org.legion.aegis.admin.service;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.legion.aegis.admin.consts.LoginStatus;
 import org.legion.aegis.admin.entity.UserAccount;
 import org.legion.aegis.admin.entity.UserLoginHistory;
@@ -11,6 +13,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
 import org.legion.aegis.common.utils.ConfigUtils;
 import org.legion.aegis.common.utils.DateUtils;
+import org.legion.aegis.common.utils.MiscGenerator;
 import org.legion.aegis.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +26,12 @@ import java.util.List;
 public class PortalLoginService {
 
     private final UserAccountService userAcctService;
+    private final Cache<Long, String> tokenCache;
 
     @Autowired
     public PortalLoginService(UserAccountService userAcctService) {
         this.userAcctService = userAcctService;
+        tokenCache = CacheBuilder.newBuilder().build();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -55,6 +60,8 @@ public class PortalLoginService {
                         appContext.setAllRoles(roles);
                         appContext.setAssignments(userAcctService.getUserProjectAssignments(user.getId()));
                         appContext.setName(user.getName());
+                        tokenCache.put(user.getId(), MiscGenerator.generateToken());
+                        SessionManager.setAttribute("token", tokenCache.getIfPresent(user.getId()));
                     } else {
                         status = LoginStatus.INVALID_PASS;
                     }
@@ -114,6 +121,10 @@ public class PortalLoginService {
             JPAExecutor.save(loginHistory);
             JPAExecutor.update(user);
         }
+    }
+
+    public String getUserToken(Long userId) {
+        return tokenCache.getIfPresent(userId);
     }
 
     private String checkStatus(UserAccount user) {
