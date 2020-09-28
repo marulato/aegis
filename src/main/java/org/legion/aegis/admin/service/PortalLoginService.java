@@ -56,12 +56,16 @@ public class PortalLoginService {
                             UserRole role = userAcctService.getRoleById(userRoleAssign.getRoleId());
                             roles.add(role);
                         }
-                        webUser.setIsFirstLogin(user.getIsFirstLogin());
-                        appContext.setAllRoles(roles);
-                        appContext.setAssignments(userAcctService.getUserProjectAssignments(user.getId()));
-                        appContext.setName(user.getName());
                         tokenCache.put(user.getId(), MiscGenerator.generateToken());
-                        SessionManager.setAttribute("token", tokenCache.getIfPresent(user.getId()));
+                        if (userRoleAssigns.isEmpty()) {
+                            status = LoginStatus.ACCOUNT_EXPIRED;
+                        } else {
+                            webUser.setIsFirstLogin(user.getIsFirstLogin());
+                            appContext.setAllRoles(roles);
+                            appContext.setAssignments(userAcctService.getUserProjectAssignments(user.getId()));
+                            appContext.setName(user.getName());
+                            SessionManager.setAttribute("token", tokenCache.getIfPresent(user.getId()));
+                        }
                     } else {
                         status = LoginStatus.INVALID_PASS;
                     }

@@ -3,6 +3,7 @@ package org.legion.aegis.admin.entity;
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
+import org.legion.aegis.common.validation.Length;
 
 import java.util.Objects;
 
@@ -11,6 +12,7 @@ public class ProjectGroup extends BasePO {
 
     @PrimaryKey(autoIncrement = true)
     private Long id;
+    @Length(min = 1, max = 100, message = "项目组名称为1~100个字符")
     private String name;
     private String description;
 

@@ -70,6 +70,21 @@
     <!-- /.login-card-body -->
   </div>
 </div>
+
+<div class="modal fade" id="waitingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <p><img th:src="@{/dist/img/loading.gif}" style="width: 60px; height: 60px">正在登录，请稍后</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
 <!-- /.login-box -->
 
 <!-- jQuery -->
@@ -82,7 +97,18 @@
 <script th:src="@{/js/aegis.js}"></script>
 
 <script>
+    function showWaiting() {
+        $('#waitingModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    }
+    function dismissWaiting() {
+        $('#waitingModal').modal('hide');
+    }
     function login() {
+        showWaiting();
         $("#browser").val(navigator.userAgent);
         $.ajax({
             url: "/web/login",
@@ -90,6 +116,7 @@
             data: $("#mainForm").serialize(),
             dataType: "json",
             success: function (res) {
+                dismissWaiting();
                 var obj = res.data;
                 if (res.status === 200) {
                     if (obj[0] === 0 && obj[1] == null) {

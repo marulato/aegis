@@ -190,7 +190,7 @@
                       <tr th:each="obj, stats:${project.modules}">
                         <td th:text="${stats.count}"></td>
                         <td th:text="${obj.name}"></td>
-                        <td th:text="${obj.description}"></td>
+                        <td th:text="${obj.description == null ? '-' : obj.description}"></td>
                       </tr>
                       </tbody>
                     </table>

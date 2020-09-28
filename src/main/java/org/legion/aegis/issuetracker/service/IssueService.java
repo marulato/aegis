@@ -345,6 +345,10 @@ public class IssueService {
     public void reAssign(Long issueId, Long userId) {
         Issue issue = getIssueById(issueId);
         if (issue != null) {
+            if (issue.getAssignedTo() == null) {
+                issue.setStatus(IssueConsts.ISSUE_STATUS_INVESTIGATION);
+                createIssueHistory(issueId, IssueConsts.ISSUE_STATUS_OPEN, issue.getStatus(), "status");
+            }
             createIssueHistory(issueId, String.valueOf(issue.getAssignedTo()), String.valueOf(userId), "assignedTo");
             issue.setAssignedTo(userId);
             JPAExecutor.update(issue);
