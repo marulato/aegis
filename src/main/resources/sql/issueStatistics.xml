@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.legion.aegis.issuetracker.dao.IssueStatisticsDAO">
+    <select id="searchUserStat" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.issuetracker.vo.UserStatisticsVO">
+        SELECT *
+        FROM ISU_ISSUE ISU
+                 LEFT JOIN PJT_PROJECT PJT ON ISU.PROJECT_ID = PJT.ID
+                 WHERE PJT.ID = #{sp.params.projectId}
+    </select>
+</mapper>

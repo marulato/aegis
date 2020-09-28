@@ -452,6 +452,8 @@
   <!-- Control sidebar content goes here -->
 </aside>
 <!-- /.control-sidebar -->
+<input type="hidden" name="ws_id" id="ws_id" th:value="${session.Legion_Web_Session_Context.userId}">
+<input type="hidden" name="tk_id" id="tk_id" th:value="${session.token}">
 </div>
 <!-- ./wrapper -->
 
@@ -739,6 +741,7 @@
     </div>
     <!-- /.modal-content -->
   </div>
+
   <!-- /.modal-dialog -->
 </div>
 
@@ -771,7 +774,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-
+        var socket = new WebSocket("ws://localhost:8080/websocket/issue/" + $("#ws_id").val() + "/" + $("#tk_id").val());
+        socket.onmessage = function(event){
+            aegis.newIssueToast(event);
+        }
     });
 
     $("#isNoticed").bootstrapSwitch({
