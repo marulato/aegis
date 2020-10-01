@@ -12,8 +12,11 @@ import java.util.List;
 @Mapper
 public interface IssueStatisticsDAO {
 
-    @Select("SELECT * FROM ISU_ISSUE WHERE PROJECT_ID = #{projectId} ")
+    @Select("SELECT * FROM ISU_ISSUE WHERE PROJECT_ID = #{projectId}")
     List<Issue> retrieveIssueByProject(Long projectId);
 
-    List<UserStatisticsVO> searchUserStat(@Param("sp") SearchParam param);
+    List<Issue> retrieveIssuesByReporter(Long reporterId, Long projectId);
+
+    List<Issue> retrieveIssuesByDeveloper(Long reporterId, Long projectId);
+
 }

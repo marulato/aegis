@@ -292,7 +292,7 @@ public class UserAccountController {
                 manager.addErrors(errors);
             } else {
                 UserAccount userAccount = accountService.getUserById(userAccountVO.getId());
-                accountService.resetPassord(userAccount, (String) params.get("pwd1"));
+                accountService.resetPassword(userAccount, (String) params.get("pwd1"));
             }
         }
         return manager.respond();
@@ -324,7 +324,7 @@ public class UserAccountController {
                 manager = AjaxResponseManager.create(AppConsts.RESPONSE_VALIDATION_NOT_PASS);
                 manager.addErrors(errors);
             } else {
-                accountService.resetPassord(user, (String) params.get("pwd1"));
+                accountService.resetPassword(user, (String) params.get("pwd1"));
             }
         }
         return manager.respond();

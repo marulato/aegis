@@ -10,6 +10,7 @@ public class IssueVcsTracker extends BasePO {
     @PrimaryKey(autoIncrement = true)
     private Long id;
     private Long issueId;
+    private Long projectId;
     private String fileFullPath;
     private String masterVersion;
     private String branch;
@@ -30,6 +31,14 @@ public class IssueVcsTracker extends BasePO {
 
     public void setIssueId(Long issueId) {
         this.issueId = issueId;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public String getFileFullPath() {

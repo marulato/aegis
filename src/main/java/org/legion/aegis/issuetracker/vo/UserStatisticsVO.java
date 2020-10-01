@@ -9,24 +9,23 @@ public class UserStatisticsVO extends BaseVO {
     private Long userId;
     private String loginId;
     private String name;
-    private Integer totalReport;
-    private Double reportPercent;
-    private Double reportPerDay;
-    private Integer totalAssigned;
-    private Double assignedPercent;
-    private Double assignedPerDay;
-    private Integer totalFixed;
-    private Integer totalUnfixed;
-    private Double fixedPerDay;
-    private Integer maxSla;
-    private Integer minSla;
-    private Integer averageSla;
-    private Integer totalMonitoring;
-    private Integer totalReopened;
-    private Integer totalClosed;
+    private int totalReport;
+    private double reportPercent;
+    private double reportPerDay;
+    private int totalAssigned;
+    private double assignedPercent;
+    private double assignedPerDay;
+    private int totalFixed;
+    private int totalUnfixed;
+    private double fixedPerDay;
+    private double maxSla;
+    private double minSla;
+    private double averageSla;
     private Map<String, CommonStatisticsVO> statusDistMap;
     private Map<String, CommonStatisticsVO> severityDistMap;
     private Map<String, CommonStatisticsVO> resolutionDistMap;
+
+    private boolean canView;
 
     public Long getUserId() {
         return userId;
@@ -52,124 +51,100 @@ public class UserStatisticsVO extends BaseVO {
         this.name = name;
     }
 
-    public Integer getTotalReport() {
+    public int getTotalReport() {
         return totalReport;
     }
 
-    public void setTotalReport(Integer totalReport) {
+    public void setTotalReport(int totalReport) {
         this.totalReport = totalReport;
     }
 
-    public Double getReportPercent() {
+    public double getReportPercent() {
         return reportPercent;
     }
 
-    public void setReportPercent(Double reportPercent) {
+    public void setReportPercent(double reportPercent) {
         this.reportPercent = reportPercent;
     }
 
-    public Double getReportPerDay() {
+    public double getReportPerDay() {
         return reportPerDay;
     }
 
-    public void setReportPerDay(Double reportPerDay) {
+    public void setReportPerDay(double reportPerDay) {
         this.reportPerDay = reportPerDay;
     }
 
-    public Integer getTotalAssigned() {
+    public int getTotalAssigned() {
         return totalAssigned;
     }
 
-    public void setTotalAssigned(Integer totalAssigned) {
+    public void setTotalAssigned(int totalAssigned) {
         this.totalAssigned = totalAssigned;
     }
 
-    public Double getAssignedPercent() {
+    public double getAssignedPercent() {
         return assignedPercent;
     }
 
-    public void setAssignedPercent(Double assignedPercent) {
+    public void setAssignedPercent(double assignedPercent) {
         this.assignedPercent = assignedPercent;
     }
 
-    public Double getAssignedPerDay() {
+    public double getAssignedPerDay() {
         return assignedPerDay;
     }
 
-    public void setAssignedPerDay(Double assignedPerDay) {
+    public void setAssignedPerDay(double assignedPerDay) {
         this.assignedPerDay = assignedPerDay;
     }
 
-    public Integer getTotalFixed() {
+    public int getTotalFixed() {
         return totalFixed;
     }
 
-    public void setTotalFixed(Integer totalFixed) {
+    public void setTotalFixed(int totalFixed) {
         this.totalFixed = totalFixed;
     }
 
-    public Integer getTotalUnfixed() {
+    public int getTotalUnfixed() {
         return totalUnfixed;
     }
 
-    public void setTotalUnfixed(Integer totalUnfixed) {
+    public void setTotalUnfixed(int totalUnfixed) {
         this.totalUnfixed = totalUnfixed;
     }
 
-    public Double getFixedPerDay() {
+    public double getFixedPerDay() {
         return fixedPerDay;
     }
 
-    public void setFixedPerDay(Double fixedPerDay) {
+    public void setFixedPerDay(double fixedPerDay) {
         this.fixedPerDay = fixedPerDay;
     }
 
-    public Integer getMaxSla() {
+    public double getMaxSla() {
         return maxSla;
     }
 
-    public void setMaxSla(Integer maxSla) {
+    public void setMaxSla(double maxSla) {
         this.maxSla = maxSla;
     }
 
-    public Integer getMinSla() {
+    public double getMinSla() {
         return minSla;
     }
 
-    public void setMinSla(Integer minSla) {
+    public void setMinSla(double minSla) {
         this.minSla = minSla;
     }
 
-    public Integer getAverageSla() {
+    public double getAverageSla() {
         return averageSla;
     }
 
-    public void setAverageSla(Integer averageSla) {
+    public void setAverageSla(double averageSla) {
         this.averageSla = averageSla;
-    }
-
-    public Integer getTotalMonitoring() {
-        return totalMonitoring;
-    }
-
-    public void setTotalMonitoring(Integer totalMonitoring) {
-        this.totalMonitoring = totalMonitoring;
-    }
-
-    public Integer getTotalReopened() {
-        return totalReopened;
-    }
-
-    public void setTotalReopened(Integer totalReopened) {
-        this.totalReopened = totalReopened;
-    }
-
-    public Integer getTotalClosed() {
-        return totalClosed;
-    }
-
-    public void setTotalClosed(Integer totalClosed) {
-        this.totalClosed = totalClosed;
     }
 
     public Map<String, CommonStatisticsVO> getStatusDistMap() {
@@ -194,5 +169,13 @@ public class UserStatisticsVO extends BaseVO {
 
     public void setResolutionDistMap(Map<String, CommonStatisticsVO> resolutionDistMap) {
         this.resolutionDistMap = resolutionDistMap;
+    }
+
+    public boolean isCanView() {
+        return canView;
+    }
+
+    public void setCanView(boolean canView) {
+        this.canView = canView;
     }
 }

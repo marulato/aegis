@@ -8,6 +8,11 @@ public class CommonStatisticsVO extends BaseVO {
     private Integer count;
     private Double percent;
 
+    public CommonStatisticsVO() {
+        count = 0;
+        percent = 0D;
+    }
+
     public String getName() {
         return name;
     }

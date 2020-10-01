@@ -42,6 +42,8 @@ public class IssueDto extends BaseDto {
             @ValidateWithMethod(methodName = "validateMatchStatus", message = "所选解决状态与问题状态不符", profile = {"update"})
     })
     private String resolution;
+    @ValidateWithMethod(methodName = "validateRootCauseMandatory", message = "请输入原因", profile = {"update"})
+    @Length(max = 4000, message = "长度不得超过4000")
     private String rootCause;
     @ValidateWithMethod(methodName = "validatePriority", message = "请选择优先级", profile = {"report", "update"})
     private String priority;
@@ -57,7 +59,10 @@ public class IssueDto extends BaseDto {
     @Length(max = 4000, message = "长度不能超过4000字符", profile = {"update"})
     private String updatedNote;
 
-    @ValidateWithMethod(methodName = "validateFixedAt", message = "请输入正确的日期格式", profile = {"update"})
+    @ValidateWithMethod.List({
+            @ValidateWithMethod(methodName = "validateFixedAt", message = "请输入正确的日期格式", profile = {"update"}),
+            @ValidateWithMethod(methodName = "validateFixedAtMandatory", message = "请输入修复时间", profile = {"update"})
+    })
     private String fixedAt;
 
     @ValidateWithMethod(methodName = "validateConfirmedBy", message = "请选择需要等待确认的人员")
@@ -223,6 +228,24 @@ public class IssueDto extends BaseDto {
             return validateAssignedTo(confirmedBy);
         } else {
             this.confirmedBy = null;
+        }
+        return true;
+    }
+
+    private boolean validateRootCauseMandatory(String rootCause) {
+        if (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(resolution)
+                || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(resolution)
+                || IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE.equals(resolution)) {
+            return StringUtils.isNotBlank(rootCause);
+        }
+        return true;
+    }
+
+    private boolean validateFixedAtMandatory(String fixedAt) {
+        if (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(resolution)
+                || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(resolution)
+                || IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE.equals(resolution)) {
+            return StringUtils.isNotBlank(fixedAt);
         }
         return true;
     }

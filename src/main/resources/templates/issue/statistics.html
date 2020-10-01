@@ -160,7 +160,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="project_user">项目</label>
-                      <select class="custom-select" name="project_user" id="project_user" onchange="">
+                      <select class="custom-select" name="project_user" id="project_user" onchange="prepareUserData()">
                         <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
                       </select>
                     </div>
@@ -174,13 +174,12 @@
                     <th style="width: 10%">接收数</th>
                     <th style="width: 10%">已修复</th>
                     <th style="width: 10%">未修复</th>
-                    <th style="width: 10%">平均SLA</th>
-                    <th style="width: 10%">提交占比</th>
-                    <th style="width: 10%">接收占比</th>
+                    <th style="width: 15%">提交占比（%）</th>
+                    <th style="width: 15%">接收占比（%）</th>
                     <th style="width: 10%">操作</th>
                   </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="userStatBody">
 
                   </tbody>
                 </table>
@@ -235,7 +234,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         prepareStatusData()
         prepareResData();
-
+        prepareUserData();
     });
 
     function prepareStatusData() {
@@ -256,6 +255,34 @@
                     });
                 } else {
                     $("#statusTableBody").append("<tr><td style='text-align: center' colspan='3'>没有数据</td></tr>");
+                }
+            }
+        });
+    }
+
+    function prepareUserData() {
+        $.ajax({
+            url: "/web/issue/statistics/user",
+            type: "get",
+            data: {"projectId": $("#project_user").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#userStatBody").empty();
+                if (res.data.length > 0) {
+                    $.each(res.data, function (idx, obj) {
+                        let tr = "";
+                        tr += "<tr><td>" + obj.name + "</td>";
+                        tr += "<td>" + obj.totalReport + "</td>";
+                        tr += "<td>" + obj.totalAssigned + "</td>";
+                        tr += "<td>" + obj.totalFixed + "</td>";
+                        tr += "<td>" + obj.totalUnfixed + "</td>";
+                        tr += "<td>" + obj.reportPercent + "</td>";
+                        tr += "<td>" + obj.assignedPercent + "</td>";
+                        tr += "<td>" + "<a style='color: #666666' href='javascript:void(0)' onclick='display("+ obj.userId +")'><i class='fas fa-clipboard' title='查看详细'></i></a>" + "</td></tr>";
+                        $("#userStatBody").append(tr);
+                    });
+                } else {
+                    $("#userStatBody").append("<tr><td style='text-align: center' colspan='8'>没有数据</td></tr>");
                 }
             }
         });
@@ -284,8 +311,9 @@
         });
     }
 
-
-
+  function display(userId) {
+        location.href = "/web/issue/statistics/view/" + $("#project_user").val() + "/" + userId;
+  }
 </script>
 </body>
 </html>

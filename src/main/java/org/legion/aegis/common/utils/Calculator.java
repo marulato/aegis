@@ -3,6 +3,7 @@ package org.legion.aegis.common.utils;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 
 public class Calculator {
 
@@ -72,4 +73,57 @@ public class Calculator {
     public static double divide(double a, double b) {
         return divide(a, b, DEFAULT_SCALE, HALF_UP);
     }
+
+    public static double sumArray(int[] arr) {
+        double sum = 0L;
+        if (arr != null) {
+            for (int var : arr) {
+                sum = add(var, sum);
+            }
+        }
+        return sum;
+    }
+
+    public static double sumArray(Integer[] arr) {
+        double sum = 0L;
+        if (arr != null) {
+            for (Integer var : arr) {
+                if (var != null) {
+                    sum = add(var, sum);
+                }
+            }
+        }
+        return sum;
+    }
+
+    public static double sumArray(double[] arr) {
+        double sum = 0L;
+        if (arr != null) {
+            for (double var : arr) {
+                sum = add(var, sum);
+            }
+        }
+        return sum;
+    }
+
+    public static double sumArray(Double[] arr) {
+        double sum = 0L;
+        if (arr != null) {
+            for (Double var : arr) {
+                if (var != null) {
+                    sum = add(var, sum);
+                }
+            }
+        }
+        return sum;
+    }
+
+    public static double average(List<Double> list) {
+        if (list != null) {
+            double sum = sumArray(list.toArray(new Double[0]));
+            return divide(sum, list.size());
+        }
+        return 0;
+    }
+
 }

@@ -314,14 +314,8 @@ public class UserAccountService {
         UserRoleAssign roleAssign = userAccountDAO.getUserRoleAssignment(userId).get(0);
         List<ProjectGroup> groups = projectService.getAllProjectGroup();
         if (isSupervisor(roleAssign.getRoleId())) {
-            List<ProjectGroup> assigendGroups = projectService.getProjectGroupUnderUser(userId, roleAssign.getRoleId());
-            Iterator<ProjectGroup> iterator = groups.iterator();
-            while (iterator.hasNext()) {
-                ProjectGroup current = iterator.next();
-                if (assigendGroups.contains(current)) {
-                    iterator.remove();
-                }
-            }
+            List<ProjectGroup> assignedGroups = projectService.getProjectGroupUnderUser(userId, roleAssign.getRoleId());
+            groups.removeIf(assignedGroups::contains);
         } else {
             groups.clear();
         }
@@ -402,7 +396,7 @@ public class UserAccountService {
         }
     }
 
-    public void resetPassord(UserAccount userAccount, String newPwd) {
+    public void resetPassword(UserAccount userAccount, String newPwd) {
         if (userAccount != null && StringUtils.isNotBlank(newPwd)) {
             userAccount.setPassword(encryptPassword(newPwd));
             userAccount.setLoginFailedTimes(0);
@@ -411,16 +405,16 @@ public class UserAccountService {
         }
     }
 
-    public List<UserAccount> getReportersUnderProject(Long groupId) {
-        List<UserAccount> reporters = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_QA);
-        List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_QA_SUPERVISOR);
+    public List<UserAccount> getReportersUnderProject(Long projectId) {
+        List<UserAccount> reporters = userAccountDAO.getUsersUnderProject(projectId, AppConsts.ROLE_QA);
+        List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(projectId, AppConsts.ROLE_QA_SUPERVISOR);
         reporters.addAll(supervisors);
         return reporters;
     }
 
-    public List<UserAccount> getDevelopersUnderProject(Long groupId) {
-        List<UserAccount> devs = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_DEV);
-        List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(groupId, AppConsts.ROLE_DEV_SUPERVISOR);
+    public List<UserAccount> getDevelopersUnderProject(Long projectId) {
+        List<UserAccount> devs = userAccountDAO.getUsersUnderProject(projectId, AppConsts.ROLE_DEV);
+        List<UserAccount> supervisors = userAccountDAO.getUsersUnderProject(projectId, AppConsts.ROLE_DEV_SUPERVISOR);
         devs.addAll(supervisors);
         return devs;
     }
@@ -434,6 +428,25 @@ public class UserAccountService {
         }
         searchResult.setTotalCounts(userAccountDAO.searchLoginHistoryCount(param));
         return searchResult;
+    }
+
+    public boolean isProjectAccessible(Long userId, Long projectId) {
+        List<UserProjectAssign> assigns = getUserProjectAssignments(userId);
+        AppContext  context = AppContext.getFromWebThread();
+        for (UserProjectAssign assign : assigns) {
+            if (assign.getProjectId() != null && assign.getProjectId().equals(projectId)) {
+                return true;
+            }
+            if (assign.getProjectId() == null && assign.getGroupId() != null) {
+                List<Project> projects = projectService.getProjectsUnderGroup(assign.getGroupId());
+                for (Project project : projects) {
+                    if (project.getId().equals(projectId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getRoleId());
     }
 
     private void assignProjects(Collection<Project> projects, Long userId) {

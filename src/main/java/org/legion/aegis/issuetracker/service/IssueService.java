@@ -558,6 +558,7 @@ public class IssueService {
         IssueVcsTracker tracker = BeanUtils.mapFromDto(dto, IssueVcsTracker.class);
         if (tracker != null && issue != null) {
             tracker.setIssueId(issue.getId());
+            tracker.setProjectId(issue.getProjectId());
             JPAExecutor.save(tracker);
         }
     }
@@ -577,6 +578,14 @@ public class IssueService {
 
     public IssueVcsTracker getIssueVcsById(Long id) {
         return issueDAO.getIssueVcsTrackerById(id);
+    }
+
+    public double getSLA(Issue issue) {
+        if (issue.getFixedAt() == null) {
+            return Calculator.divide(DateUtils.getHoursBetween(issue.getReportedAt(), new Date()), 24, 1);
+        } else {
+            return Calculator.divide(DateUtils.getHoursBetween(issue.getReportedAt(), issue.getFixedAt()), 24, 1);
+        }
     }
 
     private String formatIssueId(String id) {

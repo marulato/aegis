@@ -166,7 +166,7 @@ public class PortalLoginController {
                 UserAccount user = accountService.getUserByLoginId(userAccount.getLoginId());
                 userAccount.setIsFirstLogin(AppConsts.NO);
                 user.setIsFirstLogin(AppConsts.NO);
-                accountService.resetPassord(user, (String) params.get("pwd1"));
+                accountService.resetPassword(user, (String) params.get("pwd1"));
             }
         }
         return responseMgr.respond();

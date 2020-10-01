@@ -103,7 +103,7 @@ public class SystemMgrService {
             Element displayNameEle = parent.addElement("displayName");
             displayNameEle.setText(obj.getDisplayName());
             Element descEle = parent.addElement("description");
-            descEle.setText(obj.getDescription());
+            descEle.setText(obj.getDescription() == null ? "" : obj.getDescription());
             Element colorEle = parent.addElement("color");
             colorEle.setText(obj.getColor());
             Element isSystemEle = parent.addElement("isSystem");

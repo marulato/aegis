@@ -48,7 +48,21 @@ public class IssueStatisticsController {
         } else if ("res".equals(action)) {
             String projectId = request.getParameter("projectId");
             manager.addDataObjects(statisticsService.prepareResStatData(StringUtils.parseIfIsLong(projectId)));
+        } else if ("user".equals(action)) {
+            String projectId = request.getParameter("projectId");
+            manager.addDataObjects(statisticsService.prepareUserStat(StringUtils.parseIfIsLong(projectId)));
         }
         return manager.respond();
+    }
+
+    @GetMapping("/web/issue/statistics/view/{projectId}/{id}")
+    @RequiresLogin
+    public ModelAndView display(@PathVariable("id") String userId, @PathVariable("projectId") String projectId ) {
+        ModelAndView modelAndView = new ModelAndView("issue/userStatDisplay");
+        AppContext context = AppContext.getFromWebThread();
+        modelAndView.addObject("role", context.getRoleId());
+        modelAndView.addObject("stat", statisticsService.displayUserStat(StringUtils.parseIfIsLong(userId),
+                StringUtils.parseIfIsLong(projectId)));
+        return modelAndView;
     }
 }

@@ -117,15 +117,17 @@ public class IssueController {
         if ("project".equals(type)) {
             List<Project> projects = projectService.getAccessibleProjectsForUser(context, StringUtils.parseIfIsLong(parentId));
             manager.addDataObject(projects);
-            SearchFilter filter = SpringUtils.getBean(IssueDAO.class).getSearchFilterByUserId(context.getUserId());
-            if (filter != null) {
-                for (Project project : projects) {
-                    if (filter.getProjectId().equals(project.getId())) {
-                        manager.addDataObject(filter.getProjectId());
-                        break;
+            if (!projects.isEmpty()) {
+                SearchFilter filter = SpringUtils.getBean(IssueDAO.class).getSearchFilterByUserId(context.getUserId());
+                if (filter != null) {
+                    for (Project project : projects) {
+                        if (filter.getProjectId().equals(project.getId())) {
+                            manager.addDataObject(filter.getProjectId());
+                            break;
+                        }
                     }
+                    manager.addDataObject(projects.get(0).getId());
                 }
-                manager.addDataObject(projects.get(0).getId());
             }
         } else if ("reporter".equals(type) || "developer".equals(type)) {
             List<UserAccount> reporters = userAccountService.getReportersUnderProject(StringUtils.parseIfIsLong(parentId));
