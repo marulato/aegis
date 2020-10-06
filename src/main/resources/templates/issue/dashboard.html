@@ -245,18 +245,16 @@
 
         <!-- table-->
         <div class="col-12">
-          <div class="card">
+          <div class="card card-primary card-outline">
             <div class="card-header">
               <h3 class="card-title">问题 / 缺陷列表</h3>
-              <div style="float: right">
-                <div class="col-sm-9" style="float: right">
-                  <div class="input-group mb-4">
-                    <input name="issueId" id="issueId" type="number" class="form-control" placeholder="ID">
-                    <div class="input-group-append">
-                      <span class="input-group-text" onmouseover="this.style.cursor='pointer'" onclick="searchById()">
+              <div class="card-tools">
+                <div class="input-group input-group-sm">
+                  <input name="issueId" id="issueId" type="number" class="form-control" placeholder="ID">
+                  <div class="input-group-append">
+                      <div class="btn btn-primary" onclick="searchById()">
                         <i class="fa fa-search"></i>
-                      </span>
-                    </div>
+                      </div>
                   </div>
                 </div>
               </div>

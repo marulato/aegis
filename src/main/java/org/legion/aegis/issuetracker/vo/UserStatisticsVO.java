@@ -26,6 +26,7 @@ public class UserStatisticsVO extends BaseVO {
     private Map<String, CommonStatisticsVO> resolutionDistMap;
 
     private boolean canView;
+    private String dateRange;
 
     public Long getUserId() {
         return userId;
@@ -177,5 +178,13 @@ public class UserStatisticsVO extends BaseVO {
 
     public void setCanView(boolean canView) {
         this.canView = canView;
+    }
+
+    public String getDateRange() {
+        return dateRange;
+    }
+
+    public void setDateRange(String dateRange) {
+        this.dateRange = dateRange;
     }
 }

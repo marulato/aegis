@@ -2,6 +2,7 @@ package org.legion.aegis.issuetracker.controller;
 
 import org.legion.aegis.admin.service.ProjectService;
 import org.legion.aegis.common.AppContext;
+import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.aop.permission.RequiresLogin;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
@@ -42,15 +43,19 @@ public class IssueStatisticsController {
     @ResponseBody
     public AjaxResponseBody retrieveStatusStat(@PathVariable("action") String action, HttpServletRequest request) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        String projectId = request.getParameter("projectId");
+        String dateRange = request.getParameter("dateRange");
         if ("status".equals(action)) {
-            String projectId = request.getParameter("projectId");
-            manager.addDataObjects(statisticsService.prepareStatusStatData(StringUtils.parseIfIsLong(projectId)));
+            manager.addDataObjects(statisticsService.prepareStatusStatData(StringUtils.parseIfIsLong(projectId), dateRange));
         } else if ("res".equals(action)) {
-            String projectId = request.getParameter("projectId");
-            manager.addDataObjects(statisticsService.prepareResStatData(StringUtils.parseIfIsLong(projectId)));
+            manager.addDataObjects(statisticsService.prepareResStatData(StringUtils.parseIfIsLong(projectId), dateRange));
         } else if ("user".equals(action)) {
-            String projectId = request.getParameter("projectId");
-            manager.addDataObjects(statisticsService.prepareUserStat(StringUtils.parseIfIsLong(projectId)));
+            manager.addDataObjects(statisticsService.prepareUserStat(StringUtils.parseIfIsLong(projectId), dateRange));
+            SessionManager.setAttribute("dateRange_userStat", dateRange);
+        } else if ("sev".equals(action)) {
+            manager.addDataObjects(statisticsService.prepareSevStatData(StringUtils.parseIfIsLong(projectId), dateRange));
+        } else if ("pri".equals(action)) {
+            manager.addDataObjects(statisticsService.preparePriStatData(StringUtils.parseIfIsLong(projectId), dateRange));
         }
         return manager.respond();
     }
@@ -62,7 +67,7 @@ public class IssueStatisticsController {
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("stat", statisticsService.displayUserStat(StringUtils.parseIfIsLong(userId),
-                StringUtils.parseIfIsLong(projectId)));
+                StringUtils.parseIfIsLong(projectId), (String) SessionManager.getAttribute("dateRange_userStat")));
         return modelAndView;
     }
 }

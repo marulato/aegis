@@ -14,5 +14,6 @@ public class SystemConsts {
     public static final String MODE_UAT = "UAT";
 
     public static final String ROOT_STORAGE_PATH = CLASSPATH.replace("classes", "data");
+    public static final String ROOT_EMAIL_PATH = CLASSPATH.replace("classes", "email");
     public static final String ROOT_TEMP_PATH = CLASSPATH.replace("classes", "temp");
 }

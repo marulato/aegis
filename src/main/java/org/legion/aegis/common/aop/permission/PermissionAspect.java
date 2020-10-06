@@ -33,7 +33,7 @@ public class PermissionAspect {
         Logical logical = requiresRoles.logical();
         AppContext context = AppContext.getFromWebThread();
         if (context != null && context.isLoggedIn()) {
-            log.info("Checking User -> " + context.getLoginId());
+            log.info("Checking User -> " + context.getLoginId() + " has roles in " + roleIds);
             List<String> allRoles = new ArrayList<>();
             for (UserRole role : context.getAllRoles()) {
                 allRoles.add(role.getId());
@@ -52,6 +52,7 @@ public class PermissionAspect {
                 }
             }
             if (hasPermission) {
+                log.info("Permission check passed");
                 return joinPoint.proceed();
             } else {
                 throw new PermissionDeniedException();

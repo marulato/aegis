@@ -113,12 +113,12 @@ public class IssueService {
         if (filter == null) {
             filter = new SearchFilter();
             filter.setUserAcctId(context.getUserId());
-            filter.setGroupId(Long.parseLong((String) param.getParams().get("groupId")));
-            filter.setProjectId(Long.parseLong((String) param.getParams().get("projectId")));
+            filter.setGroupId(StringUtils.parseIfIsLong((String) param.getParams().get("groupId")));
+            filter.setProjectId(StringUtils.parseIfIsLong((String) param.getParams().get("projectId")));
             JPAExecutor.save(filter);
         } else {
-            filter.setGroupId(Long.parseLong((String) param.getParams().get("groupId")));
-            filter.setProjectId(Long.parseLong((String) param.getParams().get("projectId")));
+            filter.setGroupId(StringUtils.parseIfIsLong((String) param.getParams().get("groupId")));
+            filter.setProjectId(StringUtils.parseIfIsLong((String) param.getParams().get("projectId")));
             JPAExecutor.update(filter);
         }
         return searchResult;
@@ -178,6 +178,7 @@ public class IssueService {
             vo.setAssignedTo(assignedTo != null ? assignedTo.getName() : "-");
             vo.setReportedBy(reportedBy.getName());
             vo.setReportedAt(DateUtils.getDateString(issue.getReportedAt(), "yyyy/MM/dd HH:mm:ss"));
+            vo.setFixedAt(DateUtils.getDateString(issue.getFixedAt(), "yyyy/MM/dd HH:mm"));
             List<IssueAttachment> attachments = getIssueAttachment(issue.getId());
             vo.setAttachments(new ArrayList<>());
             for (IssueAttachment attachment : attachments) {
@@ -275,9 +276,9 @@ public class IssueService {
             isNotModified = isNotModified && createIssueHistory(issueId, issue.getPriority(), dto.getPriority(), "priority");
             issue.setPriority(dto.getPriority());
 
-            if (dto.getFixedAt() != null && (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(dto.getStatus())
-            || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(dto.getStatus())
-                    || IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE.equals(dto.getStatus()))) {
+            if (dto.getFixedAt() != null && (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(dto.getResolution())
+            || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(dto.getResolution())
+                    || IssueConsts.ISSUE_RESOLUTION_UNSOLVABLE.equals(dto.getResolution()))) {
                 createIssueHistory(issueId, DateUtils.getDateString(issue.getFixedAt(), "yyyy/MM/dd HH:mm"),
                         dto.getFixedAt(), "fixedAt");
                 issue.setFixedAt(DateUtils.parseDatetime(dto.getFixedAt(), "yyyy/MM/dd HH:mm"));

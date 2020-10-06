@@ -128,7 +128,7 @@ public class FileNetService {
         return fileNetDAO.getFileNetById(id);
     }
 
-    private String getFileUUID(byte[] fileData) {
+    private synchronized String getFileUUID(byte[] fileData) {
         if (fileData != null) {
             String fileUUID = UUID.nameUUIDFromBytes(fileData).toString().replace("-", "");
             String random = UUID.randomUUID().toString();

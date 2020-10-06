@@ -3,9 +3,7 @@ package org.legion.aegis.common.utils;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class DateUtils {
     public static final String FULL_STD_FORMAT_1 			= "yyyy-MM-dd HH:mm:ss:SSS";
@@ -19,9 +17,22 @@ public class DateUtils {
     public static final String TIME_24H 					= "HH:mm:ss";
     public static final String TIME_24H_MILLIS 				= "HH:mm:ss:SSS";
     public static final long ONE_DAY_MILLIS					= 24 * 60 * 60 * 1000;
+    public static final long ONE_MINUTE_MILLIS				= 60 * 1000;
     public static final long ONE_HOUR_MILLIS				= 60 * 60 * 1000;
     public static final List<String> COMMON_FORMAT = List.of(FULL_STD_FORMAT_1, FULL_STD_FORMAT_2, STD_FORMAT_1,
                                 STD_FORMAT_2, TODAY_FORMAT, SLASH_TODAY_FORMAT, US_TODAY_FORMAT, ENG_TODAY_FORMAT);
+    private static final Map<String, String> timeUnitMap;
+
+    static {
+        timeUnitMap = new HashMap<>();
+        timeUnitMap.put("S", "毫秒");
+        timeUnitMap.put("s", "秒");
+        timeUnitMap.put("m", "分钟");
+        timeUnitMap.put("h", "小时");
+        timeUnitMap.put("d", "天");
+        timeUnitMap.put("M", "个月");
+        timeUnitMap.put("y", "年");
+    }
 
     public static Date parseDatetime(String dateStr) {
         if (!StringUtils.isEmpty(dateStr)) {
@@ -173,6 +184,19 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    public static int getYearsBetween(Date from, Date to) {
+        if (from != null && to != null) {
+            return getDaysBetween(from, to) / 365;
+        }
+        return -1;
+    }
+
+    public static int getMonthsBetween(Date from, Date to) {
+        if (from != null && to != null) {
+            return getDaysBetween(from, to) / 30;
+        }
+        return -1;
+    }
 
     public static int getDaysBetween(Date from, Date to) {
         if (from != null && to != null) {
@@ -184,6 +208,13 @@ public class DateUtils {
     public static int getHoursBetween(Date from, Date to) {
         if (from != null && to != null) {
             return (int) (getMillisBetween(from, to) / ONE_HOUR_MILLIS);
+        }
+        return -1;
+    }
+
+    public static int getMinutesBetween(Date from, Date to) {
+        if (from != null && to != null) {
+            return (int) (getMillisBetween(from, to) / ONE_MINUTE_MILLIS);
         }
         return -1;
     }
@@ -317,6 +348,41 @@ public class DateUtils {
             return constellation;
         }
         return null;
+    }
+
+    public static String getPeriod(Date dateBefore) {
+        Date now = new Date();
+        if (dateBefore != null && dateBefore.before(now)) {
+            long millis = getMillisBetween(dateBefore, now);
+            int minutes = getMinutesBetween(dateBefore, now);
+            int hours = getHoursBetween(dateBefore, now);
+            int days = getDaysBetween(dateBefore, now);
+            int months = getMonthsBetween(dateBefore, now);
+            int years = getYearsBetween(dateBefore, now);
+            if (millis < ONE_MINUTE_MILLIS) {
+                return ((int) (millis / 1000)) + "s";
+            }
+            if (minutes >= 1 && minutes < 60) {
+                return minutes + "m";
+            }
+            if (hours >= 1 && hours < 24) {
+                return hours + "h";
+            }
+            if (days >=1 && days < 7) {
+                return days + "d";
+            }
+            if (months >=1 && months < 12) {
+                return months + "M";
+            }
+            if (years >=1) {
+                return years + "y";
+            }
+        }
+        return null;
+    }
+
+    public static String getTimeUnit(String shortName) {
+        return timeUnitMap.get(shortName);
     }
 
 }

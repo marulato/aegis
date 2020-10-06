@@ -22,7 +22,7 @@
   <!-- /.login-logo -->
   <div class="card">
     <div class="card-body login-card-body">
-      <p class="login-box-msg">Sign in to start your session</p>
+      <p class="login-box-msg">登录以开始缺陷与项目管理</p>
 
       <form id="mainForm"  method="post">
         <input type="hidden" name="browser" id="browser">
@@ -56,7 +56,7 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <button type="button" class="btn btn-primary btn-block" onclick="login()">Sign In</button>
+            <button type="button" class="btn btn-primary btn-block" onclick="login()">登录</button>
           </div>
         </div>
       </form>
@@ -64,7 +64,7 @@
       <!-- /.social-auth-links -->
 
       <p class="mb-1">
-        <a href="#">I forgot my password</a>
+        <a href="#">忘记密码</a>
       </p>
     </div>
     <!-- /.login-card-body -->
@@ -116,7 +116,9 @@
             data: $("#mainForm").serialize(),
             dataType: "json",
             success: function (res) {
-                dismissWaiting();
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
                 var obj = res.data;
                 if (res.status === 200) {
                     if (obj[0] === 0 && obj[1] == null) {

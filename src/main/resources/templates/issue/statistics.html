@@ -61,7 +61,7 @@
         <!-- Main row -->
         <div class="row">
           <div class="col-6">
-            <div class="card">
+            <div class="card card-primary card-outline">
               <div class="card-header">
                 <h3 class="card-title">问题状态统计</h3>
                 <div class="card-tools">
@@ -78,6 +78,12 @@
                       <select class="custom-select" name="project_status" id="project_status" onchange="prepareStatusData()">
                         <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
                       </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="status_date">日期</label>
+                      <input class="form-control" name="status_date" id="status_date" onchange="prepareStatusData()">
                     </div>
                   </div>
                 </div>
@@ -105,7 +111,7 @@
           </div>
 
           <div class="col-6">
-            <div class="card">
+            <div class="card card-info card-outline">
               <div class="card-header">
                 <h3 class="card-title">解决状态统计</h3>
                 <div class="card-tools">
@@ -122,6 +128,12 @@
                       <select class="custom-select" name="project_res" id="project_res" onchange="prepareResData()">
                         <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
                       </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="res_date">日期</label>
+                      <input class="form-control" name="res_date" id="res_date" onchange="prepareResData()">
                     </div>
                   </div>
                 </div>
@@ -144,8 +156,97 @@
         </div>
 
         <div class="row">
+          <div class="col-6">
+            <div class="card card-secondary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">严重程度统计</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="project_severity">项目</label>
+                      <select class="custom-select" name="project_severity" id="project_severity" onchange="prepareSevData()">
+                        <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="sev_date">日期</label>
+                      <input class="form-control" name="sev_date" id="sev_date" onchange="prepareSevData()">
+                    </div>
+                  </div>
+                </div>
+
+                <table class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 50%">状态</th>
+                    <th style="width: 25%">数量</th>
+                    <th style="width: 25%">占比（%）</th>
+                  </tr>
+                  </thead>
+                  <tbody id="sevTableBody">
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card card-success card-outline">
+              <div class="card-header">
+                <h3 class="card-title">优先级统计</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="project_priority">项目</label>
+                      <select class="custom-select" name="project_priority" id="project_priority" onchange="preparePriData()">
+                        <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="pri_date">日期</label>
+                      <input class="form-control" name="pri_date" id="pri_date" onchange="preparePriData()">
+                    </div>
+                  </div>
+                </div>
+
+                <table class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th style="width: 50%">状态</th>
+                    <th style="width: 25%">数量</th>
+                    <th style="width: 25%">占比（%）</th>
+                  </tr>
+                  </thead>
+                  <tbody id="priTableBody">
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
           <div class="col-12">
-            <div class="card">
+            <div class="card card-warning card-outline">
               <div class="card-header">
                 <h3 class="card-title">人员统计</h3>
                 <div class="card-tools">
@@ -157,12 +258,18 @@
               <!-- /.card-header -->
               <div class="card-body">
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-3">
                     <div class="form-group">
                       <label for="project_user">项目</label>
                       <select class="custom-select" name="project_user" id="project_user" onchange="prepareUserData()">
                         <option th:each="p, stats:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
                       </select>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="user_date">日期</label>
+                      <input class="form-control" name="user_date" id="user_date" onchange="prepareUserData()">
                     </div>
                   </div>
                 </div>
@@ -232,8 +339,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        defaultDateRange();
         prepareStatusData()
         prepareResData();
+        prepareSevData();
+        preparePriData();
         prepareUserData();
     });
 
@@ -241,7 +351,7 @@
         $.ajax({
             url: "/web/issue/statistics/status",
             type: "get",
-            data: {"projectId": $("#project_status").val()},
+            data: {"projectId": $("#project_status").val(), "dateRange": $("#status_date").val()},
             dataType: "json",
             success: function (res) {
                 $("#statusTableBody").empty();
@@ -264,7 +374,7 @@
         $.ajax({
             url: "/web/issue/statistics/user",
             type: "get",
-            data: {"projectId": $("#project_user").val()},
+            data: {"projectId": $("#project_user").val(), "dateRange": $("#user_date").val()},
             dataType: "json",
             success: function (res) {
                 $("#userStatBody").empty();
@@ -292,7 +402,7 @@
         $.ajax({
             url: "/web/issue/statistics/res",
             type: "get",
-            data: {"projectId": $("#project_res").val()},
+            data: {"projectId": $("#project_res").val(), "dateRange": $("#res_date").val()},
             dataType: "json",
             success: function (res) {
                 $("#resTableBody").empty();
@@ -311,9 +421,97 @@
         });
     }
 
+    function prepareSevData() {
+        $.ajax({
+            url: "/web/issue/statistics/sev",
+            type: "get",
+            data: {"projectId": $("#project_severity").val(), "dateRange": $("#sev_date").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#sevTableBody").empty();
+                if (res.data.length > 0) {
+                    $.each(res.data, function (idx, obj) {
+                        let tr = "";
+                        tr += "<tr><td>" + obj.name + "</td>";
+                        tr += "<td>" + obj.count + "</td>";
+                        tr += "<td>" + obj.percent + "</td></tr>";
+                        $("#sevTableBody").append(tr);
+                    });
+                } else {
+                    $("#sevTableBody").append("<tr><td style='text-align: center' colspan='3'>没有数据</td></tr>");
+                }
+            }
+        });
+    }
+
+    function preparePriData() {
+        $.ajax({
+            url: "/web/issue/statistics/pri",
+            type: "get",
+            data: {"projectId": $("#project_priority").val(), "dateRange": $("#pri_date").val()},
+            dataType: "json",
+            success: function (res) {
+                $("#priTableBody").empty();
+                if (res.data.length > 0) {
+                    $.each(res.data, function (idx, obj) {
+                        let tr = "";
+                        tr += "<tr><td>" + obj.name + "</td>";
+                        tr += "<td>" + obj.count + "</td>";
+                        tr += "<td>" + obj.percent + "</td></tr>";
+                        $("#priTableBody").append(tr);
+                    });
+                } else {
+                    $("#priTableBody").append("<tr><td style='text-align: center' colspan='3'>没有数据</td></tr>");
+                }
+            }
+        });
+    }
+
   function display(userId) {
         location.href = "/web/issue/statistics/view/" + $("#project_user").val() + "/" + userId;
   }
+
+    function defaultDateRange() {
+        $("#status_date").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD',
+            },
+            startDate: moment().subtract(1, 'years'),
+            endDate: moment()
+        });
+
+        $("#res_date").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD'
+            },
+            startDate: moment().subtract(1, 'years'),
+            endDate: moment()
+        });
+
+        $("#user_date").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD'
+            },
+            startDate: moment().subtract(1, 'years'),
+            endDate: moment()
+        });
+
+        $("#sev_date").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD'
+            },
+            startDate: moment().subtract(1, 'years'),
+            endDate: moment()
+        });
+
+        $("#pri_date").daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD'
+            },
+            startDate: moment().subtract(1, 'years'),
+            endDate: moment()
+        });
+    }
 </script>
 </body>
 </html>

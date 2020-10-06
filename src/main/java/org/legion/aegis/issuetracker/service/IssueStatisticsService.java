@@ -34,8 +34,8 @@ public class IssueStatisticsService {
         this.statisticsDAO = statisticsDAO;
     }
 
-    public List<CommonStatisticsVO> prepareStatusStatData(Long projectId) {
-        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId);
+    public List<CommonStatisticsVO> prepareStatusStatData(Long projectId, String dateRange) {
+        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
         AppContext context = AppContext.getFromWebThread();
         List<CommonStatisticsVO> voList = new ArrayList<>();
         if (userAccountService.isProjectAccessible(context.getUserId(), projectId)) {
@@ -53,8 +53,8 @@ public class IssueStatisticsService {
         return voList;
     }
 
-    public List<CommonStatisticsVO> prepareResStatData(Long projectId) {
-        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId);
+    public List<CommonStatisticsVO> prepareResStatData(Long projectId, String dateRange) {
+        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
         List<CommonStatisticsVO> voList = new ArrayList<>();
         AppContext context = AppContext.getFromWebThread();
         if (userAccountService.isProjectAccessible(context.getUserId(), projectId)) {
@@ -72,9 +72,47 @@ public class IssueStatisticsService {
         return voList;
     }
 
-    public List<UserStatisticsVO> prepareUserStat(Long projectId) {
+    public List<CommonStatisticsVO> prepareSevStatData(Long projectId, String dateRange) {
+        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
+        List<CommonStatisticsVO> voList = new ArrayList<>();
+        AppContext context = AppContext.getFromWebThread();
+        if (userAccountService.isProjectAccessible(context.getUserId(), projectId)) {
+            Map<String, List<Issue>> sevMap = new HashMap<>();
+            for (Issue issue : issueList) {
+                sevMap.computeIfAbsent(issue.getSeverity(), k -> new ArrayList<>());
+                sevMap.get(issue.getSeverity()).add(issue);
+            }
+            Set<String> keySet = sevMap.keySet();
+            for (String key : keySet) {
+                voList.add(initStatistics(sevMap, key,
+                        MasterCodeUtils.getMasterCode("issue.severity", key).getValue(), issueList.size()));
+            }
+        }
+        return voList;
+    }
+
+    public List<CommonStatisticsVO> preparePriStatData(Long projectId, String dateRange) {
+        List<Issue> issueList = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
+        List<CommonStatisticsVO> voList = new ArrayList<>();
+        AppContext context = AppContext.getFromWebThread();
+        if (userAccountService.isProjectAccessible(context.getUserId(), projectId)) {
+            Map<String, List<Issue>> priMap = new HashMap<>();
+            for (Issue issue : issueList) {
+                priMap.computeIfAbsent(issue.getPriority(), k -> new ArrayList<>());
+                priMap.get(issue.getPriority()).add(issue);
+            }
+            Set<String> keySet = priMap.keySet();
+            for (String key : keySet) {
+                voList.add(initStatistics(priMap, key,
+                        MasterCodeUtils.getMasterCode("issue.priority", key).getValue(), issueList.size()));
+            }
+        }
+        return voList;
+    }
+
+    public List<UserStatisticsVO> prepareUserStat(Long projectId, String dateRange) {
         List<UserStatisticsVO> list = new ArrayList<>();
-        List<Issue> issuesUnderProject = statisticsDAO.retrieveIssueByProject(projectId);
+        List<Issue> issuesUnderProject = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
         AppContext context = AppContext.getFromWebThread();
         if (issuesUnderProject.size() > 0 && userAccountService.isProjectAccessible(context.getUserId(), projectId)) {
             List<UserAccount> users = userAccountService.getReportersUnderProject(projectId);
@@ -131,14 +169,15 @@ public class IssueStatisticsService {
         return list;
     }
 
-    public UserStatisticsVO displayUserStat(Long userId, Long projectId) {
+    public UserStatisticsVO displayUserStat(Long userId, Long projectId, String dateRange) {
         UserStatisticsVO vo = new UserStatisticsVO();
-        List<Issue> issuesUnderProject = statisticsDAO.retrieveIssueByProject(projectId);
-        List<Issue> reportedByMe = statisticsDAO.retrieveIssuesByReporter(userId, projectId);
-        List<Issue> assignedToMe = statisticsDAO.retrieveIssuesByDeveloper(userId, projectId);
+        List<Issue> issuesUnderProject = statisticsDAO.retrieveIssueByProject(projectId, getDateRange(dateRange));
+        List<Issue> reportedByMe = statisticsDAO.retrieveIssuesByReporter(userId, projectId, getDateRange(dateRange));
+        List<Issue> assignedToMe = statisticsDAO.retrieveIssuesByDeveloper(userId, projectId, getDateRange(dateRange));
         vo.setName(userAccountService.getUserById(userId).getName());
         vo.setTotalReport(reportedByMe.size());
         vo.setTotalAssigned(assignedToMe.size());
+        vo.setDateRange(dateRange);
         for (Issue issue : assignedToMe) {
             if (IssueConsts.ISSUE_RESOLUTION_RESOLVED.equals(issue.getResolution())
                     || IssueConsts.ISSUE_RESOLUTION_NO_NEED.equals(issue.getResolution())) {
@@ -211,5 +250,17 @@ public class IssueStatisticsService {
         vo.setCount(map.get(key).size());
         vo.setPercent(Calculator.multiply(Calculator.divide(vo.getCount(), size, 3), 100));
         return vo;
+    }
+
+    private Map<String, Date> getDateRange(String dateRange) {
+        Map<String, Date> dateMap = new HashMap<>();
+        if (StringUtils.isNotBlank(dateRange)) {
+            String[] dates = dateRange.split("-");
+            dateMap.put("from", DateUtils.parseDatetime(dates[0]));
+            if (dates.length == 2) {
+                dateMap.put("to", DateUtils.parseDatetime(dates[1]));
+            }
+        }
+        return dateMap;
     }
 }

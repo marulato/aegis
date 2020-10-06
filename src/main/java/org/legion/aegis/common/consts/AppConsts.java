@@ -79,6 +79,17 @@ public class AppConsts {
     public static final String EMAIL_STATUS_SENT           = "SENT";
     public static final String EMAIL_STATUS_NOT_SENT       = "NOT_SENT";
     public static final String EMAIL_STATUS_SENT_FAILED    = "FAILED";
+    public static final String EMAIL_STATUS_DRAFT          = "DRAFT";
+    public static final String EMAIL_STATUS_RECOVERED      = "RECOVERED";
+    public static final String EMAIL_STATUS_INBOX          = "INBOX";
+    public static final String EMAIL_STATUS_OUTBOX         = "OUTBOX";
+
+    public static final String EMAIL_RECIPIENT_RECIPIENT      = "RECIPIENT";
+    public static final String EMAIL_RECIPIENT_SENDER         = "SENDER";
+    public static final String EMAIL_RECIPIENT_CC             = "CC";
+
+    public static final String EMAIL_READ_STATUS_READ      = "READ";
+    public static final String EMAIL_READ_STATUS_UNREAD    = "UNREAD";
 
 
 

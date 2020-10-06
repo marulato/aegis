@@ -119,14 +119,15 @@ public class IssueController {
             manager.addDataObject(projects);
             if (!projects.isEmpty()) {
                 SearchFilter filter = SpringUtils.getBean(IssueDAO.class).getSearchFilterByUserId(context.getUserId());
+                Long selected = projects.get(0).getId();
                 if (filter != null) {
                     for (Project project : projects) {
-                        if (filter.getProjectId().equals(project.getId())) {
-                            manager.addDataObject(filter.getProjectId());
+                        if (project.getId().equals(filter.getProjectId())) {
+                            selected = project.getId();
                             break;
                         }
                     }
-                    manager.addDataObject(projects.get(0).getId());
+                    manager.addDataObject(selected);
                 }
             }
         } else if ("reporter".equals(type) || "developer".equals(type)) {
@@ -187,23 +188,24 @@ public class IssueController {
     @RequiresLogin
     public ModelAndView viewIssue(@PathVariable("id") String id) {
         AppContext context = AppContext.getFromWebThread();
-        ModelAndView modelAndView = new ModelAndView("issue/viewIssue");
         Issue issue = issueService.getIssueById(StringUtils.parseIfIsLong(id));
+        if (issue == null || !userAccountService.isProjectAccessible(context.getUserId(), issue.getProjectId())) {
+            throw new PermissionDeniedException();
+        }
+        ModelAndView modelAndView = new ModelAndView("issue/viewIssue");
+        List<UserAccount> developers = userAccountService.getDevelopersUnderProject(issue.getProjectId());
+        List<UserAccount> reporters = userAccountService.getReportersUnderProject(issue.getProjectId());
+        developers.addAll(reporters);
+        developers.removeIf(var -> var.getId().equals(issue.getAssignedTo()));
+        modelAndView.addObject("assignedTo", developers);
+        modelAndView.addObject("status", systemMgrService.getAllInuseStatus());
+        modelAndView.addObject("resolution", systemMgrService.getAllInuseResolutions());
+        modelAndView.addObject("severity", MasterCodeUtils.getMasterCodeByType("issue.severity"));
+        modelAndView.addObject("priority", MasterCodeUtils.getMasterCodeByType("issue.priority"));
+        modelAndView.addObject("relationship", MasterCodeUtils.getMasterCodeByType("issue.relationship"));
+        modelAndView.addObject("timeline", issueService.retrieveIssueHistory(issue.getId()));
         modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("issue", issueService.getIssueVOForView(issue));
-        if (issue != null) {
-            List<UserAccount> developers = userAccountService.getDevelopersUnderProject(issue.getProjectId());
-            List<UserAccount> reporters = userAccountService.getReportersUnderProject(issue.getProjectId());
-            developers.addAll(reporters);
-            developers.removeIf(var -> var.getId().equals(issue.getAssignedTo()));
-            modelAndView.addObject("assignedTo", developers);
-            modelAndView.addObject("status", systemMgrService.getAllInuseStatus());
-            modelAndView.addObject("resolution", systemMgrService.getAllInuseResolutions());
-            modelAndView.addObject("severity", MasterCodeUtils.getMasterCodeByType("issue.severity"));
-            modelAndView.addObject("priority", MasterCodeUtils.getMasterCodeByType("issue.priority"));
-            modelAndView.addObject("relationship", MasterCodeUtils.getMasterCodeByType("issue.relationship"));
-            modelAndView.addObject("timeline", issueService.retrieveIssueHistory(issue.getId()));
-        }
         SessionManager.setAttribute(SESSION_KEY, issue);
         return modelAndView;
     }

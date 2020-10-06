@@ -185,6 +185,48 @@
           </ul>
         </li>
 
+        <li th:class="${(selected == '8.1' || selected == '8.2' || selected == '8.3' || selected == '8.4' || selected == '8.5') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#"  th:class="${(selected == '8.1' || selected == '8.2' || selected == '8.3'|| selected == '8.4' || selected == '8.5')  ? 'nav-link active' : 'nav-link'}">
+            <i class="nav-icon fas fa-envelope-open-text"></i>
+            <p>
+              邮箱
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/web/email/inbox" th:class="${selected == '8.1' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-envelope nav-icon"></i>
+                <p>收件箱</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/web/email/compose" th:class="${selected == '8.2' ? 'nav-link active' : 'nav-link'}">
+                <i class="fas fa-feather-alt nav-icon"></i>
+                <p>写邮件</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/web/email/outbox" th:class="${selected == '8.3' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-paper-plane nav-icon"></i>
+                <p>已发送</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/web/email/draftBox" th:class="${selected == '8.4' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-file-alt nav-icon"></i>
+                <p>草稿箱</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" th:class="${selected == '8.5' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-trash-alt nav-icon"></i>
+                <p>回收站</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
 
       </ul>
     </nav>

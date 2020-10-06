@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aegis缺陷管理平台</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
+  <!-- iCheck -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/summernote/summernote-bs4.min.css}">
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+
+  <!-- Daterange picker -->
+  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+  <link rel="stylesheet" th:href="@{/plugins/toastr/toastr.min.css}">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <div th:replace="/include/topbar::topmenu"></div>
+  <!-- /.navbar -->
+
+  <div th:replace="/include/sidebar::leftmenu('8.2', ${role})"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">撰写新邮件</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">主页</a></li>
+              <li class="breadcrumb-item active">撰写新邮件</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+
+
+        <!-- table-->
+        <div class="col-12">
+
+
+          <div class="card card-success card-outline">
+            <div class="card-header">
+              <h3 class="card-title">写邮件</h3>
+              <div class="card-tools">
+
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <form id="mainForm">
+                <div class="form-group">
+                  <label for="sentTo">收件人</label>
+                  <input class="form-control" id="sentTo" name="sentTo" placeholder="多个收件人请用;隔开" th:value="${draft.sentTo}">
+                </div>
+                <div class="form-group">
+                  <label for="cc">抄送</label>
+                  <input class="form-control" id="cc" name="cc" placeholder="多个抄送人请用;隔开" th:value="${draft.cc}">
+                </div>
+                <div class="form-group">
+                  <label for="subject">标题</label>
+                  <input class="form-control" id="subject" name="subject" placeholder="标题:" th:value="${draft.subject}">
+                </div>
+
+                <div class="form-group">
+                  <label for="content">正文</label>
+                  <textarea id="content" name="content" th:value="${draft.contentString}" th:text="${draft.contentString}"></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="attachments">附件:</label>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="attachments" name="attachments" multiple="multiple" onchange="showFileName()">
+                    <label class="custom-file-label" id="fileNameLabel" for="attachments">选择文件（可多选）</label>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="card-footer bg-white" th:style="${draft.isHasAttachment == 'Y' ? 'display: block' : 'display: none'}">
+              <ul th:each="att, stat:${draft.attachmentVOS}" class="mailbox-attachments d-flex align-items-stretch clearfix">
+                <li>
+                  <span class="mailbox-attachment-icon"><i th:class="${att.iconClass}"></i></span>
+                  <div class="mailbox-attachment-info">
+                    <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
+                    <span class="mailbox-attachment-size clearfix mt-1">
+                          <span th:text="${att.sizeString}">1,245 KB</span>
+                          <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-trash-alt"></i></a>
+                        </span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+
+            <div class="card-footer">
+              <div class="float-right">
+                <button type="button" style="font-size: 14px" class="btn btn-default" onclick="saveDraft()"><i class="fas fa-pencil-alt"></i> 保存草稿</button>
+                <button type="button" id="sendBtn" style="font-size: 14px" class="btn btn-primary" onclick="sendEmail()"><i class="far fa-paper-plane"></i> 发送</button>
+              </div>
+              <button type="button" style="font-size: 14px" class="btn btn-default"><i class="fas fa-times"></i> 删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <div th:replace="/include/footer::footer"></div>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+<div class="modal fade" id="waitingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <p><img th:src="@{/dist/img/loading.gif}" style="width: 60px; height: 60px">正在发送，请稍后</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<!-- jQuery -->
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+<script th:src="@{/plugins/summernote/summernote-bs4.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.js}"></script>
+<!-- AdminLTE for demo purposes -->
+<script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script>
+    function showWaiting() {
+        $('#waitingModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    }
+    function dismissWaiting() {
+        $('#waitingModal').modal('hide');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        $("#content").summernote();
+    });
+
+    toastr.options = { // toastr配置
+        "closeButton": false, //是否显示关闭按钮
+        "debug": false, //是否使用debug模式
+        "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+        "positionClass": "toast-top-right",//显示的动画时间
+        "showDuration": "200", //显示的动画时间
+        "hideDuration": "400", //消失的动画时间
+        "timeOut": "1000", //展现时间
+        "extendedTimeOut": "1000", //加长展示时间
+        "showEasing": "swing", //显示时的动画缓冲方式
+        "hideEasing": "linear", //消失时的动画缓冲方式
+        "showMethod": "fadeIn", //显示时的动画方式
+        "hideMethod": "fadeOut" //消失时的动画方式
+    }
+
+    toastr.options.onHidden = function () {
+        location.href = "/web/email/inbox";
+    }
+
+    function showFileName() {
+        var file = $("#attachments")[0].files;
+        var name = "";
+        $.each(file, function (idx, f){
+            name += f.name + "; ";
+            if (f.size > 16 * 1024 * 1024) {
+                alert("单个附件不能超过16MB");
+                $("#attachments").val('');
+                $("#fileNameLabel").html('');
+            }
+        });
+        name = name.substring(0, name.length - 2);
+        $("#fileNameLabel").html(name);
+    }
+
+    function sendEmail() {
+        aegis.clearErrors();
+        showWaiting();
+        $("#sendBtn").attr("disabled", true);
+        var formData = new FormData($("#mainForm")[0]);
+        $.ajax({
+            url: "/web/email/compose",
+            type: "post",
+            data: formData,
+            contentType: false,
+            processData: false,
+            cache: false,
+            dataType: "json",
+            success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                    $("#sendBtn").removeAttr("disabled");
+                } else {
+                    toastr.success("邮件已发送！");
+                }
+            }
+        });
+    }
+
+    function saveDraft() {
+        aegis.clearErrors();
+        var formData = new FormData($("#mainForm")[0]);
+        $.ajax({
+            url: "/web/email/compose/draft",
+            type: "post",
+            data: formData,
+            contentType: false,
+            processData: false,
+            cache: false,
+            dataType: "json",
+            success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    toastr.success("草稿已保存！");
+                }
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

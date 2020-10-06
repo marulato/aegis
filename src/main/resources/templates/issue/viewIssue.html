@@ -543,7 +543,7 @@
             <div class="col-md-12">
               <div class="form-group">
                 <label for="rootCause">问题原因:</label>
-                <input class="form-control" name="rootCause" id="rootCause">
+                <input class="form-control" name="rootCause" id="rootCause" th:value="${issue.rootCause}">
               </div>
             </div>
           </div>
@@ -551,8 +551,8 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="fixedAt">解决时间（yyyy/MM/dd HH:mm:ss）:</label>
-                <input type="text" class="form-control" name="fixedAt" id="fixedAt">
+                <label for="fixedAt">解决时间（yyyy/MM/dd HH:mm）:</label>
+                <input type="text" class="form-control" name="fixedAt" id="fixedAt" th:value="${issue.fixedAt}">
               </div>
             </div>
           </div>
@@ -797,7 +797,7 @@
     });
 
     $("#fixedAt").datetimepicker({
-        format: "yyyy/mm/dd hh:i",
+        format: "yyyy/mm/dd hh:ii",
         language:'zh-CN'
     });
 
