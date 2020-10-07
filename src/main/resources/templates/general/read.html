@@ -85,9 +85,9 @@
               <div class="mailbox-read-message" th:utext="${email.contentString}"></div>
             </div>
             <!--Attachments-->
-            <div class="card-footer bg-white" th:style="${email.isHasAttachment == 'Y' ? 'display: block' : 'display: none'}">
-              <ul th:each="att, stat:${email.attachmentVOS}" class="mailbox-attachments d-flex align-items-stretch clearfix">
-                <li>
+            <div class="card-footer bg-white" th:if="${email.isHasAttachment == 'Y'}">
+              <ul class="mailbox-attachments d-flex align-items-stretch clearfix">
+                <li th:each="att, stat:${email.attachmentVOS}">
                   <span class="mailbox-attachment-icon"><i th:class="${att.iconClass}"></i></span>
                   <div class="mailbox-attachment-info">
                     <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
@@ -105,7 +105,8 @@
                 <button type="button" style="font-size: 14px" class="btn btn-default" onclick="showReply()"><i class="fas fa-reply"></i> 回复</button>
                 <button type="button" id="sendBtn" style="font-size: 14px" class="btn btn-primary" onclick="showReplyAll()"><i class="fas fa-reply-all"></i> 回复全部</button>
               </div>
-              <button type="button" style="font-size: 14px" class="btn btn-outline-danger"><i class="fas fa-times"></i> 删除</button>
+              <button id="deleteBtn" th:if="${email.status != 'DELETED'}" type="button" style="font-size: 14px" class="btn btn-outline-danger" onclick="moveToRecycleBin()"><i class="fas fa-times"></i> 删除</button>
+              <button id="recoverBtn" th:if="${email.status == 'DELETED'}" type="button" style="font-size: 14px" class="btn btn-outline-info" onclick="recover()"><i class="fas fa-trash-restore"></i> 恢复</button>
             </div>
           </div>
 
@@ -221,7 +222,9 @@
 <script>
 
     document.addEventListener('DOMContentLoaded', function () {
-        $("#content").summernote();
+        $("#content").summernote({
+            toolbar: aegis.toolbar()
+        });
     });
 
     toastr.options = { // toastr配置
@@ -277,6 +280,31 @@
             }
         });
     }
+
+    function moveToRecycleBin() {
+        $("#deleteBtn").attr("disabled", true);
+        $.ajax({
+            url: "/web/email/moveToRecycleBin",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                toastr.info("已移入回收站！");
+            }
+        });
+    }
+
+    function recover() {
+        $("#recoverBtn").attr("disabled", true);
+        $.ajax({
+            url: "/web/email/recover",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                toastr.success("已移出回收站！");
+            }
+        });
+    }
+
 
 
 </script>

@@ -30,8 +30,11 @@ public class EmailDto extends BaseDto {
     private String cc;
     @Length(max = 100, message = "标题长度不能超过100个字符")
     private String subject;
+    @NotBlank(message = "内容不能为空")
     private String content;
     private List<MultipartFile> attachments;
+
+    private String outboxId;
 
     private boolean validateRecipients(String recipients) {
         String afterTrim = EmailService.trim(recipients);
@@ -117,5 +120,13 @@ public class EmailDto extends BaseDto {
 
     public void setAttachments(List<MultipartFile> attachments) {
         this.attachments = attachments;
+    }
+
+    public String getOutboxId() {
+        return outboxId;
+    }
+
+    public void setOutboxId(String outboxId) {
+        this.outboxId = outboxId;
     }
 }

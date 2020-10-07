@@ -171,7 +171,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        $("#content").summernote();
+        $("#content").summernote({
+            toolbar: aegis.toolbar()
+        });
     });
 
     toastr.options = { // toastr配置
@@ -214,7 +216,7 @@
         $("#sendBtn").attr("disabled", true);
         var formData = new FormData($("#mainForm")[0]);
         $.ajax({
-            url: "/web/email/compose",
+            url: "/web/email/send",
             type: "post",
             data: formData,
             contentType: false,

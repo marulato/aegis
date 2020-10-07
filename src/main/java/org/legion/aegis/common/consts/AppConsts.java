@@ -83,6 +83,7 @@ public class AppConsts {
     public static final String EMAIL_STATUS_RECOVERED      = "RECOVERED";
     public static final String EMAIL_STATUS_INBOX          = "INBOX";
     public static final String EMAIL_STATUS_OUTBOX         = "OUTBOX";
+    public static final String EMAIL_STATUS_DELETED        = "DELETED";
 
     public static final String EMAIL_RECIPIENT_RECIPIENT      = "RECIPIENT";
     public static final String EMAIL_RECIPIENT_SENDER         = "SENDER";

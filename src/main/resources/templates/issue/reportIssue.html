@@ -292,7 +292,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         toggleProjectSelector();
         aegis.required();
-        $("#description").summernote();
+        $("#description").summernote({
+            toolbar: aegis.toolbar()
+        });
 
     });
 

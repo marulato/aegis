@@ -41,12 +41,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">撰写新邮件</h1>
+            <h1 class="m-0 text-dark">编辑草稿</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">主页</a></li>
-              <li class="breadcrumb-item active">撰写新邮件</li>
+              <li class="breadcrumb-item active">编辑草稿</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -65,7 +65,7 @@
 
           <div class="card card-success card-outline">
             <div class="card-header">
-              <h3 class="card-title">写邮件</h3>
+              <h3 class="card-title">编辑草稿</h3>
               <div class="card-tools">
 
               </div>
@@ -73,6 +73,7 @@
             <!-- /.card-header -->
             <div class="card-body">
               <form id="mainForm">
+                <input type="hidden" name="outboxId" th:value="${draft.outboxId}">
                 <div class="form-group">
                   <label for="sentTo">收件人</label>
                   <input class="form-control" id="sentTo" name="sentTo" placeholder="多个收件人请用;隔开" th:value="${draft.sentTo}">
@@ -102,14 +103,14 @@
             </div>
 
             <div class="card-footer bg-white" th:style="${draft.isHasAttachment == 'Y' ? 'display: block' : 'display: none'}">
-              <ul th:each="att, stat:${draft.attachmentVOS}" class="mailbox-attachments d-flex align-items-stretch clearfix">
-                <li>
+              <ul class="mailbox-attachments d-flex align-items-stretch clearfix">
+                <li th:each="att, stat:${draft.attachmentVOS}">
                   <span class="mailbox-attachment-icon"><i th:class="${att.iconClass}"></i></span>
                   <div class="mailbox-attachment-info">
                     <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
                     <span class="mailbox-attachment-size clearfix mt-1">
                           <span th:text="${att.sizeString}">1,245 KB</span>
-                          <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-trash-alt"></i></a>
+                          <a href="javascript:void(0);" class="btn btn-default btn-sm float-right" th:onclick="deleteAttachment([[${draft.outboxId}]], [[${att.id}]])"><i class="fas fa-trash-alt"></i></a>
                         </span>
                   </div>
                 </li>
@@ -120,9 +121,9 @@
             <div class="card-footer">
               <div class="float-right">
                 <button type="button" style="font-size: 14px" class="btn btn-default" onclick="saveDraft()"><i class="fas fa-pencil-alt"></i> 保存草稿</button>
-                <button type="button" id="sendBtn" style="font-size: 14px" class="btn btn-primary" onclick="sendEmail()"><i class="far fa-paper-plane"></i> 发送</button>
+                <button type="button" id="sendBtn" style="font-size: 14px" class="btn btn-primary" onclick="sendDraft()"><i class="far fa-paper-plane"></i> 发送</button>
               </div>
-              <button type="button" style="font-size: 14px" class="btn btn-default"><i class="fas fa-times"></i> 删除</button>
+              <button type="button" style="font-size: 14px" class="btn btn-outline-danger" onclick="deleteDraft()"><i class="fas fa-times"></i> 删除草稿</button>
             </div>
           </div>
         </div>
@@ -188,7 +189,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        $("#content").summernote();
+        $("#content").summernote({
+            toolbar: aegis.toolbar()
+        });
     });
 
     toastr.options = { // toastr配置
@@ -206,8 +209,9 @@
         "hideMethod": "fadeOut" //消失时的动画方式
     }
 
+
     toastr.options.onHidden = function () {
-        location.href = "/web/email/inbox";
+        location.href = "/web/email/draftBox";
     }
 
     function showFileName() {
@@ -276,6 +280,54 @@
         });
     }
 
+    function deleteAttachment(outboxId, attachId) {
+      $.ajax({
+          url: "/web/email/draftBox/" + outboxId + "/" + attachId,
+          type: "get",
+          dataType: "json",
+          success: function (res) {
+              toastr.warning("附件已删除！");
+          }
+      });
+    }
+
+    function sendDraft() {
+        aegis.clearErrors();
+        showWaiting();
+        $("#sendBtn").attr("disabled", true);
+        var formData = new FormData($("#mainForm")[0]);
+        $.ajax({
+            url: "/web/email/send",
+            type: "post",
+            data: formData,
+            contentType: false,
+            processData: false,
+            cache: false,
+            dataType: "json",
+            success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                    $("#sendBtn").removeAttr("disabled");
+                } else {
+                    toastr.success("邮件已发送！");
+                }
+            }
+        });
+    }
+
+    function deleteDraft() {
+        $.ajax({
+            url: "/web/email/draftBox/delete",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                toastr.warning("草稿已删除！");
+            }
+        });
+    }
 
 </script>
 </body>

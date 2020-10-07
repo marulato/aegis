@@ -72,11 +72,11 @@ public class ContentConsts {
         if (size >= 0 && size < KB) {
             return size + "B";
         } else if (size >= KB && size < MB) {
-            return Calculator.divide(size, KB, 1) + "KB";
+            return Calculator.divide(size, KB, 1) + " KB";
         } else if (size >= MB && size < GB) {
-            return Calculator.divide(size, MB, 1) + "MB";
+            return Calculator.divide(size, MB, 1) + " MB";
         } else if (size >= GB){
-            return Calculator.divide(size, GB, 1) + "MB";
+            return Calculator.divide(size, GB, 1) + " GB";
         }
         return "-1B";
     }

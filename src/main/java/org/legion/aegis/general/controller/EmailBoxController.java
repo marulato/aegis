@@ -10,6 +10,7 @@ import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
+import org.legion.aegis.common.validation.Email;
 import org.legion.aegis.general.dto.EmailDto;
 import org.legion.aegis.general.service.EmailService;
 import org.legion.aegis.general.vo.EmailVO;
@@ -26,6 +27,7 @@ public class EmailBoxController {
 
     private final EmailService emailService;
     public static final String SESSION_KEY = "SESSION_EMAIL";
+    public static final String SESSION_KEY_DRAFT = "SESSION_DRAFT";
 
     public EmailBoxController(EmailService emailService) {
         this.emailService = emailService;
@@ -38,6 +40,7 @@ public class EmailBoxController {
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
         SessionManager.removeAttribute(SESSION_KEY);
+        SessionManager.removeAttribute(SESSION_KEY_DRAFT);
         return modelAndView;
     }
 
@@ -48,6 +51,7 @@ public class EmailBoxController {
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
         SessionManager.removeAttribute(SESSION_KEY);
+        SessionManager.removeAttribute(SESSION_KEY_DRAFT);
         return modelAndView;
     }
 
@@ -58,6 +62,18 @@ public class EmailBoxController {
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
         SessionManager.removeAttribute(SESSION_KEY);
+        SessionManager.removeAttribute(SESSION_KEY_DRAFT);
+        return modelAndView;
+    }
+
+    @GetMapping("/web/email/recycle")
+    @RequiresLogin
+    public ModelAndView recycleBoxPage() {
+        ModelAndView modelAndView = new ModelAndView("general/emailRecycleBox");
+        AppContext context = AppContext.getFromWebThread();
+        modelAndView.addObject("role", context.getRoleId());
+        SessionManager.removeAttribute(SESSION_KEY);
+        SessionManager.removeAttribute(SESSION_KEY_DRAFT);
         return modelAndView;
     }
 
@@ -68,10 +84,11 @@ public class EmailBoxController {
         AppContext context = AppContext.getFromWebThread();
         modelAndView.addObject("role", context.getRoleId());
         SessionManager.removeAttribute(SESSION_KEY);
+        SessionManager.removeAttribute(SESSION_KEY_DRAFT);
         return modelAndView;
     }
 
-    @PostMapping("/web/email/compose")
+    @PostMapping("/web/email/send")
     @RequiresLogin
     @ResponseBody
     public AjaxResponseBody sendEmail(EmailDto dto, HttpServletRequest request) throws Exception {
@@ -85,7 +102,11 @@ public class EmailBoxController {
             List<MultipartFile> files = req.getFiles("attachments");
             files.removeIf(var -> var.getSize() <= 0);
             dto.setAttachments(files);
-            emailService.sendEmail(dto);
+            if (StringUtils.isBlank(dto.getOutboxId())) {
+                emailService.sendEmail(dto);
+            } else {
+                emailService.sendDraft(dto);
+            }
         }
         return manager.respond();
     }
@@ -114,6 +135,15 @@ public class EmailBoxController {
     public AjaxResponseBody draftBox(@RequestBody SearchParam searchParam) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         manager.addDataObject(emailService.searchDraftBox(searchParam));
+        return manager.respond();
+    }
+
+    @PostMapping("/web/email/recycle")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody recycleBox(@RequestBody SearchParam searchParam) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        manager.addDataObject(emailService.searchRecycleBox(searchParam));
         return manager.respond();
     }
 
@@ -166,7 +196,7 @@ public class EmailBoxController {
         } else {
             StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
             List<MultipartFile> files = req.getFiles("attachments");
-            files.removeIf(var -> var.getSize() <= 0);
+            files.removeIf(var -> var.getSize() < 0);
             dto.setAttachments(files);
             emailService.saveEmailDraft(dto);
         }
@@ -174,11 +204,55 @@ public class EmailBoxController {
     }
 
     @GetMapping("/web/email/draftBox/{outboxId}")
+    @RequiresLogin
     public ModelAndView readDraft(@PathVariable("outboxId") String outboxId) throws Exception {
         AppContext context = AppContext.getFromWebThread();
         ModelAndView modelAndView = new ModelAndView("general/readDraft");
         modelAndView.addObject("role", context.getRoleId());
-        modelAndView.addObject("draft", emailService.readDraft(StringUtils.parseIfIsLong(outboxId)));
+        EmailVO draft = emailService.readDraft(StringUtils.parseIfIsLong(outboxId));
+        modelAndView.addObject("draft", draft);
+        SessionManager.setAttribute(SESSION_KEY_DRAFT, draft);
         return modelAndView;
+    }
+
+    @GetMapping("/web/email/draftBox/{outboxId}/{attachId}")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody deleteAttachmentInDraft(@PathVariable("outboxId") String outboxId,
+                                                    @PathVariable("attachId") String attachId) {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        emailService.deleteAttachmentInDraft(StringUtils.parseIfIsLong(outboxId),
+                StringUtils.parseIfIsLong(attachId));
+        return manager.respond();
+    }
+
+    @GetMapping("/web/email/draftBox/delete")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody deleteDraft() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        EmailVO vo = (EmailVO) SessionManager.getAttribute(SESSION_KEY_DRAFT);
+        emailService.deleteDraft(vo.getOutboxId());
+        return manager.respond();
+    }
+
+    @GetMapping("/web/email/moveToRecycleBin")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody moveToRecycleBin() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        EmailVO vo = (EmailVO) SessionManager.getAttribute(SESSION_KEY);
+        emailService.moveToRecycleBin(vo.getInboxId());
+        return manager.respond();
+    }
+
+    @GetMapping("/web/email/recover")
+    @RequiresLogin
+    @ResponseBody
+    public AjaxResponseBody recover() {
+        AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
+        EmailVO vo = (EmailVO) SessionManager.getAttribute(SESSION_KEY);
+        emailService.recover(vo.getInboxId());
+        return manager.respond();
     }
 }

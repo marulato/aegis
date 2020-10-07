@@ -26,11 +26,15 @@ public interface EmailDAO {
 
     List<EmailVO> searchMailDraftBox(@Param("sp") SearchParam searchParam);
 
+    List<EmailVO> searchMailRecycleBox(@Param("sp") SearchParam searchParam);
+
     Integer searchMailOutboxCount(@Param("sp") SearchParam searchParam);
 
     Integer searchMailInBoxCount(@Param("sp") SearchParam searchParam);
 
     Integer searchMailDraftBoxCount(@Param("sp") SearchParam searchParam);
+
+    Integer searchMailRecycleBoxCount(@Param("sp") SearchParam searchParam);
 
     @Select("SELECT * FROM GNL_EMAIL_REPLY WHERE EMAIL_ID = #{emailId} ORDER BY CREATED_AT DESC")
     List<EmailReply> retrieveReplyByEmailId(Long emailId);
@@ -69,5 +73,8 @@ public interface EmailDAO {
     List<EmailAttachmentVO> retrieveEmailAttachmentByEmailId(Long emailId);
 
     List<EmailAttachmentVO> retrieveReplyAttachmentByReplyId(Long emailReplyId);
+
+    @Select("SELECT * FROM GNL_EMAIL_ATTACHMENT WHERE ID = #{id}")
+    EmailAttachment getEmailAttachmentById(Long id);
 
 }

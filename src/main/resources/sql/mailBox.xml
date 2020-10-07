@@ -52,6 +52,7 @@
         SELECT
                ATT.ID,
                ATT.FILE_NAME,
+               FN.ID AS FILE_NET_ID,
                FN.FILE_TYPE AS EXTENSION,
                FN.SIZE,
                FN.FILE_UUID AS UUID
@@ -64,6 +65,7 @@
         SELECT
             ATT.ID,
             ATT.FILE_NAME,
+            FN.ID AS FILE_NET_ID,
             FN.FILE_TYPE AS EXTENSION,
             FN.SIZE,
             FN.FILE_UUID AS UUID
@@ -82,7 +84,8 @@
         EM.CONTENT,
         OUTBOX.STATUS,
         EM.IS_HAS_ATTACHMENT,
-        DATE_FORMAT(OUTBOX.CREATED_AT, '%Y/%m/%d %T') AS CREATED_AT
+        DATE_FORMAT(OUTBOX.CREATED_AT, '%Y/%m/%d %T') AS CREATED_AT,
+        DATE_FORMAT(OUTBOX.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
         FROM GNL_EMAIL_OUTBOX OUTBOX
         LEFT JOIN GNL_EMAIL EM ON EM.ID = OUTBOX.EMAIL_ID
         LEFT JOIN AC_USER_ACCT USER ON USER.LOGIN_ID = OUTBOX.SENDER
@@ -118,7 +121,8 @@
         EM.CONTENT,
         OUTBOX.STATUS,
         EM.IS_HAS_ATTACHMENT,
-        DATE_FORMAT(OUTBOX.CREATED_AT, '%Y/%m/%d %T') AS CREATED_AT
+        DATE_FORMAT(OUTBOX.CREATED_AT, '%Y/%m/%d %T') AS CREATED_AT,
+        DATE_FORMAT(OUTBOX.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
         FROM GNL_EMAIL_OUTBOX OUTBOX
         LEFT JOIN GNL_EMAIL EM ON EM.ID = OUTBOX.EMAIL_ID
         LEFT JOIN AC_USER_ACCT USER ON USER.LOGIN_ID = OUTBOX.SENDER
@@ -141,6 +145,48 @@
                 AND OUTBOX.SENDER = #{sp.params.sender}
             </if>
             AND OUTBOX.STATUS = 'DRAFT'
+        </where>
+    </select>
+
+    <select id="searchMailRecycleBox" parameterType="org.legion.aegis.common.base.SearchParam"
+            resultType="org.legion.aegis.general.vo.EmailVO">
+        SELECT
+        EM.ID AS EMAIL_ID,
+        INBOX.ID AS INBOX_ID,
+        USER.NAME AS SENT_FROM,
+        EM.SUBJECT,
+        EM.CONTENT,
+        INBOX.RECIPIENT AS SENT_TO,
+        INBOX.RECIPIENT_TYPE AS CC,
+        INBOX.STATUS,
+        INBOX.IS_READ,
+        EM.IS_HAS_ATTACHMENT,
+        DATE_FORMAT(INBOX.CREATED_AT, '%Y/%m/%d %T') AS CREATED_AT,
+        DATE_FORMAT(OUTBOX.UPDATED_AT, '%Y/%m/%d %T') AS UPDATED_AT
+        FROM GNL_EMAIL_INBOX INBOX
+        LEFT JOIN GNL_EMAIL EM ON EM.ID = INBOX.EMAIL_ID
+        LEFT JOIN GNL_EMAIL_OUTBOX OUTBOX ON OUTBOX.EMAIL_ID = EM.ID
+        LEFT JOIN AC_USER_ACCT USER ON USER.LOGIN_ID = OUTBOX.SENDER
+        <where>
+            <if test="sp.params.sentTo != null">
+                AND INBOX.RECIPIENT = #{sp.params.sentTo}
+            </if>
+            AND INBOX.STATUS = 'DELETED'
+        </where>
+        LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+    </select>
+
+    <select id="searchMailRecycleBoxCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(EM.ID)
+        FROM GNL_EMAIL_INBOX INBOX
+        LEFT JOIN GNL_EMAIL EM ON EM.ID = INBOX.EMAIL_ID
+        LEFT JOIN GNL_EMAIL_OUTBOX OUTBOX ON OUTBOX.EMAIL_ID = EM.ID
+        LEFT JOIN AC_USER_ACCT USER ON USER.LOGIN_ID = OUTBOX.SENDER
+        <where>
+            <if test="sp.params.sentTo != null">
+                AND INBOX.RECIPIENT = #{sp.params.sentTo}
+            </if>
+            AND INBOX.STATUS = 'DELETED'
         </where>
     </select>
 </mapper>

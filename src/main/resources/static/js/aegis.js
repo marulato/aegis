@@ -1,24 +1,27 @@
 var aegis = {};
 
-aegis.showErrors = function(errorData) {
+aegis.showErrors = function (errorData) {
     aegis.clearErrors();
     $.each(errorData, function (index, element) {
-       var input = $("input[name=" + index + "]")[0];
-       var appendDiv = $("div[name=" + index + "_append]")[0];
-       if (input == null || input == {} || input == '') {
-           input = $("select[name=" + index + "]")[0];
-       }
-       $(input).addClass("is-invalid");
-       var divName = "errorArea_" + index;
-       if (appendDiv != null) {
-           $(appendDiv).after("<div class='invalid-feedback' name='"+ divName +"'>" + element + "</div>");
-       } else {
-           $(input).after("<div class='invalid-feedback' name='"+ divName +"'>" + element + "</div>");
-       }
+        var input = $("input[name=" + index + "]")[0];
+        var appendDiv = $("div[name=" + index + "_append]")[0];
+        if (input == null || input == {} || input == '') {
+            input = $("select[name=" + index + "]")[0];
+        }
+        if (input == null || input == {} || input == '') {
+            input = $("textarea[name=" + index + "]")[0];
+        }
+        $(input).addClass("is-invalid");
+        var divName = "errorArea_" + index;
+        if (appendDiv != null) {
+            $(appendDiv).after("<div class='invalid-feedback' name='" + divName + "'>" + element + "</div>");
+        } else {
+            $(input).after("<div class='invalid-feedback' name='" + divName + "'>" + element + "</div>");
+        }
     });
 }
 
-aegis.showErrorString = function(errorData) {
+aegis.showErrorString = function (errorData) {
     var str = "";
     $.each(errorData, function (index, element) {
         str += index + " : " + element;
@@ -37,10 +40,16 @@ aegis.clearErrors = function () {
     $("#mainForm").find("select").each(function (idx, ele) {
         $(ele).removeClass("is-invalid");
     });
+    $("#mainForm").find("textarea").each(function (idx, ele) {
+        $(ele).removeClass("is-invalid");
+    });
     $(".modal-body").find("input").each(function (idx, ele) {
         $(ele).removeClass("is-invalid");
     });
     $(".modal-body").find("select").each(function (idx, ele) {
+        $(ele).removeClass("is-invalid");
+    });
+    $(".modal-body").find("textarea").each(function (idx, ele) {
         $(ele).removeClass("is-invalid");
     });
 }
@@ -66,8 +75,8 @@ aegis.activate = function () {
     });
 }
 
-aegis.loading = function() {
-    $.blockUI({message:'<span style="font-size: 12px"><img src="/dist/img/loading.gif">&nbsp;正在处理，请稍后</span>'});
+aegis.loading = function () {
+    $.blockUI({message: '<span style="font-size: 12px"><img src="/dist/img/loading.gif">&nbsp;正在处理，请稍后</span>'});
 }
 
 aegis.locale = {
@@ -138,4 +147,20 @@ aegis.newIssueToast = function (event) {
         subtitle: '有新问题提交至您的账号名下',
         body: event.data
     });
+
+}
+
+aegis.toolbar = function () {
+    return [
+        ['style', ['style']],
+        ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+        ['fontname', ['fontname']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['table', ['table']],
+        ['insert', ['link', 'picture', 'video', 'hr']],
+        ['height', ['height']],
+        ['view', ['fullscreen', 'codeview', 'help']],
+    ];
 }

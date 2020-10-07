@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -54,34 +56,7 @@ public class EmailService {
             Email email = saveEmail(dto, false);
             String[] sendTos = trim(dto.getSentTo()).split(";");
             String[] ccs = trim(dto.getCc()).split(";");
-            EmailInbox senderInbox = new EmailInbox();
-            senderInbox.setEmailId(email.getId());
-            senderInbox.setIsRead(AppConsts.NO);
-            senderInbox.setRecipient(context.getLoginId());
-            senderInbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_SENDER);
-            senderInbox.setStatus(AppConsts.EMAIL_STATUS_OUTBOX);
-            JPAExecutor.save(senderInbox);
-            for (String sendTo : sendTos) {
-                EmailInbox inbox = new EmailInbox();
-                inbox.setEmailId(email.getId());
-                inbox.setIsRead(AppConsts.NO);
-                inbox.setRecipient(sendTo);
-                inbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_RECIPIENT);
-                inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
-                JPAExecutor.save(inbox);
-            }
-            for (String cc : ccs) {
-                if (StringUtils.isBlank(cc)) {
-                    continue;
-                }
-                EmailInbox inbox = new EmailInbox();
-                inbox.setEmailId(email.getId());
-                inbox.setIsRead(AppConsts.NO);
-                inbox.setRecipient(cc);
-                inbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_CC);
-                inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
-                JPAExecutor.save(inbox);
-            }
+            sendToInbox(email, sendTos, ccs);
         }
     }
 
@@ -99,9 +74,12 @@ public class EmailService {
             if (!replyInboxList.isEmpty()) {
                 emailVO.setIsReplyRead(AppConsts.YES);
                 for (EmailReplyInbox replyInbox : replyInboxList) {
-                    if (context.getLoginId().equals(replyInbox.getRecipient()) && AppConsts.NO.equals(replyInbox.getIsRead())) {
-                        emailVO.setIsReplyRead(AppConsts.NO);
-                        break;
+                    if (AppConsts.NO.equals(emailVO.getIsHasAttachment())) {
+                        EmailReply reply = emailDAO.retrieveEmailReplyById(replyInbox.getEmailReplyId());
+                        emailVO.setIsHasAttachment(reply.getIsHasAttachment());
+                    }
+                    if (AppConsts.YES.equals(emailVO.getIsReplyRead())) {
+                        emailVO.setIsReplyRead(replyInbox.getIsRead());
                     }
                 }
                 setReplyPeriod(replyInboxList.get(0).getCreatedAt(), emailVO);
@@ -129,7 +107,7 @@ public class EmailService {
             if (!replyInboxList.isEmpty()) {
                 setReplyPeriod(replyInboxList.get(0).getCreatedAt(), emailVO);
             } else {
-                setReplyPeriod(DateUtils.parseDatetime(emailVO.getCreatedAt()), emailVO);
+                setReplyPeriod(DateUtils.parseDatetime(emailVO.getUpdatedAt()), emailVO);
             }
         }
         results.sort(Comparator.comparing(EmailVO::getLastReplyOn, Comparator.reverseOrder()));
@@ -137,6 +115,7 @@ public class EmailService {
         searchResult.setTotalCounts(emailDAO.searchMailOutboxCount(param));
         return searchResult;
     }
+
     public SearchResult<EmailVO> searchDraftBox(SearchParam param) {
         AppContext context = AppContext.getFromWebThread();
         if (param != null) {
@@ -146,11 +125,28 @@ public class EmailService {
         for (EmailVO emailVO : results) {
             emailVO.setContentString(formatLength(new String(emailVO.getContent(), StandardCharsets.UTF_8), 50));
             emailVO.setSubject(formatLength(emailVO.getSubject(), 20));
-            setReplyPeriod(DateUtils.parseDatetime(emailVO.getCreatedAt()), emailVO);
+            setReplyPeriod(DateUtils.parseDatetime(emailVO.getUpdatedAt()), emailVO);
         }
         results.sort(Comparator.comparing(EmailVO::getLastReplyOn, Comparator.reverseOrder()));
         SearchResult<EmailVO> searchResult = new SearchResult<>(results, param);
         searchResult.setTotalCounts(emailDAO.searchMailDraftBoxCount(param));
+        return searchResult;
+    }
+    public SearchResult<EmailVO> searchRecycleBox(SearchParam param) {
+        AppContext context = AppContext.getFromWebThread();
+        if (param != null) {
+            param.addParam("sentTo", context.getLoginId());
+        }
+        List<EmailVO> results = emailDAO.searchMailRecycleBox(param);
+
+        for (EmailVO emailVO : results) {
+            emailVO.setSubject(formatLength(emailVO.getSubject(), 20));
+            emailVO.setContentString(formatLength(new String(emailVO.getContent(), StandardCharsets.UTF_8), 50));
+            setReplyPeriod(DateUtils.parseDatetime(emailVO.getUpdatedAt()), emailVO);
+        }
+        results.sort(Comparator.comparing(EmailVO::getLastReplyOn, Comparator.reverseOrder()));
+        SearchResult<EmailVO> searchResult = new SearchResult<>(results, param);
+        searchResult.setTotalCounts(emailDAO.searchMailRecycleBoxCount(param));
         return searchResult;
     }
 
@@ -170,6 +166,7 @@ public class EmailService {
             vo.setEmailId(inbox.getEmailId());
             vo.setInboxId(inbox.getId());
             vo.setOriginalTo(outbox.getSender());
+            vo.setStatus(inbox.getStatus());
             List<String> recipientListForReply = new ArrayList<>();
             recipientListForReply.add(outbox.getSender());
             for (EmailInbox inbox1 : recipientsInboxes) {
@@ -258,6 +255,7 @@ public class EmailService {
         if (outbox != null) {
             EmailVO vo = new EmailVO();
             Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
+            vo.setOutboxId(outbox.getId());
             vo.setSubject(email.getSubject());
             vo.setContentString(new String(email.getContent(), StandardCharsets.UTF_8));
             vo.setIsHasAttachment(email.getIsHasAttachment());
@@ -329,12 +327,116 @@ public class EmailService {
 
     @Transactional
     public void saveEmailDraft(EmailDto dto) throws Exception {
-        saveEmail(dto, true);
+        if (StringUtils.isBlank(dto.getOutboxId())) {
+            saveEmail(dto, true);
+        } else {
+            EmailOutbox outbox = emailDAO.retrieveEmailOutboxById(StringUtils.parseIfIsLong(dto.getOutboxId()));
+            if (outbox != null) {
+                Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
+                email.setSubject(dto.getSubject());
+                email.setContent(dto.getContent().getBytes(StandardCharsets.UTF_8));
+                if (!CollectionUtils.isEmpty(dto.getAttachments())) {
+                    email.setIsHasAttachment(AppConsts.YES);
+                } else {
+                    email.setIsHasAttachment(AppConsts.NO);
+                }
+                JPAExecutor.update(email);
+                String[] sendTos = trim(dto.getSentTo()).split(";");
+                String[] ccs = trim(dto.getCc()).split(";");
+                outbox.setRecipient(getRecipientsJson(sendTos, ccs));
+                JPAExecutor.update(outbox);
+                saveEmailAttachments(dto.getAttachments(), email);
+            }
+        }
     }
 
     @Transactional
-    public void saveReplyDraft(EmailDto dto, Long emailId) throws Exception {
-        saveReply(dto, emailId, true);
+    public void deleteAttachmentInDraft(Long outboxId, Long attachmentId) {
+        EmailOutbox outbox = emailDAO.retrieveEmailOutboxById(outboxId);
+        if (outbox != null) {
+            Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
+            AppContext context = AppContext.getFromWebThread();
+            List<EmailAttachmentVO> attachments = emailDAO.retrieveEmailAttachmentByEmailId(email.getId());
+            if (AppConsts.YES.equals(email.getIsHasAttachment()) && !attachments.isEmpty()) {
+                EmailAttachment attachment = emailDAO.getEmailAttachmentById(attachmentId);
+                FileNet fileNet = fileNetService.getFileNetById(attachment.getFileNetId());
+                JPAExecutor.delete(fileNet);
+                JPAExecutor.delete(attachment);
+                deleteFile(fileNet);
+                if (attachments.size() - 1 == 0) {
+                    email.setIsHasAttachment(AppConsts.NO);
+                }
+            }
+            JPAExecutor.update(email);
+            JPAExecutor.update(outbox);
+        }
+    }
+
+    @Transactional
+    public void sendDraft(EmailDto dto) throws Exception {
+        if (dto != null && StringUtils.isNotBlank(dto.getOutboxId())) {
+            saveEmailDraft(dto);
+            EmailOutbox outbox = emailDAO.retrieveEmailOutboxById(StringUtils.parseIfIsLong(dto.getOutboxId()));
+            if (outbox != null) {
+                Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
+                String[] sendTos = trim(dto.getSentTo()).split(";");
+                String[] ccs = trim(dto.getCc()).split(";");
+                sendToInbox(email, sendTos, ccs);
+                outbox.setStatus(AppConsts.EMAIL_STATUS_SENT);
+                JPAExecutor.update(outbox);
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteDraft(Long outboxId) {
+        EmailOutbox outbox = emailDAO.retrieveEmailOutboxById(outboxId);
+        if (outbox != null) {
+            Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
+            List<EmailAttachmentVO> attachments = emailDAO.retrieveEmailAttachmentByEmailId(email.getId());
+            for (EmailAttachmentVO attachment : attachments) {
+                EmailAttachment att = emailDAO.getEmailAttachmentById(attachment.getId());
+                FileNet fileNet = fileNetService.getFileNetById(att.getFileNetId());
+                JPAExecutor.delete(fileNet);
+                JPAExecutor.delete(att);
+                deleteFile(fileNet);
+            }
+            JPAExecutor.delete(outbox);
+            JPAExecutor.delete(email);
+        }
+    }
+
+    public void moveToRecycleBin(Long inboxId) {
+        EmailInbox inbox = emailDAO.retrieveEmailInboxById(inboxId);
+        if (inbox != null) {
+            inbox.setStatus(AppConsts.EMAIL_STATUS_DELETED);
+            if (AppConsts.EMAIL_RECIPIENT_SENDER.equals(inbox.getRecipientType())) {
+                EmailOutbox outbox = emailDAO.retrieveEmailOutboxByEmailId(inbox.getEmailId());
+                outbox.setStatus(AppConsts.EMAIL_STATUS_DELETED);
+                JPAExecutor.update(outbox);
+            }
+            JPAExecutor.update(inbox);
+        }
+    }
+
+    public void recover(Long inboxId) {
+        EmailInbox inbox = emailDAO.retrieveEmailInboxById(inboxId);
+        if (inbox != null) {
+            AppContext context = AppContext.getFromWebThread();
+            List<EmailReplyInbox> replyInboxList = emailDAO.retrieveReplyInboxByEmailId(inbox.getEmailId());
+            replyInboxList.removeIf(var -> !context.getLoginId().equals(var.getRecipient()));
+            if (replyInboxList.isEmpty()) {
+                inbox.setStatus(AppConsts.EMAIL_STATUS_OUTBOX);
+            } else {
+                inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
+            }
+            if (AppConsts.EMAIL_RECIPIENT_SENDER.equals(inbox.getRecipientType())) {
+                EmailOutbox outbox = emailDAO.retrieveEmailOutboxByEmailId(inbox.getEmailId());
+                outbox.setStatus(AppConsts.EMAIL_STATUS_SENT);
+                JPAExecutor.update(outbox);
+            }
+            JPAExecutor.update(inbox);
+        }
     }
 
     private String formatLength(String value, int length) {
@@ -392,19 +494,7 @@ public class EmailService {
         emailDAO.createEmail(email);
         outbox.setEmailId(email.getId());
         JPAExecutor.save(outbox);
-        if (dto.getAttachments() != null) {
-            for (MultipartFile file : dto.getAttachments()) {
-                FileNet fileNet = fileNetService.saveFileNetLocal(file.getOriginalFilename(),
-                        file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId());
-                if (fileNet != null) {
-                    EmailAttachment attachment = new EmailAttachment();
-                    attachment.setEmailId(email.getId());
-                    attachment.setFileNetId(fileNet.getId());
-                    attachment.setFileName(file.getOriginalFilename());
-                    JPAExecutor.save(attachment);
-                }
-            }
-        }
+        saveEmailAttachments(dto.getAttachments(), email);
         return email;
     }
 
@@ -475,6 +565,69 @@ public class EmailService {
             }
         }
         return new ObjectMapper().writeValueAsString(recipientList);
+    }
+
+    private void saveEmailAttachments(List<MultipartFile> attachments, Email email) throws Exception {
+        if (attachments != null && email != null) {
+            AppContext context = AppContext.getFromWebThread();
+            for (MultipartFile file : attachments) {
+                FileNet fileNet = fileNetService.saveFileNetLocal(file.getOriginalFilename(),
+                        file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId());
+                if (fileNet != null) {
+                    EmailAttachment attachment = new EmailAttachment();
+                    attachment.setEmailId(email.getId());
+                    attachment.setFileNetId(fileNet.getId());
+                    attachment.setFileName(file.getOriginalFilename());
+                    JPAExecutor.save(attachment);
+                }
+            }
+        }
+    }
+
+    private void sendToInbox(Email email, String[] sendTos, String[] ccs) {
+        AppContext context = AppContext.getFromWebThread();
+        EmailInbox senderInbox = new EmailInbox();
+        senderInbox.setEmailId(email.getId());
+        senderInbox.setIsRead(AppConsts.NO);
+        senderInbox.setRecipient(context.getLoginId());
+        senderInbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_SENDER);
+        senderInbox.setStatus(AppConsts.EMAIL_STATUS_OUTBOX);
+        JPAExecutor.save(senderInbox);
+        for (String sendTo : sendTos) {
+            EmailInbox inbox = new EmailInbox();
+            inbox.setEmailId(email.getId());
+            inbox.setIsRead(AppConsts.NO);
+            inbox.setRecipient(sendTo);
+            inbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_RECIPIENT);
+            inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
+            JPAExecutor.save(inbox);
+        }
+        for (String cc : ccs) {
+            if (StringUtils.isBlank(cc)) {
+                continue;
+            }
+            EmailInbox inbox = new EmailInbox();
+            inbox.setEmailId(email.getId());
+            inbox.setIsRead(AppConsts.NO);
+            inbox.setRecipient(cc);
+            inbox.setRecipientType(AppConsts.EMAIL_RECIPIENT_CC);
+            inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
+            JPAExecutor.save(inbox);
+        }
+    }
+
+    private void deleteFile(FileNet fileNet) {
+        AppContext context = AppContext.getFromWebThread();
+        File file = new File(SystemConsts.ROOT_EMAIL_PATH + context.getLoginId(), fileNet.getFileUuid());
+        if (file.isFile() && file.exists()) {
+            if (file.delete()) {
+                log.info("File: [" + fileNet.getFileUuid() + "] DELETED FROM DISK");
+            } else {
+                log.info("Delete FAILED");
+            }
+        } else {
+            log.warn("File: [" + fileNet.getFileUuid() + "] NOT Found");
+        }
     }
 
     public static String trim(String receivers) {

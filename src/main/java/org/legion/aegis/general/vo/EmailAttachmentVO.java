@@ -10,6 +10,7 @@ public class EmailAttachmentVO extends BaseVO {
     private String uuid;
     private String extension;
     private Long id;
+    private Long fileNetId;
     private String sizeString;
 
     public String getIconClass() {
@@ -66,5 +67,13 @@ public class EmailAttachmentVO extends BaseVO {
 
     public void setSizeString(String sizeString) {
         this.sizeString = sizeString;
+    }
+
+    public Long getFileNetId() {
+        return fileNetId;
+    }
+
+    public void setFileNetId(Long fileNetId) {
+        this.fileNetId = fileNetId;
     }
 }
