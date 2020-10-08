@@ -100,7 +100,7 @@ public class EmailBoxController {
         } else {
             StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
             List<MultipartFile> files = req.getFiles("attachments");
-            files.removeIf(var -> var.getSize() <= 0);
+            files.removeIf(var -> (var.getSize() < 0 || StringUtils.isBlank(var.getOriginalFilename())));
             dto.setAttachments(files);
             if (StringUtils.isBlank(dto.getOutboxId())) {
                 emailService.sendEmail(dto);
@@ -177,7 +177,7 @@ public class EmailBoxController {
         } else {
             StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
             List<MultipartFile> files = req.getFiles("attachments");
-            files.removeIf(var -> var.getSize() <= 0);
+            files.removeIf(var -> (var.getSize() < 0 || StringUtils.isBlank(var.getOriginalFilename())));
             dto.setAttachments(files);
             emailService.reply(dto, vo.getEmailId());
         }
@@ -196,7 +196,7 @@ public class EmailBoxController {
         } else {
             StandardMultipartHttpServletRequest req = (StandardMultipartHttpServletRequest) request;
             List<MultipartFile> files = req.getFiles("attachments");
-            files.removeIf(var -> var.getSize() < 0);
+            files.removeIf(var -> (var.getSize() < 0 || StringUtils.isBlank(var.getOriginalFilename())));
             dto.setAttachments(files);
             emailService.saveEmailDraft(dto);
         }
