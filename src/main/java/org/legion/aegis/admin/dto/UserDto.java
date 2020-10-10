@@ -49,7 +49,7 @@ public class UserDto extends BaseDto {
     }
 
     private boolean validateProject(String[] project) {
-        if (project != null) {
+        if (project != null && project.length > 0) {
             ProjectService projectService = SpringUtils.getBean(ProjectService.class);
             if (AppConsts.ROLE_DEV_SUPERVISOR.equals(role) || AppConsts.ROLE_QA_SUPERVISOR.equals(role)) {
                 for (String groupId : project) {
