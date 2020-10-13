@@ -258,7 +258,7 @@ public class IssueStatisticsService {
             String[] dates = dateRange.split("-");
             dateMap.put("from", DateUtils.parseDatetime(dates[0]));
             if (dates.length == 2) {
-                dateMap.put("to", DateUtils.parseDatetime(dates[1]));
+                dateMap.put("to", DateUtils.addDay(DateUtils.parseDatetime(dates[1]), 1));
             }
         }
         return dateMap;
