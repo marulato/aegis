@@ -25,6 +25,9 @@ public abstract class EmailTemplateGenerator implements IDocGenerator{
         if ("\\".equals(File.separator)) {
             templatePath = templatePath.replaceAll("/", "\\\\");
         }
+        if (!templatePath.startsWith(File.separator)) {
+            templatePath = File.separator + templatePath;
+        }
         Configuration config = new Configuration(Configuration.VERSION_2_3_30);
         config.setDirectoryForTemplateLoading(new File(templatePath));
         Template template = config.getTemplate(fileName, "UTF-8");

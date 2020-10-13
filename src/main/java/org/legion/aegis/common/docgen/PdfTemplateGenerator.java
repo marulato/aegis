@@ -43,6 +43,9 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
         if ("\\".equals(File.separator)) {
             cssPath = cssPath.replaceAll("/", "\\\\");
         }
+        if (!cssPath.startsWith(File.separator)) {
+            cssPath = File.separator + cssPath;
+        }
         FileInputStream inputStream = new FileInputStream(cssPath);
         XMLWorkerHelper.getInstance().parseXHtml(pdfWriter, document,
                 new ByteArrayInputStream(content), inputStream, StandardCharsets.UTF_8, fontProvider);
@@ -101,6 +104,9 @@ public abstract class PdfTemplateGenerator implements IDocGenerator {
         }
         if ("\\".equals(File.separator)) {
             templatePath = templatePath.replaceAll("/", "\\\\");
+        }
+        if (!templatePath.startsWith(File.separator)) {
+            templatePath = File.separator + templatePath;
         }
         Configuration config = new Configuration(Configuration.VERSION_2_3_30);
         config.setDirectoryForTemplateLoading(new File(templatePath));
