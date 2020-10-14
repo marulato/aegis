@@ -28,9 +28,9 @@ public class EmailDto extends BaseDto {
 
     @ValidateWithMethod(methodName = "validateCc", message = "收件人不存在", profile = {"send"})
     private String cc;
-    @Length(max = 100, message = "标题长度不能超过100个字符")
+    @Length(max = 100, message = "标题长度不能超过100个字符", profile = {"send", "reply"})
     private String subject;
-    @NotBlank(message = "内容不能为空")
+    @NotBlank(message = "内容不能为空", profile = {"send", "reply"})
     private String content;
     private List<MultipartFile> attachments;
 

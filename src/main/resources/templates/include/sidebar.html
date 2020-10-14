@@ -128,6 +128,31 @@
           </ul>
         </li>
 
+
+        <li th:class="${(selected == '9.1' || selected == '9.2') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#"  th:class="${(selected == '9.1' || selected == '9.2')  ? 'nav-link active' : 'nav-link'}">
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              日程安排
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item" >
+              <a href="/web/calendar" th:class="${selected == '9.1' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>日历</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" th:class="${selected == '9.2' ? 'nav-link active' : 'nav-link'}" th:if="${role == 'SYSADMIN'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>事件设置</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
         <li th:class="nav-item">
           <a href="/web/myAccount" th:class="${(selected == '4') ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-address-card"></i>

@@ -106,8 +106,8 @@ public class ContentConsts {
         iconClassMap.put("PDF", "far fa-file-pdf");
         iconClassMap.put("DOC", "far fa-file-word");
         iconClassMap.put("DOCX", "far fa-file-word");
-        iconClassMap.put("XLS", "far fa-file-spreadsheet");
-        iconClassMap.put("XLSX", "far fa-file-spreadsheet");
+        iconClassMap.put("XLS", "far fa-file-excel");
+        iconClassMap.put("XLSX", "far fa-file-excel");
         iconClassMap.put("ZIP", "far fa-file-archive");
         iconClassMap.put("RAR", "far fa-file-archive");
         iconClassMap.put("7Z", "far fa-file-archive");

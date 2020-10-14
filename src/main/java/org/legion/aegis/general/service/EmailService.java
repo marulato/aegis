@@ -425,7 +425,7 @@ public class EmailService {
             AppContext context = AppContext.getFromWebThread();
             List<EmailReplyInbox> replyInboxList = emailDAO.retrieveReplyInboxByEmailId(inbox.getEmailId());
             replyInboxList.removeIf(var -> !context.getLoginId().equals(var.getRecipient()));
-            if (replyInboxList.isEmpty()) {
+            if (replyInboxList.isEmpty() && AppConsts.EMAIL_RECIPIENT_SENDER.equals(inbox.getRecipientType())) {
                 inbox.setStatus(AppConsts.EMAIL_STATUS_OUTBOX);
             } else {
                 inbox.setStatus(AppConsts.EMAIL_STATUS_INBOX);
