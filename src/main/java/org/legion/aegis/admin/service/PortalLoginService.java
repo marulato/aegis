@@ -3,23 +3,19 @@ package org.legion.aegis.admin.service;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.legion.aegis.admin.consts.LoginStatus;
-import org.legion.aegis.admin.entity.UserAccount;
-import org.legion.aegis.admin.entity.UserLoginHistory;
-import org.legion.aegis.admin.entity.UserRole;
-import org.legion.aegis.admin.entity.UserRoleAssign;
+import org.legion.aegis.admin.dao.UserAccountDAO;
+import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.SessionManager;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
-import org.legion.aegis.common.utils.ConfigUtils;
-import org.legion.aegis.common.utils.DateUtils;
-import org.legion.aegis.common.utils.MiscGenerator;
-import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -83,6 +79,20 @@ public class PortalLoginService {
                 logLogin(user, status, request);
             } else {
                 status = LoginStatus.ACCOUNT_NOT_EXIST;
+                UnknownLoginHistory unHistory = new UnknownLoginHistory();
+                if (webUser.getLoginId().length() > 32) {
+                    webUser.setLoginId(webUser.getLoginId().substring(0, 32));
+                }
+                Date now = new Date();
+                unHistory.setLoginId(webUser.getLoginId());
+                unHistory.setIpAddress(SessionManager.getIpAddress(request));
+                unHistory.setLoginAt(now);
+                unHistory.setBrowser(request.getParameter("browser"));
+                unHistory.setCreatedAt(now);
+                unHistory.setUpdatedAt(now);
+                unHistory.setCreatedBy("VIRTUAL_LOGIN");
+                unHistory.setUpdatedBy("VIRTUAL_LOGIN");
+                SpringUtils.getBean(UserAccountDAO.class).createUnknownHistory(unHistory);
             }
         }
         return status;

@@ -1,10 +1,7 @@
 package org.legion.aegis.admin.dao;
 
 import org.apache.ibatis.annotations.*;
-import org.legion.aegis.admin.entity.UserAccount;
-import org.legion.aegis.admin.entity.UserProjectAssign;
-import org.legion.aegis.admin.entity.UserRole;
-import org.legion.aegis.admin.entity.UserRoleAssign;
+import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.vo.UserAccountVO;
 import org.legion.aegis.admin.vo.UserLoginHistoryVO;
 import org.legion.aegis.admin.vo.UserProjectVO;
@@ -68,4 +65,7 @@ public interface UserAccountDAO {
     List<UserLoginHistoryVO> searchLoginHistory(@Param("sp") SearchParam param);
 
     Integer searchLoginHistoryCount(@Param("sp") SearchParam param);
+
+    @InsertProvider(type = SimpleSQLGenerator.class, method = "insert")
+    void createUnknownHistory(UnknownLoginHistory history);
 }
