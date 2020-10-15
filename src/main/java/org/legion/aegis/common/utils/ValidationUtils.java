@@ -1,5 +1,8 @@
 package org.legion.aegis.common.utils;
 
+import com.google.common.base.Splitter;
+
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +28,26 @@ public class ValidationUtils {
 
     public static boolean isValidPassword(String pwd) {
         return matcher(PASSWORD_REGEX, pwd).matches();
+    }
+
+    public static boolean validateColor(String color) {
+        if (StringUtils.isNotBlank(color) && color.length() == 7) {
+            String hexNumber = color.substring(1);
+            List<String> rgb = Splitter.fixedLength(2).splitToList(hexNumber);
+            for (String hex : rgb) {
+                try {
+                    int rgbColor = Integer.parseInt(hex, 16);
+                    if (rgbColor < 0 || rgbColor > 255) {
+                        return false;
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+
+            }
+            return true;
+        }
+        return false;
     }
 
     private static Matcher matcher(String regex, String src) {

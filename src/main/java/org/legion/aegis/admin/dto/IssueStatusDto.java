@@ -7,6 +7,7 @@ import org.legion.aegis.common.base.BaseDto;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
+import org.legion.aegis.common.utils.ValidationUtils;
 import org.legion.aegis.common.validation.Length;
 import org.legion.aegis.common.validation.MatchesPattern;
 import org.legion.aegis.common.validation.MemberOf;
@@ -37,23 +38,7 @@ public class IssueStatusDto extends BaseDto {
     }
 
     private boolean validateColor(String color) {
-        if (StringUtils.isNotBlank(color) && color.length() == 7) {
-            String hexNumber = color.substring(1);
-            List<String> rgb = Splitter.fixedLength(2).splitToList(hexNumber);
-            for (String hex : rgb) {
-                try {
-                    int rgbColor = Integer.parseInt(hex, 16);
-                    if (rgbColor < 0 || rgbColor > 255) {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    return false;
-                }
-
-            }
-            return true;
-        }
-        return false;
+        return ValidationUtils.validateColor(color);
     }
 
     public String getStatusCode() {

@@ -117,7 +117,7 @@
               <div class="form-group">
                 <label for="color" data-required="true">事件颜色</label>
                 <div class="input-group my-colorpicker2">
-                  <input type="text" class="form-control" name="color" id="color">
+                  <input type="text" class="form-control" name="color" id="color" placeholder="">
 
                   <div class="input-group-append">
                     <span class="input-group-text"><i id="colorSpan" class="fas fa-square"></i></span>
@@ -131,10 +131,10 @@
               <div class="form-group">
                 <label for="textColor" data-required="true">文字颜色</label>
                 <div class="input-group my-colorpicker2">
-                  <input type="text" class="form-control" name="textColor" id="textColor">
+                  <input type="text" class="form-control" name="textColor" id="textColor" placeholder="#FFFFFF">
 
                   <div class="input-group-append">
-                    <span class="input-group-text"><i id="textColorSpan" class="fas fa-square"></i></span>
+                    <span class="input-group-text"><i id="textColorSpan" style="color: white" class="fas fa-square"></i></span>
                   </div>
                 </div>
               </div>
@@ -143,16 +143,26 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="startAt">开始时间</label>
-                <input type="text" class="form-control" name="start" id="startAt">
+                <div class="icheck-primary">
+                  <input type="checkbox" class="custom-control-input" value="Y" name="isAllDay" id="isAllDay" onclick="toggleDate()">
+                  <label for="isAllDay">全天</label>
+                </div>
               </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row" id="startRow">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="startAt">开始时间</label>
+                <input type="text" class="form-control" name="startAt" id="startAt">
+              </div>
+            </div>
+          </div>
+          <div class="row" id="endRow">
             <div class="col-md-6">
               <div class="form-group">
                 <label for="endAt">结束时间</label>
-                <input type="text" class="form-control" name="end" id="endAt">
+                <input type="text" class="form-control" name="endAt" id="endAt">
               </div>
             </div>
           </div>
@@ -254,6 +264,7 @@
                 $("#event_title").html('添加事件: ' + info.dateStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
+                $("#isAllDay").attr("checked", false);
             },
 /*            events: function (info, successCallback, failureCallback) {
                 $.ajax({
@@ -287,6 +298,17 @@
         });
         calendar.render();
     });
+
+    function toggleDate() {
+        var isChecked = $("#isAllDay").is(':checked');
+        if (isChecked) {
+            $("#startRow").hide();
+            $("#endRow").hide();
+        } else {
+            $("#startRow").show();
+            $("#endRow").show();
+        }
+    }
 
 </script>
 </body>
