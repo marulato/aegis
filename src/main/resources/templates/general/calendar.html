@@ -150,7 +150,7 @@
               </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row" id="isAllDayDiv">
             <div class="col-md-6">
               <div class="form-group">
                 <div class="icheck-primary">
@@ -279,12 +279,24 @@
             eventMouseEnter: function () {
                 $("#calendar").css("cursor","pointer");
             },
+            eventMouseLeave: function () {
+                $("#calendar").css("cursor","default");
+            },
             dateClick: function (info) {
                 $("#event_title").html('添加事件: ' + info.dateStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
                 $("#isAllDay").attr("checked", false);
                 $("#chosenDate").val(info.dateStr);
+                $("#isAllDayDiv").show();
+            },
+            select: function (info) {
+                $("#event_title").html('添加事件: ' + info.startStr + "至" + info.endStr);
+                $("#start").val(info.dateStr);
+                $("#modal_common_event").modal({backdrop: true, show: true});
+                $("#isAllDay").attr("checked", false);
+                $("#chosenDate").val(info.dateStr);
+                $("#isAllDayDiv").hide();
             },
             events: function (info, successCallback, failureCallback) {
                 var obj = {
