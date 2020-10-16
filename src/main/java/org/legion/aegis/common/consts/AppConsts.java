@@ -92,8 +92,9 @@ public class AppConsts {
     public static final String EMAIL_READ_STATUS_READ      = "READ";
     public static final String EMAIL_READ_STATUS_UNREAD    = "UNREAD";
 
-
-
+    public static final String TIMESHEET_EVENT_COMMON       = "COMMON";
+    public static final String TIMESHEET_EVENT_TASK         = "TASK";
+    public static final String TIMESHEET_EVENT_PUBLIC       = "PUBLIC";
 
     public static final List<String> ALL_DOC_CATEGORIES = List.of();
 

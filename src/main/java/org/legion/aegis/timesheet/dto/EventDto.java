@@ -1,16 +1,22 @@
 package org.legion.aegis.timesheet.dto;
 
+import org.legion.aegis.common.AppContext;
 import org.legion.aegis.common.base.BaseDto;
+import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.utils.ValidationUtils;
 import org.legion.aegis.common.validation.Length;
+import org.legion.aegis.common.validation.MemberOf;
 import org.legion.aegis.common.validation.NotBlank;
 import org.legion.aegis.common.validation.ValidateWithMethod;
 import java.util.Date;
 
 public class EventDto extends BaseDto {
 
+    @MemberOf(value = {AppConsts.TIMESHEET_EVENT_COMMON, AppConsts.TIMESHEET_EVENT_TASK,
+            AppConsts.TIMESHEET_EVENT_PUBLIC}, message = "请选择正确的事件类型")
+    @ValidateWithMethod(methodName = "canPostPublic", message = "请选择正确的事件类型")
     private String type;
     @NotBlank(message = "标题不能为空")
     @Length(max = 100, message = "长度不得超过10个字符")
@@ -30,6 +36,8 @@ public class EventDto extends BaseDto {
     })
     private String endAt;
 
+    private String chosenDate;
+
     private boolean validateColor(String color) {
         if (StringUtils.isNotBlank(color)) {
             return ValidationUtils.validateColor(color);
@@ -39,7 +47,7 @@ public class EventDto extends BaseDto {
 
     private boolean validateTime(String time) {
         if (!StringUtils.parseBoolean(isAllDay)) {
-            Date date = DateUtils.parseDatetime(time, "HH:mm:ss");
+            Date date = DateUtils.parseDatetime(chosenDate + " " + time, "yyyy-MM-dd HH:mm");
             return date != null;
         }
         return true;
@@ -47,13 +55,19 @@ public class EventDto extends BaseDto {
 
     private boolean validateEffective(String time) {
         if (!StringUtils.parseBoolean(isAllDay)) {
-            Date start = DateUtils.parseDatetime(startAt, "HH:mm:ss");
-            Date end = DateUtils.parseDatetime(endAt, "HH:mm:ss");
+            Date start = DateUtils.parseDatetime(chosenDate + " " + startAt, "yyyy-MM-dd HH:mm");
+            Date end = DateUtils.parseDatetime(chosenDate + " " + endAt, "yyyy-MM-dd HH:mm");
             return start != null && end != null && start.before(end);
         }
         return true;
     }
 
+    private boolean canPostPublic(String type) {
+        if (AppConsts.TIMESHEET_EVENT_PUBLIC.equals(type)) {
+            return AppConsts.ROLE_SYSTEM_ADMIN.equals(AppContext.getFromWebThread().getRoleId());
+        }
+        return true;
+    }
 
     public String getType() {
         return type;
@@ -117,5 +131,13 @@ public class EventDto extends BaseDto {
 
     public void setEndAt(String endAt) {
         this.endAt = endAt;
+    }
+
+    public String getChosenDate() {
+        return chosenDate;
+    }
+
+    public void setChosenDate(String chosenDate) {
+        this.chosenDate = chosenDate;
     }
 }

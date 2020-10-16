@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.legion.aegis.timesheet.dao.TimesheetDAO">
+    <select id="searchCommonEvents" resultType="org.legion.aegis.timesheet.vo.EventVO">
+        SELECT EV.TITLE,
+               EV.ID,
+               EV.CONTENT,
+               EV.TYPE AS EVENT_TYPE,
+               DATE_FORMAT(EV.START_AT, '%Y-%m-%d %T') AS START,
+               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T') AS END,
+               EV.COLOR,
+               EV.TEXT_COLOR,
+               EV.IS_ALL_DAY AS ALL_DAY,
+               EV.IS_EDITABLE AS EDITABLE
+        FROM GNL_TIMESHEET TS
+                 LEFT JOIN GNL_COMMON_EVENT EV
+                           ON TS.EVENT_REFERRAL_ID = EV.ID AND TS.EVENT_REFERRAL_TBL = 'GNL_COMMON_EVENT'
+        WHERE TS.USER_ACCT_ID = #{sp.userId}
+          AND EV.START_AT BETWEEN #{sp.startAt} AND #{sp.endAt}
+    </select>
+
+    <select id="searchPublicEvents" resultType="org.legion.aegis.timesheet.vo.EventVO">
+        SELECT EV.TITLE,
+               EV.ID,
+               EV.CONTENT,
+               EV.TYPE AS EVENT_TYPE,
+               DATE_FORMAT(EV.START_AT, '%Y-%m-%d %T') AS START,
+               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T') AS END,
+               EV.COLOR,
+               EV.TEXT_COLOR,
+               EV.IS_ALL_DAY AS ALL_DAY,
+               EV.IS_EDITABLE AS EDITABLE
+        FROM GNL_COMMON_EVENT EV
+        WHERE EV.START_AT BETWEEN #{sp.startAt} AND #{sp.endAt} AND TYPE = 'PUBLIC'
+    </select>
+</mapper>

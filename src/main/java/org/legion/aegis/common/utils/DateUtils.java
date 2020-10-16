@@ -15,12 +15,13 @@ public class DateUtils {
     public static final String US_TODAY_FORMAT 				= "MM/dd/yyyy";
     public static final String ENG_TODAY_FORMAT 	        = "dd/MM/yyyy";
     public static final String TIME_24H 					= "HH:mm:ss";
+    public static final String TIME_SHORT 					= "HH:mm";
     public static final String TIME_24H_MILLIS 				= "HH:mm:ss:SSS";
     public static final long ONE_DAY_MILLIS					= 24 * 60 * 60 * 1000;
     public static final long ONE_MINUTE_MILLIS				= 60 * 1000;
     public static final long ONE_HOUR_MILLIS				= 60 * 60 * 1000;
     public static final List<String> COMMON_FORMAT = List.of(FULL_STD_FORMAT_1, FULL_STD_FORMAT_2, STD_FORMAT_1,
-                                STD_FORMAT_2, TODAY_FORMAT, SLASH_TODAY_FORMAT, US_TODAY_FORMAT, ENG_TODAY_FORMAT);
+                                STD_FORMAT_2, TODAY_FORMAT, SLASH_TODAY_FORMAT, US_TODAY_FORMAT, ENG_TODAY_FORMAT, TIME_SHORT);
     private static final Map<String, String> timeUnitMap;
 
     static {

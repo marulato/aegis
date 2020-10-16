@@ -97,13 +97,23 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="reply_title" >回复</h4>
+        <h4 class="modal-title" id="event_title" >回复</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <form id="mainForm">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="type">类型</label>
+                <select class="custom-select" name="type" id="type" onchange="">
+                  <option th:each="type, stat:${types}" th:value="${type.code}" th:text="${type.value}"></option>
+                </select>
+              </div>
+            </div>
+          </div>
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -174,12 +184,12 @@
               </div>
             </div>
           </div>
-
+          <input type="hidden" name="chosenDate" id="chosenDate">
         </form>
       </div>
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-success" style="font-size: 14px" onclick=""><i class="fas fa-paper-plane"></i> 添加</button>
+        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="createCommonEvent()"><i class="fas fa-save"></i> 保存</button>
       </div>
     </div>
     <!-- /.modal-content -->
@@ -231,6 +241,26 @@
             $("#textColorSpan").css('color', event.color.toString());
         });
 
+
+        toastr.options = { // toastr配置
+            "closeButton": false, //是否显示关闭按钮
+            "debug": false, //是否使用debug模式
+            "progressBar": true, //是否显示进度条，当为false时候不显示；当为true时候，显示进度条，当进度条缩短到0时候，消息通知弹窗消失
+            "positionClass": "toast-top-right",//显示的动画时间
+            "showDuration": "200", //显示的动画时间
+            "hideDuration": "400", //消失的动画时间
+            "timeOut": "1000", //展现时间
+            "extendedTimeOut": "1000", //加长展示时间
+            "showEasing": "swing", //显示时的动画缓冲方式
+            "hideEasing": "linear", //消失时的动画缓冲方式
+            "showMethod": "fadeIn", //显示时的动画方式
+            "hideMethod": "fadeOut" //消失时的动画方式
+        }
+
+        toastr.options.onHidden = function () {
+            location.reload();
+        }
+
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             headerToolbar: {
@@ -246,17 +276,6 @@
             droppable: true,
             dayMaxEvents: true, // allow "more" link when too many events
             locale: 'zh-cn',
-            events: [
-                {
-                    title: 'All Day Event',
-                    start: '2020-10-01'
-                },
-                {
-                    title: 'Long Event',
-                    start: '2020-10-07',
-                    end: '2020-10-10'
-                },
-            ],
             eventMouseEnter: function () {
                 $("#calendar").css("cursor","pointer");
             },
@@ -265,7 +284,25 @@
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
                 $("#isAllDay").attr("checked", false);
+                $("#chosenDate").val(info.dateStr);
             },
+            events: function (info, successCallback, failureCallback) {
+                var obj = {
+                    startAt: info.start,
+                    endAt: info.end
+                }
+                $.ajax({
+                    url: "/web/calendar/searchEvents",
+                    data: JSON.stringify(obj),
+                    contentType: "application/json;charset=utf-8",
+                    type: "post",
+                    dataType: "json",
+                    success: function (res) {
+                        successCallback(res.data);
+                    }
+                });
+            },
+
 /*            events: function (info, successCallback, failureCallback) {
                 $.ajax({
                     url: "/web/events",
@@ -308,6 +345,25 @@
             $("#startRow").show();
             $("#endRow").show();
         }
+    }
+
+    function createCommonEvent() {
+        aegis.clearErrors();
+        $.ajax({
+            url: "/web/calendar/event",
+            type: "post",
+            data: $("#mainForm").serialize(),
+            dataType: "json",
+            cache: false,
+            success: function (res) {
+                if (res.status == 221) {
+                    aegis.showErrors(res.data);
+                } else {
+                    $("#modal_common_event").modal("hide");
+                    toastr.success("保存成功！");
+                }
+            }
+        });
     }
 
 </script>

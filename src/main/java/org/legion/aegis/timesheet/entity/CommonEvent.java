@@ -2,11 +2,15 @@ package org.legion.aegis.timesheet.entity;
 
 import org.legion.aegis.common.base.BasePO;
 import org.legion.aegis.common.jpa.annotation.Entity;
+import org.legion.aegis.common.jpa.annotation.NotColumn;
 import org.legion.aegis.common.jpa.annotation.PrimaryKey;
 import java.util.Date;
 
 @Entity(tableName = "GNL_COMMON_EVENT")
 public class CommonEvent extends BasePO {
+
+    @NotColumn
+    public static final String TABLE_NAME = "GNL_COMMON_EVENT";
 
     @PrimaryKey(autoIncrement = true)
     private Long id;

@@ -4,6 +4,7 @@ import org.legion.aegis.common.base.BaseVO;
 
 public class EventVO extends BaseVO {
 
+    private Long id;
     private String title;
     private String content;
     private String eventType;
@@ -11,9 +12,16 @@ public class EventVO extends BaseVO {
     private String end;
     private String color;
     private String textColor;
-    private String backgroundColor;
     private boolean allDay;
     private boolean editable;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -69,14 +77,6 @@ public class EventVO extends BaseVO {
 
     public void setTextColor(String textColor) {
         this.textColor = textColor;
-    }
-
-    public String getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    public void setBackgroundColor(String backgroundColor) {
-        this.backgroundColor = backgroundColor;
     }
 
     public boolean isAllDay() {
