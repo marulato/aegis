@@ -30,6 +30,19 @@ public class IssueExportXlsxGenerator implements IDocGenerator {
     public byte[] generate() {
         Excel excel = new Excel();
         if (issueVOList != null) {
+            List<String> header = new ArrayList<>();
+            header.add("ID");
+            header.add("提交人");
+            header.add("接收人");
+            header.add("模块");
+            header.add("严重性");
+            header.add("SLA");
+            header.add("解决状态");
+            header.add("状态");
+            header.add("概述");
+            header.add("提交时间");
+            header.add("修改时间");
+            excel.setRow(0, header);
             for (int i = 0; i < issueVOList.size(); i++) {
                 List<String> row = new ArrayList<>();
                 IssueVO vo = issueVOList.get(i);

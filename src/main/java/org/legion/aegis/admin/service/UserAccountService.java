@@ -227,7 +227,11 @@ public class UserAccountService {
         List<UserSearchVO> userSearchVOS = userAccountDAO.search(searchParam);
         SearchResult<UserSearchVO> searchResult = new SearchResult<>(userSearchVOS, searchParam);
         searchResult.setTotalCounts(userAccountDAO.searchCount(searchParam));
+        AppContext context = AppContext.getFromWebThread();
         for (UserSearchVO vo : userSearchVOS) {
+            if (AppConsts.ROLE_SYSTEM_ADMIN.equals(context.getRoleId()) || AppConsts.ROLE_DEV_SUPERVISOR.equals(context.getRoleId())) {
+                vo.setCanEdit(true);
+            }
             if (isSupervisor(vo.getRoleId())) {
                 List<ProjectGroup> groups = projectService.getProjectGroupUnderUser(vo.getId(), vo.getRoleId());
                 List<String> groupNames = new ArrayList<>();

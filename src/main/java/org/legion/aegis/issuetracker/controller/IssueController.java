@@ -1,5 +1,6 @@
 package org.legion.aegis.issuetracker.controller;
 
+import com.google.common.base.Stopwatch;
 import org.legion.aegis.admin.entity.*;
 import org.legion.aegis.admin.entity.Module;
 import org.legion.aegis.admin.service.ProjectService;
@@ -36,6 +37,8 @@ import org.legion.aegis.issuetracker.generator.IssueExportXmlGenerator;
 import org.legion.aegis.issuetracker.generator.IssueZipGenerator;
 import org.legion.aegis.issuetracker.service.IssueService;
 import org.legion.aegis.issuetracker.vo.IssueVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class IssueController {
@@ -58,6 +62,8 @@ public class IssueController {
     public static final String SESSION_KEY = "SESSION_ISSUE";
     public static final String SESSION_DL_KEY = "SESSION_OCTET_STREAM";
     public static final String SESSION_SEARCH_PARAM = "SEARCH_PARAM";
+
+    private static final Logger log = LoggerFactory.getLogger(IssueController.class);
 
     @Autowired
     public IssueController(IssueService issueService, ProjectService projectService,
@@ -72,6 +78,7 @@ public class IssueController {
     @ResponseBody
     @RequiresLogin
     public AjaxResponseBody search(@RequestBody SearchParam param) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         SessionManager.removeAttribute(SESSION_KEY);
         AppContext context = AppContext.getFromWebThread();
@@ -79,6 +86,8 @@ public class IssueController {
         param.addParam("userId", context.getUserId());
         manager.addDataObject(issueService.search(param));
         SessionManager.setAttribute(SESSION_SEARCH_PARAM, param);
+        log.info("Issue Search Params: " + param.toString());
+        log.info("Issue Search: " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
         return manager.respond();
     }
 
@@ -187,6 +196,7 @@ public class IssueController {
     @GetMapping("/web/issue/view/{id}")
     @RequiresLogin
     public ModelAndView viewIssue(@PathVariable("id") String id) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         AppContext context = AppContext.getFromWebThread();
         Issue issue = issueService.getIssueById(StringUtils.parseIfIsLong(id));
         if (issue == null || !userAccountService.isProjectAccessible(context.getUserId(), issue.getProjectId())) {
@@ -207,6 +217,7 @@ public class IssueController {
         modelAndView.addObject("role", context.getRoleId());
         modelAndView.addObject("issue", issueService.getIssueVOForView(issue));
         SessionManager.setAttribute(SESSION_KEY, issue);
+        log.info("View Issue -> " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
         return modelAndView;
     }
 
@@ -293,6 +304,7 @@ public class IssueController {
     @RequiresLogin
     @ResponseBody
     public AjaxResponseBody export(@RequestBody SearchParam param, @PathVariable("type") String type) throws Exception {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);
         AppContext context = AppContext.getFromWebThread();
         param.addParam("roleId", context.getRoleId());
@@ -319,6 +331,7 @@ public class IssueController {
         } else {
             manager.addDataObject("/web/error");
         }
+        log.info("Export Issue -> " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
         return manager.respond();
     }
 

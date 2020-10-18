@@ -66,7 +66,7 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR, AppConsts.ROLE_QA_SUPERVISOR})
     public ModelAndView redirectUserPage(HttpServletRequest request) {
         AppContext context = AppContext.getAppContext(request);
         ModelAndView modelAndView = new ModelAndView("admin/userList");
@@ -78,7 +78,7 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user/{id}")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR, AppConsts.ROLE_QA_SUPERVISOR})
     public ModelAndView display(@PathVariable("id") String id, HttpServletRequest request) {
         accountService.verifyRequest(StringUtils.parseIfIsLong(id));
         ModelAndView modelAndView = new ModelAndView("admin/userDisplay");
@@ -114,7 +114,7 @@ public class UserAccountController {
     }
 
     @PostMapping("/web/user/list")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR, AppConsts.ROLE_QA_SUPERVISOR})
     @ResponseBody
     public AjaxResponseBody search(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         SessionManager.removeAttribute(SESSION_KEY);
@@ -195,7 +195,7 @@ public class UserAccountController {
     }
 
     @GetMapping("/web/user/selectProject/{roleId}")
-    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR})
+    @RequiresRoles({AppConsts.ROLE_SYSTEM_ADMIN, AppConsts.ROLE_DEV_SUPERVISOR, AppConsts.ROLE_QA_SUPERVISOR})
     @ResponseBody
     public AjaxResponseBody retrieveProjectSelector(@PathVariable("roleId") String roleId) {
         AjaxResponseManager manager = AjaxResponseManager.create(AppConsts.RESPONSE_SUCCESS);

@@ -5,6 +5,8 @@ import org.legion.aegis.common.base.BaseVO;
 public class EventVO extends BaseVO {
 
     private Long id;
+    private Long groupId;
+    private Long timesheetId;
     private String title;
     private String content;
     private String eventType;
@@ -14,6 +16,10 @@ public class EventVO extends BaseVO {
     private String textColor;
     private boolean allDay;
     private boolean editable;
+    private String common;
+    private String startAt;
+    private String endAt;
+    private boolean rangeEvent;
 
     public Long getId() {
         return id;
@@ -21,6 +27,22 @@ public class EventVO extends BaseVO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getTimesheetId() {
+        return timesheetId;
+    }
+
+    public void setTimesheetId(Long timesheetId) {
+        this.timesheetId = timesheetId;
     }
 
     public String getTitle() {
@@ -87,11 +109,43 @@ public class EventVO extends BaseVO {
         this.allDay = allDay;
     }
 
+    public String getCommon() {
+        return common;
+    }
+
+    public void setCommon(String common) {
+        this.common = common;
+    }
+
     public boolean isEditable() {
         return editable;
     }
 
     public void setEditable(boolean editable) {
         this.editable = editable;
+    }
+
+    public String getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(String startAt) {
+        this.startAt = startAt;
+    }
+
+    public String getEndAt() {
+        return endAt;
+    }
+
+    public void setEndAt(String endAt) {
+        this.endAt = endAt;
+    }
+
+    public boolean isRangeEvent() {
+        return rangeEvent;
+    }
+
+    public void setRangeEvent(boolean rangeEvent) {
+        this.rangeEvent = rangeEvent;
     }
 }

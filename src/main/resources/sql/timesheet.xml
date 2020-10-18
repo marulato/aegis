@@ -5,13 +5,15 @@
         SELECT EV.TITLE,
                EV.ID,
                EV.CONTENT,
-               EV.TYPE AS EVENT_TYPE,
+               EV.TYPE                                 AS EVENT_TYPE,
                DATE_FORMAT(EV.START_AT, '%Y-%m-%d %T') AS START,
-               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T') AS END,
+               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T')   AS END,
                EV.COLOR,
                EV.TEXT_COLOR,
-               EV.IS_ALL_DAY AS ALL_DAY,
-               EV.IS_EDITABLE AS EDITABLE
+               EV.IS_ALL_DAY                           AS ALL_DAY,
+               EV.IS_EDITABLE                          AS EDITABLE,
+               TS.ID                                   AS TIMESHEET_ID,
+               TS.ID                                   AS GROUP_ID
         FROM GNL_TIMESHEET TS
                  LEFT JOIN GNL_COMMON_EVENT EV
                            ON TS.EVENT_REFERRAL_ID = EV.ID AND TS.EVENT_REFERRAL_TBL = 'GNL_COMMON_EVENT'
@@ -23,14 +25,19 @@
         SELECT EV.TITLE,
                EV.ID,
                EV.CONTENT,
-               EV.TYPE AS EVENT_TYPE,
+               EV.TYPE                                 AS EVENT_TYPE,
                DATE_FORMAT(EV.START_AT, '%Y-%m-%d %T') AS START,
-               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T') AS END,
+               DATE_FORMAT(EV.END_AT, '%Y-%m-%d %T')   AS END,
                EV.COLOR,
                EV.TEXT_COLOR,
-               EV.IS_ALL_DAY AS ALL_DAY,
-               EV.IS_EDITABLE AS EDITABLE
-        FROM GNL_COMMON_EVENT EV
-        WHERE EV.START_AT BETWEEN #{sp.startAt} AND #{sp.endAt} AND TYPE = 'PUBLIC'
+               EV.IS_ALL_DAY                           AS ALL_DAY,
+               EV.IS_EDITABLE                          AS EDITABLE,
+               TS.ID                                   AS TIMESHEET_ID,
+               TS.ID                                   AS GROUP_ID
+        FROM GNL_TIMESHEET TS
+                 LEFT JOIN GNL_COMMON_EVENT EV
+                           ON TS.EVENT_REFERRAL_ID = EV.ID AND TS.EVENT_REFERRAL_TBL = 'GNL_COMMON_EVENT'
+        WHERE EV.START_AT BETWEEN #{sp.startAt} AND #{sp.endAt}
+          AND EV.TYPE = 'PUBLIC'
     </select>
 </mapper>

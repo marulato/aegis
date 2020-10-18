@@ -102,7 +102,7 @@
                 </table>
               </div>
               <div class="card-footer">
-                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="">
+                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="exportCommon('status', $('#project_status').val(), $('#status_date').val())">
                   <i class="fa fa-file-export"></i>
                   导出Excel
                 </button>
@@ -151,6 +151,12 @@
                   </tbody>
                 </table>
               </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="exportCommon('resolution', $('#project_res').val(), $('#res_date').val())">
+                  <i class="fa fa-file-export"></i>
+                  导出Excel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -197,6 +203,12 @@
                   </tbody>
                 </table>
               </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="exportCommon('severity', $('#project_severity').val(), $('#sev_date').val())">
+                  <i class="fa fa-file-export"></i>
+                  导出Excel
+                </button>
+              </div>
             </div>
           </div>
           <div class="col-6">
@@ -239,6 +251,12 @@
 
                   </tbody>
                 </table>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-outline-info" style="font-size: 14px" onclick="exportCommon('priority', $('#project_priority').val(), $('#pri_date').val())">
+                  <i class="fa fa-file-export"></i>
+                  导出Excel
+                </button>
               </div>
             </div>
           </div>
@@ -467,9 +485,9 @@
         });
     }
 
-  function display(userId) {
+    function display(userId) {
         location.href = "/web/issue/statistics/view/" + $("#project_user").val() + "/" + userId;
-  }
+    }
 
     function defaultDateRange() {
         $("#status_date").daterangepicker({
@@ -510,6 +528,18 @@
             },
             startDate: moment().subtract(1, 'years'),
             endDate: moment()
+        });
+    }
+
+    function exportCommon(type, id, date) {
+        $.ajax({
+            url: "/web/issue/statistics/report/" + type,
+            type: "get",
+            data: {"projectId": id, "dateRange": date},
+            dataType: "json",
+            success: function (res) {
+                location.href = res.data[0];
+            }
         });
     }
 </script>

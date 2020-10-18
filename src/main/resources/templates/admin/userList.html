@@ -228,8 +228,12 @@
                 {"data": "status", "defaultContent": "-"},
                 {"data": "lastLoginSuccessDt", "defaultContent": "-"},
                 {"data": "-", "defaultContent": "-", "render": function (data, type, full, meta) {
+                    var edit = "";
+                    if (full.canEdit) {
+                        edit = "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-user-edit'></i></a>";
+                    }
                         return "<a style='color: #666666' href='javascript:void(0)' onclick='display("+full.id+")' title='查看'><i class='fa fa-clipboard'></i></a>" +
-                            "&emsp;<a style='color: #666666' href='javascript:void(0)' onclick='modify("+full.id+")' title='修改'><i class='fa fa-user-edit'></i></a>";
+                            edit;
                     }}
             ],
             language: aegis.locale

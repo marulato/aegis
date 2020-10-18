@@ -6,6 +6,8 @@ import org.legion.aegis.common.cache.ICache;
 import org.legion.aegis.common.cache.MasterCodeCache;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.ConstraintViolation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -14,6 +16,7 @@ public class AjaxResponseManager {
     private final AjaxResponseBody ajaxResponseBody;
     private final Map<String, String> errorCodes;
     private final List<Object> dataObjects;
+    private static final Logger log = LoggerFactory.getLogger(AjaxResponseManager.class);
 
     private AjaxResponseManager(int code){
         ajaxResponseBody = new AjaxResponseBody();
@@ -23,6 +26,7 @@ public class AjaxResponseManager {
     }
 
     public static AjaxResponseManager create(int responseCode) {
+        log.info("Ajax Response STATUS -> " + responseCode);
         return new AjaxResponseManager(responseCode);
     }
 
@@ -42,6 +46,7 @@ public class AjaxResponseManager {
             }
             errorCodes.put(violation.getValidatedFieldName(), violation.getMessage());
         }
+        log.info("Validation NOT Pass -> " + violations);
     }
 
     public void addDataObject(Object object) {

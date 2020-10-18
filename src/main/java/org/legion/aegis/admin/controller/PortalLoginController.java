@@ -12,6 +12,7 @@ import org.legion.aegis.common.aop.permission.RequiresLogin;
 import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.consts.AppConsts;
+import org.legion.aegis.common.utils.DateUtils;
 import org.legion.aegis.common.utils.LogUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +91,8 @@ public class PortalLoginController {
                     context.setLoggedIn(false);
                     SessionManager.setAttribute(SESSION_KEY, webUser);
                 }
+                log.info("User [" + webUser.getLoginId() + "] Login Successfully at "
+                        + DateUtils.getDateString(new Date(), DateUtils.FULL_STD_FORMAT_1));
             } else if (loginStatus == LoginStatus.ACCOUNT_EXPIRED) {
                 responseMgr.addError("loginId", "账户已过期");
             } else if (loginStatus == LoginStatus.ACCOUNT_LOCKED) {
@@ -175,6 +179,9 @@ public class PortalLoginController {
     @GetMapping("/web/logout")
     @RequiresLogin
     public String logout(HttpServletRequest request) {
+        AppContext context = AppContext.getFromWebThread();
+        log.info("User [" + context.getLoginId() + "] Logout Successfully at "
+                + DateUtils.getDateString(new Date(), DateUtils.FULL_STD_FORMAT_1));
         request.getSession().invalidate();
         return "redirect:/web/login";
     }

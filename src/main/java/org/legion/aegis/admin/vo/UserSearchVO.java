@@ -18,6 +18,7 @@ public class UserSearchVO extends BaseVO {
     private String role;
     private String roleId;
     private String project;
+    private boolean canEdit;
 
     public Long getId() {
         return id;
@@ -107,4 +108,11 @@ public class UserSearchVO extends BaseVO {
         this.project = project;
     }
 
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
+    }
 }

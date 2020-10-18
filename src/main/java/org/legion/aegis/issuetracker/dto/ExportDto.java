@@ -6,6 +6,13 @@ public class ExportDto {
     private String uuid;
     private String type;
 
+    public Integer getSize() {
+        if (data != null) {
+            return data.length;
+        }
+        return 0;
+    }
+
     public byte[] getData() {
         return data;
     }

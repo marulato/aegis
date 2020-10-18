@@ -35,6 +35,7 @@
   <!-- /.navbar -->
 
   <div th:replace="/include/sidebar::leftmenu('9.1', ${role})"></div>
+  <input id="canPublic" type="hidden" th:value="${role == 'SYSADMIN' ? 'y' : 'N'}">
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -127,7 +128,7 @@
               <div class="form-group">
                 <label for="color" data-required="true">事件颜色</label>
                 <div class="input-group my-colorpicker2">
-                  <input type="text" class="form-control" name="color" id="color" placeholder="">
+                  <input type="text" class="form-control" name="color" id="color" placeholder="#3788D8">
 
                   <div class="input-group-append">
                     <span class="input-group-text"><i id="colorSpan" class="fas fa-square"></i></span>
@@ -185,11 +186,15 @@
             </div>
           </div>
           <input type="hidden" name="chosenDate" id="chosenDate">
+          <input type="hidden" name="timesheetId" id="timesheetId">
         </form>
       </div>
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-default" style="font-size: 14px" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-success" style="font-size: 14px" onclick="createCommonEvent()"><i class="fas fa-save"></i> 保存</button>
+        <div>
+          <button id="deleteBtn" type="button" class="btn btn-outline-danger" style="font-size: 14px" onclick="deleteTimesheet()"><i class="fas fa-trash-alt"></i> 删除</button>
+          <button id="saveBtn" type="button" class="btn btn-outline-success" style="font-size: 14px" onclick="createCommonEvent()"><i class="fas fa-save"></i> 保存</button>
+        </div>
       </div>
     </div>
     <!-- /.modal-content -->
@@ -283,20 +288,88 @@
                 $("#calendar").css("cursor","default");
             },
             dateClick: function (info) {
+                aegis.clearErrors();
+                $("#type").removeAttr("disabled");
                 $("#event_title").html('添加事件: ' + info.dateStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
-                $("#isAllDay").attr("checked", false);
+                $("#isAllDay").removeAttr("checked");
                 $("#chosenDate").val(info.dateStr);
                 $("#isAllDayDiv").show();
+                toggleDate();
+                $("#timesheetId").val('');
+                $("#title").val('');
+                $("#content").val('');
+                $("#colorSpan").css("color", "#3788D8");
+                $("#textColorSpan").css("color", "#FFFFFF");
+                $("#deleteBtn").hide();
+                $("#saveBtn").show();
+                if ($("#canPublic").val() === "N") {
+                    $("#type").find("option[value='PUBLIC']").remove();
+                }
             },
             select: function (info) {
+                aegis.clearErrors();
+                $("#type").removeAttr("disabled");
                 $("#event_title").html('添加事件: ' + info.startStr + "至" + info.endStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
-                $("#isAllDay").attr("checked", false);
-                $("#chosenDate").val(info.dateStr);
+                $("#isAllDay").removeAttr("checked");
+                toggleDate();
+                $("#chosenDate").val(info.startStr + ":" + info.endStr);
                 $("#isAllDayDiv").hide();
+                $("#timesheetId").val('');
+                $("#deleteBtn").hide();
+                $("#saveBtn").show();
+                if ($("#canPublic").val() === "N") {
+                    $("#type").find("option[value='PUBLIC']").remove();
+                }
+            },
+
+            eventClick: function (info) {
+                let event = info.event;
+                $("#event_title").html('修改: ' + event.title);
+                $.ajax({
+                    url: "/web/calendar/" + event.groupId,
+                    type: "get",
+                    dataType: "json",
+                    success: function (res) {
+                        aegis.clearErrors();
+                        var obj = res.data[0];
+                        if ($("#type").find("option[value='PUBLIC']").length === 0) {
+                            $("#type").append("<option value='PUBLIC'>公共</option>");
+                        }
+                        $("#type").val(obj.eventType);
+                        $("#type").attr("disabled", true);
+                        $("#title").val(obj.title);
+                        $("#content").val(obj.content);
+                        $("#color").val(obj.color);
+                        $("#colorSpan").css("color", obj.color);
+                        $("#textColorSpan").css("color", obj.textColor);
+                        $("#textColor").val(obj.textColor);
+                        $("#timesheetId").val(obj.timesheetId);
+                        if (obj.allDay) {
+                            $("#isAllDay").attr("checked", true);
+                        } else {
+                            $("#isAllDay").removeAttr("checked");
+                        }
+                        if (obj.rangeEvent) {
+                            $("#isAllDayDiv").hide();
+                            $("#isAllDay").removeAttr("checked");
+                        }
+                        $("#startAt").val(obj.startAt);
+                        $("#endAt").val(obj.endAt);
+                        if (!obj.editable) {
+                            $("#deleteBtn").hide();
+                            $("#saveBtn").hide();
+                        } else {
+                            $("#deleteBtn").show();
+                            $("#saveBtn").show();
+                        }
+                        toggleDate();
+                        $("#modal_common_event").modal({backdrop: true, show: true});
+                    }
+                });
             },
             events: function (info, successCallback, failureCallback) {
                 var obj = {
@@ -374,6 +447,18 @@
                     $("#modal_common_event").modal("hide");
                     toastr.success("保存成功！");
                 }
+            }
+        });
+    }
+
+    function deleteTimesheet() {
+        $.ajax({
+            url: "/web/calendar/delete/" + $("#timesheetId").val(),
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                $("#modal_common_event").modal("hide");
+                toastr.info("已删除");
             }
         });
     }

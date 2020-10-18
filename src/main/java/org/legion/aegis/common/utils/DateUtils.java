@@ -386,4 +386,12 @@ public class DateUtils {
         return timeUnitMap.get(shortName);
     }
 
+    public static Date truncate(Date date) {
+        if (date != null) {
+            String originalDateStr = getDateString(date, TODAY_FORMAT);
+            return parseDatetime(originalDateStr);
+        }
+        return date;
+    }
+
 }

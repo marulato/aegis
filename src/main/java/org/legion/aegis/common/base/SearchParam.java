@@ -13,6 +13,18 @@ public class SearchParam implements Serializable {
     private Integer draw;
     private Map<String, Object> params;
 
+    @Override
+    public String toString() {
+        return "SearchParam{" +
+                "pageNo=" + pageNo +
+                ", pageSize=" + pageSize +
+                ", orderColumnNo=" + orderColumnNo +
+                ", order='" + order + '\'' +
+                ", draw=" + draw +
+                ", params=" + params +
+                '}';
+    }
+
     public void addParam(String name, Object param) {
         if (params == null) {
             params = new HashMap<>();
