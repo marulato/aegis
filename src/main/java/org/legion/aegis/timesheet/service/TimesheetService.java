@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TimesheetService {
@@ -86,7 +83,8 @@ public class TimesheetService {
                         event.setTextColor("#FFFFFF");
                     }
                     String start = DateUtils.getDateString(event.getStartAt(), "yyyy-MM-dd") + " " + eventDto.getStartAt();
-                    String end = DateUtils.getDateString(event.getEndAt(), "yyyy-MM-dd") + " " + eventDto.getEndAt();
+                    String end = DateUtils.getDateString(event.getEndAt() == null ? DateUtils.
+                            truncate(event.getStartAt()) : event.getEndAt(), "yyyy-MM-dd") + " " + eventDto.getEndAt();
                     if (AppConsts.YES.equals(eventDto.getIsAllDay())) {
                         event.setIsAllDay(AppConsts.YES);
                         event.setStartAt(DateUtils.parseDatetime(start, "yyyy-MM-dd"));

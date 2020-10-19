@@ -293,7 +293,7 @@
                 $("#event_title").html('添加事件: ' + info.dateStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
-                $("#isAllDay").removeAttr("checked");
+                $("#isAllDay").prop("checked", false);
                 $("#chosenDate").val(info.dateStr);
                 $("#isAllDayDiv").show();
                 toggleDate();
@@ -314,7 +314,7 @@
                 $("#event_title").html('添加事件: ' + info.startStr + "至" + info.endStr);
                 $("#start").val(info.dateStr);
                 $("#modal_common_event").modal({backdrop: true, show: true});
-                $("#isAllDay").removeAttr("checked");
+                $("#isAllDay").prop("checked", false);
                 toggleDate();
                 $("#chosenDate").val(info.startStr + ":" + info.endStr);
                 $("#isAllDayDiv").hide();
@@ -349,13 +349,15 @@
                         $("#textColor").val(obj.textColor);
                         $("#timesheetId").val(obj.timesheetId);
                         if (obj.allDay) {
-                            $("#isAllDay").attr("checked", true);
+                            $("#isAllDay").prop("checked", true);
                         } else {
-                            $("#isAllDay").removeAttr("checked");
+                            $("#isAllDay").prop("checked", false);
                         }
                         if (obj.rangeEvent) {
                             $("#isAllDayDiv").hide();
-                            $("#isAllDay").removeAttr("checked");
+                            $("#isAllDay").prop("checked", false);
+                        } else {
+                            $("#isAllDayDiv").show();
                         }
                         $("#startAt").val(obj.startAt);
                         $("#endAt").val(obj.endAt);
