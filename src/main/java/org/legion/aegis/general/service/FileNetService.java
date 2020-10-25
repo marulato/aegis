@@ -68,7 +68,7 @@ public class FileNetService {
         return 0L;
     }
 
-    private FileNet saveFileNet(String fileName, byte[] data, boolean saveDB) {
+    private FileNet saveFileNet(String fileName, String abstractPath, byte[] data, boolean saveDB) {
         if (StringUtils.isNotBlank(fileName) && data != null) {
             FileNet fileNet = new FileNet();
             fileNet.setSha512(DigestUtils.sha512Hex(data).toUpperCase());
@@ -76,6 +76,7 @@ public class FileNetService {
             fileNet.setFileUuid(getFileUUID(data));
             fileNet.setFileName(fileName);
             fileNet.setStatus(AppConsts.FILE_NET_STATUS_STORED);
+            fileNet.setPath(abstractPath);
             if (saveDB) {
                 fileNet.setStorageType(AppConsts.FILE_NET_STORAGE_TYPE_DATABASE);
                 fileNet.setData(data);
@@ -94,16 +95,16 @@ public class FileNetService {
     }
 
     public FileNet saveFileNetDB(String fileName, byte[] data) {
-        return saveFileNet(fileName, data, true);
+        return saveFileNet(fileName, null, data, true);
     }
 
-    public FileNet saveFileNetLocal(String fileName, byte[] data, String localPath) throws Exception {
+    public FileNet saveFileNetLocal(String fileName, byte[] data, String localPath, String abstractPath) throws Exception {
         if (StringUtils.isNotBlank(localPath)) {
             File file = new File(localPath);
             if (!file.exists()) {
                 file.mkdirs();
             }
-            FileNet fileNet = saveFileNet(fileName, data, false);
+            FileNet fileNet = saveFileNet(fileName, abstractPath, data, false);
             if (fileNet != null) {
                 String savedName = fileNet.getFileUuid();
                 String fullPath = FileNameGenerator.format(localPath) + savedName;

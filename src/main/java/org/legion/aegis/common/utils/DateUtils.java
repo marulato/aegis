@@ -369,7 +369,7 @@ public class DateUtils {
             if (hours >= 1 && hours < 24) {
                 return hours + "h";
             }
-            if (days >=1 && days < 7) {
+            if (days >=1 && days < 30) {
                 return days + "d";
             }
             if (months >=1 && months < 12) {
@@ -391,7 +391,7 @@ public class DateUtils {
             String originalDateStr = getDateString(date, TODAY_FORMAT);
             return parseDatetime(originalDateStr);
         }
-        return date;
+        return null;
     }
 
 }

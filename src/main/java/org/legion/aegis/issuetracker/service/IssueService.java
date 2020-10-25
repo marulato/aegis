@@ -589,6 +589,15 @@ public class IssueService {
         }
     }
 
+    public SearchResult<IssueVcsTrackerVO> searchIssueVCS(SearchParam param) {
+        if (StringUtils.isNotBlank((String) param.getParams().get("issueId"))) {
+            param.getParams().put("issueId", StringUtils.parseIfIsLong((String) param.getParams().get("issueId")));
+        }
+        SearchResult<IssueVcsTrackerVO> result = new SearchResult<>(issueDAO.searchVcs(param), param);
+        result.setTotalCounts(issueDAO.searchVcsCount(param));
+        return result;
+    }
+
     private String formatIssueId(String id) {
         if (id.length() < 4) {
             StringBuilder issueId = new StringBuilder(id);
@@ -624,7 +633,7 @@ public class IssueService {
                 Project project = projectService.getProjectById(issue.getProjectId(), false);
                 if (project != null) {
                     FileNet fileNet = fileNetService.saveFileNetLocal(file.getOriginalFilename(), file.getBytes(),
-                            SystemConsts.ROOT_STORAGE_PATH + project.getFilePath());
+                            SystemConsts.ROOT_STORAGE_PATH + project.getFilePath(), null);
                     if (fileNet != null) {
                         IssueAttachment issueAttachment = new IssueAttachment();
                         issueAttachment.setIssueId(issue.getId());
@@ -633,9 +642,7 @@ public class IssueService {
                         JPAExecutor.save(issueAttachment);
                     }
                 }
-
             }
         }
     }
-
 }

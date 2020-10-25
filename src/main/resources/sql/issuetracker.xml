@@ -135,7 +135,7 @@
                 <if test="sp.order != null and sp.order != ''">${sp.order}</if>
             </when>
         </choose>
-        <if test="sp.params.export == null or !sp.params.export or sp.params.export == ''">
+        <if test="sp.params.export == null or sp.params.export == ''">
             LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
         </if>
     </select>
@@ -346,5 +346,49 @@
                  LEFT JOIN AC_USER_ACCT USER
                            ON ISF.USER_ACCT_ID = USER.ID
         WHERE ISF.USER_ACCT_ID = #{sp.params.userId} AND ISS.STATUS != 'CLOSED'
+    </select>
+
+    <select id="searchVcs" parameterType="org.legion.aegis.common.base.SearchParam" resultType="org.legion.aegis.issuetracker.vo.IssueVcsTrackerVO">
+        SELECT
+        VCS.ID,
+        VCS.ISSUE_ID,
+        VCS.FILE_FULL_PATH,
+        VCS.MASTER_VERSION,
+        VCS.BRANCH,
+        VCS.BRANCH_VERSION,
+        VCS.TAG,
+        DATE_FORMAT(VCS.UPDATED_AT, '%Y/%m/%d') AS UPDATED_AT,
+        PJT.NAME AS PROJECT
+        FROM ISU_VCS_TRACKER VCS
+        LEFT JOIN PJT_PROJECT PJT ON VCS.PROJECT_ID = PJT.ID
+        <where>
+            <if test="sp.params.project != null and sp.params.project != ''">
+                AND VCS.PROJECT_ID = #{sp.params.project}
+            </if>
+            <if test="sp.params.issueId != null and sp.params.issueId != ''">
+                AND VCS.ISSUE_ID = #{sp.params.issueId}
+            </if>
+            <if test="sp.params.tag != null and sp.params.tag != ''">
+                AND UPPER(VCS.TAG) LIKE CONCAT('%', UPPER(#{sp.params.tag}), '%')
+            </if>
+        </where>
+        <if test="sp.params.export == null or sp.params.export or sp.params.export == ''">
+            LIMIT ${(sp.pageNo - 1) * sp.pageSize}, #{sp.pageSize}
+        </if>
+    </select>
+
+    <select id="searchVcsCount" parameterType="org.legion.aegis.common.base.SearchParam" resultType="integer">
+        SELECT COUNT(VCS.ID) FROM ISU_VCS_TRACKER VCS
+        <where>
+            <if test="sp.params.project != null and sp.params.project != ''">
+                AND VCS.PROJECT_ID = #{sp.params.project}
+            </if>
+            <if test="sp.params.issueId != null and sp.params.issueId != ''">
+                AND VCS.ISSUE_ID = #{sp.params.issueId}
+            </if>
+            <if test="sp.params.tag != null and sp.params.tag != ''">
+                AND UPPER(VCS.TAG) LIKE CONCAT('%', UPPER(#{sp.params.tag}), '%')
+            </if>
+        </where>
     </select>
 </mapper>

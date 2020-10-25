@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aegis缺陷管理平台</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" th:href="@{/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css}">
+  <!-- iCheck -->
+  <link rel="stylesheet" th:href="@{/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+
+  <link rel="stylesheet" th:href="@{/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
+  <!-- Theme style -->
+  <link rel="stylesheet" th:href="@{/dist/css/adminlte.min.css}">
+
+  <!-- Daterange picker -->
+  <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker.css}">
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <div th:replace="/include/topbar::topmenu"></div>
+  <!-- /.navbar -->
+
+  <div th:replace="/include/sidebar::leftmenu('1.4', ${role})"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">文件版本控制</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">主页</a></li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- ./col -->
+        <!-- Main row -->
+
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">文件版本控制</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="收起 / 展开">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="project">项目</label>
+                    <select class="custom-select" name="project" id="project" onblur="search()">
+                      <option th:each="p, stat:${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="issueId">ID</label>
+                    <input class="form-control" name="issueId" id="issueId" onblur="search()">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="tag">Tag</label>
+                    <input class="form-control" name="tag" id="tag" onblur="search()">
+                  </div>
+                </div>
+              </div>
+              <table id="vcsTable" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                  <th style="width: 5%">ID</th>
+                  <th style="width: 10%">项目</th>
+                  <th style="width: 10%">分支</th>
+                  <th style="width: 10%">Tag</th>
+                  <th style="width: 40%">文件路径</th>
+                  <th style="width: 10%">主干版本</th>
+                  <th style="width: 10%">分支版本</th>
+                  <th style="width: 5%">修改时间</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+              </table>
+            </div>
+            <div class="card-footer">
+              <button type="button" class="btn btn-outline-primary" style="font-size: 14px" onclick="exportVCS()">
+                <i class="fa fa-file-export"></i>
+                导出Excel
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <div th:replace="/include/footer::footer"></div>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <input type="hidden" name="ws_id" id="ws_id" th:value="${session.Legion_Web_Session_Context.userId}">
+  <input type="hidden" name="tk_id" id="tk_id" th:value="${session.token}">
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+<div class="modal fade" id="waitingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <p><img th:src="@{/dist/img/loading.gif}" style="width: 60px; height: 60px">正在处理，请稍后</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- jQuery -->
+<script th:src="@{/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!-- daterangepicker -->
+<script th:src="@{/plugins/moment/moment.min.js}"></script>
+<script th:src="@{/plugins/daterangepicker/daterangepicker.js}"></script>
+
+<script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
+<script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/dist/js/adminlte.js}"></script>
+<!-- AdminLTE for demo purposes -->
+<script th:src="@{/dist/js/demo.js}"></script>
+<script th:src="@{/js/aegis.js}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<script>
+
+    function showWaiting() {
+        $('#waitingModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    }
+    function dismissWaiting() {
+        $('#waitingModal').modal('hide');
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var socket = new WebSocket("ws://localhost:8080/websocket/issue/" + $("#ws_id").val() + "/" + $("#tk_id").val());
+        socket.onmessage = function(event){
+            aegis.newIssueToast(event);
+        }
+
+    });
+
+    var vcsTable = $('#vcsTable').DataTable({
+        "processing": true,
+        "lengthChange": true,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "aLengthMenu": [20, 50, 100],
+        "bPaginate": true,
+        "serverSide": true,
+        ajax: function (data, callback, settings) {
+            var obj = {
+                project: $("#project").val(),
+                issueId: $("#issueId").val(),
+                tag: $("#tag").val()
+            };
+            aegis.callDataTableAjax("/web/issue/versionControl", obj, data, callback);
+        },
+        columns: [
+            {"data": "issueId", "defaultContent": "-"},
+            {"data": "project", "defaultContent": "-"},
+            {"data": "branch", "defaultContent": "-"},
+            {"data": "tag", "defaultContent": "-"},
+            {"data": "fileFullPath", "defaultContent": "-"},
+            {"data": "masterVersion", "defaultContent": "-"},
+            {"data": "branchVersion", "defaultContent": "-"},
+            {"data": "updatedAt", "defaultContent": "-"}
+        ],
+        language: aegis.locale
+    });
+
+    function search() {
+        vcsTable.draw();
+    }
+
+    function exportVCS() {
+        showWaiting();
+        var obj = {
+            project: $("#project").val(),
+            issueId: $("#issueId").val(),
+            tag: $("#tag").val()
+        };
+        var param = {
+            params: obj
+        }
+        $.ajax({
+            url: "/web/issue/versionControl/export",
+            type: "post",
+            contentType: "application/json;charset=utf-8",
+            cache: false,
+            data: JSON.stringify(param),
+            dataType: "json",
+            success: function (res) {
+                setTimeout(function () {
+                    dismissWaiting();
+                }, 500);
+                location.href = res.data[0];
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

@@ -36,8 +36,8 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
-        <li th:class="${(selected == '1.1' || selected == '1.2' || selected == '1.3') ? 'nav-item menu-open' : 'nav-item'}">
-          <a href="#" th:class="${(selected == '1.1' ||selected == '1.2' || selected == '1.3') ? 'nav-link active' : 'nav-link'}">
+        <li th:class="${(selected == '1.1' || selected == '1.2' || selected == '1.3' || selected == '1.4') ? 'nav-item menu-open' : 'nav-item'}">
+          <a href="#" th:class="${(selected == '1.1' ||selected == '1.2' || selected == '1.3' || selected == '1.4') ? 'nav-link active' : 'nav-link'}">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
               缺陷管理
@@ -61,6 +61,12 @@
               <a href="/web/issue/report" th:class="${selected == '1.3' ? 'nav-link active' : 'nav-link'}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>提交缺陷</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/web/issue/versionControl" th:class="${selected == '1.4' ? 'nav-link active' : 'nav-link'}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>版本控制</p>
               </a>
             </li>
           </ul>

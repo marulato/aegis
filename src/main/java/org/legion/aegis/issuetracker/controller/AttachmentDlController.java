@@ -89,4 +89,19 @@ public class AttachmentDlController {
         }
         SessionManager.removeAttribute(IssueStatisticsController.SESSION_DL_KEY);
     }
+
+    @GetMapping("/web/issue/versionControl/download/{uuid}")
+    @RequiresLogin
+    public void exportVCS(@PathVariable("uuid") String uuid, HttpServletResponse response) throws Exception {
+        ExportDto exportDto = (ExportDto) SessionManager.getAttribute(VcsController.SESSION_DL_KEY);
+        if (exportDto != null) {
+            if (StringUtils.isNotBlank(uuid) && uuid.equals(UUID.nameUUIDFromBytes(exportDto.getData()).toString())) {
+                String date = DateUtils.getDateString(new Date(), DateUtils.TODAY_FORMAT);
+                NetworkFileTransfer.download(exportDto.getData(), "VCS-" + date + "." + exportDto.getType() , response);
+                AppContext context = AppContext.getFromWebThread();
+                log.info("VCS File List Downloaded -> [" + context.getLoginId() +" : " + uuid +"]");
+            }
+        }
+        SessionManager.removeAttribute(VcsController.SESSION_DL_KEY);
+    }
 }

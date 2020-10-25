@@ -4,6 +4,7 @@ import org.legion.aegis.admin.entity.MasterCode;
 import org.legion.aegis.common.cache.CachePool;
 import org.legion.aegis.common.cache.ICache;
 import org.legion.aegis.common.cache.MasterCodeCache;
+import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.ConstraintViolation;
 import org.slf4j.Logger;
@@ -26,7 +27,9 @@ public class AjaxResponseManager {
     }
 
     public static AjaxResponseManager create(int responseCode) {
-        log.info("Ajax Response STATUS -> " + responseCode);
+        if (responseCode != AppConsts.RESPONSE_SUCCESS) {
+            log.info("Ajax Response STATUS -> " + responseCode);
+        }
         return new AjaxResponseManager(responseCode);
     }
 

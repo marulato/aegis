@@ -90,10 +90,10 @@
                 <li th:each="att, stat:${email.attachmentVOS}">
                   <span class="mailbox-attachment-icon"><i th:class="${att.iconClass}"></i></span>
                   <div class="mailbox-attachment-info">
-                    <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
+                    <a th:href="${'/web/email/attachment/download/' + att.id + '/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
                     <span class="mailbox-attachment-size clearfix mt-1">
                           <span th:text="${att.sizeString}">1,245 KB</span>
-                          <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
+                          <a th:href="${'/web/email/attachment/download/' + att.id + '/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
                         </span>
                   </div>
                 </li>
@@ -135,10 +135,10 @@
                 <li>
                   <span class="mailbox-attachment-icon"><i th:class="${att.iconClass}"></i></span>
                   <div class="mailbox-attachment-info">
-                    <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
+                    <a th:href="${'/web/email/attachment/download/' + att.id + '/' + att.getUuid()}" class="mailbox-attachment-name"><i class="fas fa-paperclip"></i> <span th:text="${att.fileName}"></span></a>
                     <span class="mailbox-attachment-size clearfix mt-1">
                           <span th:text="${att.sizeString}">1,245 KB</span>
-                          <a th:href="${'/web/email/attachment/download/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
+                          <a th:href="${'/web/email/attachment/download/' + att.id + '/' + att.getUuid()}" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
                         </span>
                   </div>
                 </li>

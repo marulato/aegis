@@ -355,7 +355,6 @@ public class EmailService {
         EmailOutbox outbox = emailDAO.retrieveEmailOutboxById(outboxId);
         if (outbox != null) {
             Email email = emailDAO.retrieveEmailById(outbox.getEmailId());
-            AppContext context = AppContext.getFromWebThread();
             List<EmailAttachmentVO> attachments = emailDAO.retrieveEmailAttachmentByEmailId(email.getId());
             if (AppConsts.YES.equals(email.getIsHasAttachment()) && !attachments.isEmpty()) {
                 EmailAttachment attachment = emailDAO.getEmailAttachmentById(attachmentId);
@@ -437,6 +436,10 @@ public class EmailService {
             }
             JPAExecutor.update(inbox);
         }
+    }
+
+    public EmailAttachment getAttachmentById(Long id) {
+        return emailDAO.getEmailAttachmentById(id);
     }
 
     private String formatLength(String value, int length) {
@@ -526,7 +529,8 @@ public class EmailService {
             if (dto.getAttachments() != null) {
                 for (MultipartFile file : dto.getAttachments()) {
                     FileNet fileNet = fileNetService.saveFileNetLocal(file.getOriginalFilename(),
-                            file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId());
+                            file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId(),
+                            "/classpath/" + context.getLoginId());
                     if (fileNet != null) {
                         EmailReplyAttachment attachment = new EmailReplyAttachment();
                         attachment.setEmailReplyId(reply.getId());
@@ -572,7 +576,8 @@ public class EmailService {
             AppContext context = AppContext.getFromWebThread();
             for (MultipartFile file : attachments) {
                 FileNet fileNet = fileNetService.saveFileNetLocal(file.getOriginalFilename(),
-                        file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId());
+                        file.getBytes(), SystemConsts.ROOT_EMAIL_PATH + context.getLoginId(),
+                        "/classpath/" + context.getLoginId());
                 if (fileNet != null) {
                     EmailAttachment attachment = new EmailAttachment();
                     attachment.setEmailId(email.getId());

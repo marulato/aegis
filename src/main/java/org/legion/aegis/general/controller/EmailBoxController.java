@@ -7,12 +7,18 @@ import org.legion.aegis.common.base.AjaxResponseBody;
 import org.legion.aegis.common.base.AjaxResponseManager;
 import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.consts.AppConsts;
+import org.legion.aegis.common.consts.SystemConsts;
+import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
 import org.legion.aegis.common.validation.CommonValidator;
 import org.legion.aegis.common.validation.ConstraintViolation;
 import org.legion.aegis.common.validation.Email;
+import org.legion.aegis.common.webmvc.NetworkFileTransfer;
 import org.legion.aegis.general.dto.EmailDto;
+import org.legion.aegis.general.entity.EmailAttachment;
+import org.legion.aegis.general.entity.FileNet;
 import org.legion.aegis.general.service.EmailService;
+import org.legion.aegis.general.service.FileNetService;
 import org.legion.aegis.general.vo.EmailVO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Controller
@@ -254,5 +261,22 @@ public class EmailBoxController {
         EmailVO vo = (EmailVO) SessionManager.getAttribute(SESSION_KEY);
         emailService.recover(vo.getInboxId());
         return manager.respond();
+    }
+
+    @GetMapping("/web/email/attachment/download/{id}/{uuid}")
+    @RequiresLogin
+    @ResponseBody
+    public void downloadAttachment(@PathVariable("id") String id, @PathVariable("uuid") String uuid,
+                                   HttpServletResponse response) throws Exception {
+        FileNetService fileNetService = SpringUtils.getBean(FileNetService.class);
+        EmailAttachment attachment = emailService.getAttachmentById(StringUtils.parseIfIsLong(id));
+        if (attachment != null) {
+            FileNet fileNet = fileNetService.getFileNetById(attachment.getFileNetId());
+            if (fileNet != null && fileNet.getFileUuid().equals(uuid)) {
+                NetworkFileTransfer.download(SystemConsts.ROOT_EMAIL_PATH + fileNet.getPath().
+                        substring(fileNet.getPath().indexOf("/classpath/") + "/classpath/".length())
+                        + "/" + uuid, fileNet.getFileName(), response);
+            }
+        }
     }
 }

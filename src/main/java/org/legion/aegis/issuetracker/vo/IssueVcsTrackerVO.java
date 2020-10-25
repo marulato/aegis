@@ -18,6 +18,7 @@ public class IssueVcsTrackerVO extends BaseVO {
     private String branch;
     private String branchVersion;
     private String tag;
+    private String project;
 
     public Long getId() {
         return id;
@@ -73,5 +74,13 @@ public class IssueVcsTrackerVO extends BaseVO {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
 }

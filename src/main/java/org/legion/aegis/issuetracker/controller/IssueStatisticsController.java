@@ -26,7 +26,7 @@ public class IssueStatisticsController {
 
     private final ProjectService projectService;
     private final IssueStatisticsService statisticsService;
-    public static final String SESSION_DL_KEY = "";
+    public static final String SESSION_DL_KEY = "ISSUE_STAT_DL";
 
     public IssueStatisticsController(ProjectService projectService, IssueStatisticsService statisticsService) {
         this.projectService = projectService;

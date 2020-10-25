@@ -5,6 +5,7 @@ import org.legion.aegis.common.base.SearchParam;
 import org.legion.aegis.common.jpa.SimpleSQLGenerator;
 import org.legion.aegis.issuetracker.entity.*;
 import org.legion.aegis.issuetracker.vo.IssueVO;
+import org.legion.aegis.issuetracker.vo.IssueVcsTrackerVO;
 
 import java.util.List;
 
@@ -74,4 +75,8 @@ public interface IssueDAO {
 
     @Select("SELECT * FROM ISU_SEARCH_FILTER WHERE USER_ACCT_ID = #{userId}")
     SearchFilter getSearchFilterByUserId(Long userId);
+
+    List<IssueVcsTrackerVO> searchVcs(@Param("sp") SearchParam param);
+
+    Integer searchVcsCount(@Param("sp") SearchParam param);
 }
