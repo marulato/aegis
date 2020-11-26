@@ -18,7 +18,6 @@ import org.legion.aegis.common.base.SearchResult;
 import org.legion.aegis.common.consts.AppConsts;
 import org.legion.aegis.common.docgen.IDocGenerator;
 import org.legion.aegis.common.jpa.exec.JPAExecutor;
-import org.legion.aegis.common.utils.CompressUtils;
 import org.legion.aegis.common.utils.MasterCodeUtils;
 import org.legion.aegis.common.utils.SpringUtils;
 import org.legion.aegis.common.utils.StringUtils;
@@ -45,9 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -167,7 +164,6 @@ public class IssueController {
     @RequiresLogin
     public ModelAndView reportIssuePage() {
         SessionManager.removeAttribute(SESSION_KEY);
-        AppContext context = AppContext.getFromWebThread();
         ModelAndView modelAndView = main();
         modelAndView.setViewName("issue/reportIssue");
         modelAndView.addObject("rpd", MasterCodeUtils.getMasterCodeByType("issue.reproducibility"));
